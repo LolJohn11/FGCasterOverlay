@@ -1,0 +1,334 @@
+@font-face {
+	font-family: 'Akko Pro';
+	src: url('fonts/AKKOPRO-CONDENSED.otf');
+	font-weight: normal;
+	font-style: normal;
+}
+
+body {
+	margin: 0;
+	/* font-family: 'Titillium Web', sans-serif; <--- Default font*/
+	font-family: 'Akko Pro', sans-serif;
+	color: white;
+	background: transparent;
+}
+.debug {
+	background-color: var(--debug-bg-color, black) !important; 
+	/* border: solid 1px red;*/
+}
+
+.debug-bg-container {
+	position: fixed;
+	width: 1920px;
+	height: 1080px;
+	overflow: hidden;
+}
+
+.debug-bg, .bg-img {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover; /* keep aspect ratio while filling space */
+	z-index: 0;
+}
+
+.scoreboardContainer {
+	display: flex;
+	justify-content: center;
+	align-items: flex-start;
+	height: 80px;
+	padding: 0 20px;
+	background-color: transparent;
+	position: relative;
+	z-index: 1;
+}
+
+.nameBlock {
+	background-color: transparent;
+	width: 364px;
+	height: 49px;
+	padding: 0px 5px 0px 5px;
+	align-content: center;
+	text-shadow: 0 0 10px black, 2px 0 black, -2px 0 black, 0 2px black, 0 -2px black, 1px 1px black, -1px -1px black, 1px -1px black, -1px 1px black;
+}
+
+.name {
+	font-size: 32px;
+	white-space: nowrap;
+	text-align: center;
+}
+
+#nameBlockP1 {
+	margin: 15px 18px 0px 0px;
+}
+
+#nameBlockP2 {
+	margin: 15px 0px 0px 18px;
+}
+
+.scoreBlock {
+	background-color: transparent;
+	margin-top: 14px;
+	padding: 2px 0px;
+	width: 38px;
+	height: 47px;
+	align-content: center;
+	text-align: center;
+	align-items: center;
+	text-shadow: 0 0 4px black , 2px 0 black, -2px 0 black, 0 2px black, 0 -2px black, 1px 1px black, -1px -1px black, 1px -1px black, -1px 1px black;
+}
+
+.score {
+	font-size: 36px;
+	font-weight: bold;
+	text-align: center;
+}
+
+.centerPanel {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+	margin: 2px 34px;
+}
+
+.infoRow {
+	background-color: transparent;
+	display: flex;
+	width: 532px;
+	gap: 10px;
+	align-items: center;
+	justify-content: center;
+}
+
+.infoBar {
+	background-color: transparent;
+	text-align: center;
+	align-content: center;
+	padding: 2px 10px;
+	font-size: 14px;
+	margin: 0 4px;
+}
+
+#topText {
+	max-width: 250px;
+	height: 30px;
+	font-size: 22px;
+}
+
+#stageText, #matchTypeText {
+	width: 170px;
+	height: 20px;
+	font-size: 18px;
+	padding-left: 0px;
+	padding-right: 0px;
+}
+
+.imgBlock {
+	min-width: 65px;
+	height: 49px;
+	vertical-align: middle;
+	align-items: center;
+	display: flex;
+	justify-content: center;
+	margin-top: 15px;
+}
+
+.playerImg {
+	vertical-align: middle;
+}
+
+.flag-style {
+	height: 49px;
+	width: 65px;
+}
+
+.custom-image-style {
+	max-height: 49px;
+	max-width: 65px;
+}
+
+.team-custom-image-style {
+	max-height: 53px;
+	max-width: 71px;
+}
+
+.teamsContainer {
+	position: absolute;
+	display: flex;
+	justify-content: center;
+	width: 100%;
+	margin-top: 54px;
+}
+
+#teamsDivider {
+	width: 100px;
+}
+
+.team {
+	display: flex;
+	min-width: 399px;
+	min-height: 53px;
+	align-items: center;
+}
+
+.team-left {
+	justify-content: flex-end;
+}
+
+.team-right {
+	justify-content: flex-start;
+}
+
+.teamText {
+	display: flex;
+	gap: 40px;
+}
+
+#team1Name,
+#team2Name {
+	width: 254px;
+	height: 36px;
+	display: inline-flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 22px;
+}
+
+#team1Score,
+#team2Score {
+	height: 36px;
+	width: 34px;
+	display: inline-flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 26px;
+}
+
+.teamImg {
+	width: 71px;
+	height: 53px;
+	object-fit: cover;
+	display: none; 
+}
+
+#team1Img {
+	mask-image: url('img/img_mask_t1.png');
+	mask-size: 71px 49px;
+	mask-position: 0px 3px; /* mask alignment is hard, good luck :( */
+}
+
+#team2Img {
+	mask-image: url('img/img_mask_t2.png');
+	mask-size: 71px 49px;
+	mask-position: 0px 3px;
+}
+
+.commentators {
+	background-color: transparent;
+	align-items: center;
+	gap: 6px;
+	font-size: 18px;
+	display: flex;
+	justify-content: center;
+	height: 20px;
+	position: relative;
+	z-index: 1;
+}
+
+.micIcon {
+	width: 12px;
+	height: 12px;
+	background-color: red;
+	border-radius: 50%;
+}
+
+#casterContainer {
+	align-items: center;
+	height: 18px;
+	position: relative;
+	top: 976px;
+}
+
+.casterIcon {
+	width: 18px;
+	height: 18px;
+	margin: 0 4px;
+	/* font-size: 1.1em; */
+	text-align: center;
+	align-content: center;
+}
+
+.casterText {
+	display: inline-flex;
+	height: 18px;
+	width: 130px;
+	align-items: center;
+	justify-content: center;
+}
+
+:root {
+	--fade-duration: 500ms; /* length of .fade animation, set here */
+}
+
+.fade {
+	opacity: 1;
+	transition: opacity var(--fade-duration) ease-in-out;
+}
+
+.fade-hidden {
+	opacity: 0;
+}
+
+/* Default values for the animation */
+[data-anim] {
+	opacity: 0;
+	will-change: transform, opacity;
+	/* Customizable via CSS variables (set by JS from data-*): */
+	--delay: 0ms;
+	--dur: 500ms;
+}
+
+/* After the entrance animations finish, keep everything visible and prevent any replays */
+body.post-entrance [data-anim] {
+	opacity: 1;
+	transform: none;
+	animation: none !important;
+}
+
+/* Types of animations */
+body.anim-start [data-anim="fade"]  { animation: fade-in         var(--dur) ease-out var(--delay) both; }
+body.anim-start [data-anim="up"]    { animation: slide-up-fade   var(--dur) ease-out var(--delay) both; }
+body.anim-start [data-anim="down"]  { animation: slide-down-fade var(--dur) ease-out var(--delay) both; }
+body.anim-start [data-anim="left"]  { animation: slide-left-fade var(--dur) ease-out var(--delay) both; }
+body.anim-start [data-anim="right"] { animation: slide-right-fade var(--dur) ease-out var(--delay) both; }
+
+.bg-img[data-anim] { pointer-events: none; }
+
+/* Overlay animation keyframes */
+@keyframes fade-in {
+	from { opacity: 0 }
+	to   { opacity: 1 }
+}
+
+@keyframes slide-up-fade {
+	from { transform: translateY(24px); opacity: 0 }
+	to   { transform: none;             opacity: 1 }
+}
+
+@keyframes slide-down-fade {
+	from { transform: translateY(-24px); opacity: 0 }
+	to   { transform: none;             opacity: 1 }
+}
+
+@keyframes slide-left-fade {
+	from { transform: translateX(50px); opacity: 0 }
+	to   { transform: none;             opacity: 1 }
+}
+
+@keyframes slide-right-fade {
+	from { transform: translateX(-50px); opacity: 0 }
+	to   { transform: none;              opacity: 1 }
+}

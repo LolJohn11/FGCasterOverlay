@@ -1,0 +1,6 @@
+BACKUP/
+build/
+dist/
+FGCaster-Overlay.exe
+FGCaster-Overlay.spec
+build.bat

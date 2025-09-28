@@ -1,0 +1,42 @@
+{
+  "ui_scale": 1,
+  "player1": {
+    "name": "",
+    "clan": "",
+    "wl": "",
+    "score": 0,
+    "img": ""
+  },
+  "player2": {
+    "name": "",
+    "clan": "",
+    "wl": "",
+    "score": 0,
+    "img": ""
+  },
+  "team1": {
+    "name": "",
+    "score": 0,
+    "img": ""
+  },
+  "team2": {
+    "name": "",
+    "score": 0,
+    "img": ""
+  },
+  "stage": "",
+  "match_type": "",
+  "caster1": {
+    "name": "",
+    "twitch": "",
+    "twitter": ""
+  },
+  "caster2": {
+    "name": "",
+    "twitch": "",
+    "twitter": ""
+  },
+  "toptext": "",
+  "port": 8008,
+  "active_template": "default"
+}
