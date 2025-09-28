@@ -50,7 +50,7 @@ FGCaster Overlay  | Other overlay apps
 1. Download the `.zip` file from the Releases section and extract the contents into any folder of your choosing.
 2. Launch the `FGCaster-Overlay.exe`.
 3. In your streaming software, add the controller UI as a custom browser dock. In OBS, you can do it by going to `Docks -> Custom Browser Docks` menu and adding a new dock with the URL `http://localhost:8008/`.
-![OBS Custom Dock Example](static/img/OBS_custom_dock.png)
+![OBS Custom Dock Example](static/img/OBS_custom_dock.jpg)
 4. Add the overlay as a browser source to your scene. Set the URL to `http://localhost:8008/scoreboard` and match the size of the source to the size of the template (1920x1080 by default).
 5. (Optional) If you ever need to change the port that this app will use from the default `8008` port, you can do that by changing the `port` value inside the `data.json`, found in the app's root folder.
 
