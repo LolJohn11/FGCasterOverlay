@@ -226,6 +226,18 @@ input::placeholder,
    box-shadow: none !important;
 }
 
+.btn-group-vertical {
+	justify-content: flex-start;
+	height: 66px;
+}
+
+.btn-group-vertical .btn {
+	width: 31px;
+    max-height: 23px;
+    border-color: #6c757d !important;
+	padding: 0px;
+}
+
 .player-box {
    width: 204px;
 }

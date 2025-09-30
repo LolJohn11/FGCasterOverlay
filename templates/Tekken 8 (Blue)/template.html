@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Scoreboard Overlay</title>
+  <title>FGCaster Overlay</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <!-- Backup font just in case -->
   <!-- <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@700&display=swap" rel="stylesheet" /> -->
@@ -273,30 +273,28 @@ function connectSocket() {
          const hasAny1 = !!(t1Name || t1Score > 0 || (t1.img && t1.img.trim()));
          const hasAny2 = !!(t2Name || t2Score > 0 || (t2.img && t2.img.trim()));
 
-         const isFlag1 = !!t1.img && t1.img.includes('/flags/') && t1.img.endsWith('.svg');
-         const isFlag2 = !!t2.img && t2.img.includes('/flags/') && t2.img.endsWith('.svg');
-         const hasCustom1 = !!t1.img && !isFlag1;
-         const hasCustom2 = !!t2.img && !isFlag2;
+         const hasImg1 = !!(t1.img && t1.img.trim());
+		 const hasImg2 = !!(t2.img && t2.img.trim());
 
-         function show(el, on) {
-            if (el) el.style.display = on ? 'block' : 'none';
-         }
+		 function show(el, on) { if (el) el.style.display = on ? 'block' : 'none'; }
 
-         if (!hasAny1) {
-            show(team1BG, false);
-            show(team1BGFull, false);
-         } else {
-            show(team1BG, !hasCustom1);
-            show(team1BGFull, hasCustom1);
-         }
+		
+		 if (!hasAny1) {
+		   show(team1BG, false);
+		   show(team1BGFull, false);
+		 } else {
+		   show(team1BGFull, hasImg1);     // full when any image (flag or custom)
+		   show(team1BG, !hasImg1);        // partial when no image but some team data
+		 }
 
-         if (!hasAny2) {
-            show(team2BG, false);
-            show(team2BGFull, false);
-         } else {
-            show(team2BG, !hasCustom2);
-            show(team2BGFull, hasCustom2);
-         }
+		
+		 if (!hasAny2) {
+		   show(team2BG, false);
+		   show(team2BGFull, false);
+		 } else {
+		   show(team2BGFull, hasImg2);
+		   show(team2BG, !hasImg2);
+		 }
 
          document.getElementById('team1Name')
             .textContent = t1Name;
@@ -393,9 +391,6 @@ function connectSocket() {
          };
 		 
 		 //////// Caster animation handling
-         //let casterEntranceSynced = false; // ensure we only hook the first start once
-         // Build rotation sequence dynamically
-         //displayPhases = [];
          // Build / (re)start rotation only if data actually changed
          if (changed) {
             displayPhases = [];
@@ -516,6 +511,7 @@ function updateCasterDisplayCycle() {
 			isCycling = false;
 			return;
 		 }
+		 
          casterCycleTimeout = setTimeout(() => {
             updateCasterDisplayCycle();
          }, displayDurations[phase]);

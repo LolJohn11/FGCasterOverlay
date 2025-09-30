@@ -93,9 +93,9 @@ def _summarize_payload(data: dict) -> str:
     top = data.get("toptext", "")
     parts = []
     if p1 or p2:
-        parts.append(f"[yellow]Players: [/yellow][b]{(p1.get('name') or '—')}[/b] {p1.get('score',0)} — [b]{(p2.get('name') or '—')}[/b] {p2.get('score',0)}")
+        parts.append(f"[yellow]Players: [/yellow][b]{(p1.get('name') or 'None')}[/b] {p1.get('score',0)} vs [b]{(p2.get('name') or 'None')}[/b] {p2.get('score',0)}")
     if t1 or t2:
-        parts.append(f"[yellow]Teams:[/yellow] [b]{(t1.get('name') or '—')}[/b] {t1.get('score',0)} vs [b]{(t2.get('name') or '—')}[/b] {t2.get('score',0)}")
+        parts.append(f"[yellow]Teams:[/yellow] [b]{(t1.get('name') or 'None')}[/b] {t1.get('score',0)} vs [b]{(t2.get('name') or 'None')}[/b] {t2.get('score',0)}")
     if stage:
         parts.append(f"[yellow]Event Stage: [/yellow][b]{stage}[/b]")
     if mtype:
@@ -470,6 +470,70 @@ def set_template():
     # notify overlays to reload
     socketio.emit('template_changed', {"template": name})
     log.info(f"[bold cyan]Switched active template[/bold cyan] → [bold]{name}[/bold]")
+    return jsonify(ok=True)
+
+# ---- new reset functions ----
+@app.route('/reset/players', methods=['POST'])
+def reset_players():
+    """Reset only players (names, scores, clans, imgs, W/L), keep everything else."""
+    current = load_data() or {}
+    # keep non-player fields as-is
+    cleared = dict(current)
+    cleared["player1"] = {}
+    cleared["player2"] = {}
+
+    # Persist while preserving server-owned keys no matter what
+    save_data_preserving(cleared)
+
+    socketio.emit('update_scoreboard', cleared)
+    log.info("[bold cyan]Player values reset")
+    return jsonify(ok=True)
+
+@app.route('/reset/teams', methods=['POST'])
+def reset_teams():
+    """Reset only teams (names, scores, imgs), keep everything else."""
+    current = load_data() or {}
+    # keep non-player fields as-is
+    cleared = dict(current)
+    cleared["team1"] = {}
+    cleared["team2"] = {}
+
+    # Persist while preserving server-owned keys no matter what
+    save_data_preserving(cleared)
+
+    socketio.emit('update_scoreboard', cleared)
+    log.info("[bold cyan]Team values reset")
+    return jsonify(ok=True)
+
+@app.route('/reset/all', methods=['POST'])
+def reset_all():
+    """Reset the scoreboard data, preserving server-owned config keys (port/template)
+       and optional UI config like ui_scale."""
+    current = load_data() or {}
+
+    # Build a fresh, cleared scoreboard payload
+    cleared = {
+        "player1": {},
+        "player2": {},
+        "team1":   {},
+        "team2":   {},
+        "stage":   "",
+        "match_type": "",
+        "toptext": "",
+        "caster1": {},
+        "caster2": {},
+    }
+
+    # Carry over any non-scoreboard, UI-level settings you want to persist
+    for k in ("ui_scale",):  # add more keys here if you want to keep them across "Reset All"
+        if k in current:
+            cleared[k] = current[k]
+
+    # Persist while preserving server-owned keys no matter what
+    save_data_preserving(cleared)
+
+    socketio.emit('update_scoreboard', cleared)
+    log.info("[bold cyan]All values reset")
     return jsonify(ok=True)
 
 # ----------------------------------

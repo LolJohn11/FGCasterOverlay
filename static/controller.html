@@ -43,7 +43,7 @@
                   </div>
                   <input type="file" id="customImageInput" data-player="1" accept="image/*" style="display: none;">
                   <input type="hidden" name="player1Img" id="player1Img" data-player="1" value="" />
-                  <input name="player1_clan" placeholder="Team" class="inputTeam form-control sr-1" value="" />
+                  <input name="player1_clan" placeholder="Tag" class="inputTeam form-control sr-1" value="" />
                   <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="P1 Team Info">
                      <button type="button" id="team1toggle" class="btn btn-sm btn-outline-secondary team-popover" data-bs-placement="right" data-popover-content="team1Popover"><i class="fa-solid fa-user-group fa-xs"></i></button>
                   </span>
@@ -80,14 +80,21 @@
                      <i class="fa-solid fa-arrow-right-arrow-left fa-sm"></i><i class="fa-solid fa-infinity fa-sm"></i>
                   </button>
                </div>
-               <div class="d-flex flex-column ml-3" style="gap: 4px; margin-left: 0px !important;">
-                  <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Reset Player Values" style="height: 31px; border-color: #6c757d !important;" onclick="resetPValues()">
+               	  <div class="btn-group-vertical" role="group">
+					  <button id="resetPlayersBtn" type="button" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Reset Player Values" class="btn btn-warning" onclick="resetPValues()"><i class="fa-solid fa-xmark fa-xs"></i></button>
+					  <button id="resetTeamsBtn" type="button" data-bs-toggle="tooltip" data-bs-placement="right" title="Reset Teams Values" class="btn btn-primary" onclick="resetTValues()"><i class="fa-solid fa-xmark fa-xs"></i></button>
+					  <button id="resetAllBtn" type="button" data-bs-toggle="tooltip" data-bs-placement="top" title="Reset All Values" class="btn btn-danger" onclick="resetAll()"><i class="fa-solid fa-xmark fa-xs"></i></button>
+				  </div>
+			   <!--
+			   <div class="d-flex flex-column ml-3" style="gap: 4px; margin-left: 0px !important;">
+                  <button id="resetPlayersBtn" type="button" class="btn btn-warning btn-sm" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Reset Player Values" style="height: 31px; border-color: #6c757d !important;" onclick="resetPValues()">
                      <i class="fa-solid fa-trash fa-sm"></i>
                   </button>
-                  <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Reset All Values" style="height: 31px; border-color: #6c757d !important;" onclick="resetAll()">
+                  <button id="resetAllBtn" type="button" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Reset All Values" style="height: 31px; border-color: #6c757d !important;" onclick="resetAll()">
                      <i class="fa-solid fa-trash fa-sm"></i>
                   </button>
                </div>
+			   -->
             </div>
             <div class="player-box mr-3 col" style="margin-left: 4px; align-content: center;">
                <div class="form-inline sb-2 row" style="width: 203px;">
@@ -97,7 +104,7 @@
                   </div>
                   <input type="file" id="customImageInput2" data-player="2" accept="image/*" style="display: none;">
                   <input type="hidden" name="player2Img" id="player2Img" data-player="2" value="" />
-                  <input name="player2_clan" placeholder="Team" class="form-control sr-1 inputTeam" value="" />
+                  <input name="player2_clan" placeholder="Tag" class="form-control sr-1 inputTeam" value="" />
                   <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="P2 Team Info">
                      <button type="button" id="team2toggle" class="btn btn-sm btn-outline-secondary team-popover" data-bs-placement="right" data-popover-content="team2Popover"><i class="fa-solid fa-user-group fa-xs"></i></button>
                   </span>
@@ -133,7 +140,6 @@
                      <button class="btn btn-outline-secondary btn-sm" style="width: 22px; height: 31px; padding-left: 0px; padding-right: 0px;" onclick="changeMatchWins(1)"><i class="fa-solid fa-arrow-up-long fa-xs"></i></button>
                      <button class="btn btn-outline-secondary btn-sm" style="width: 22px; height: 31px; padding-left: 0px; padding-right: 0px;" onclick="changeMatchWins(-1)"><i class="fa-solid fa-arrow-down-long fa-xs"></i></button>
                   </div>
-                  <!-- custom match type (shown only when BO/FT are off) -->
                   <input id="customMatchTypeInput" class="form-control form-control-sm" type="text" placeholder="Custom text" style="display:none;" />
                </div>
             </div>
@@ -1406,13 +1412,20 @@ function getMatchTypeLabel(type) {
 
 function getMatchTypeString() {
    const isShort = document.getElementById("shortMatchLabel").checked;
-   if (!matchType || !matchWins) return "";
+   // If no preset, use the custom input value
+	  if (!matchType) {
+		const v = (document.getElementById('customMatchTypeInput')?.value || '').trim();
+		document.getElementById('MatchTypeData').value = v;
+		return v;
+	  }
+
+	  if (!matchWins) return "";
 
    const label = isShort ? (matchType === "Best of" ? "BO" : "FT") : matchType;
-
    const space = isShort ? "" : " ";
-   document.getElementById("MatchTypeData").value = `${label}${space}${matchWins}`;
-   return `${label}${space}${matchWins}`;
+   const s = `${label}${space}${matchWins}`;
+   document.getElementById("MatchTypeData").value = s;
+   return s;
 }
 
 function resetMatchType() {
@@ -2070,117 +2083,172 @@ function resetSingleScore(inputId) {
    emitUpdate();
 }
 
+document.getElementById('resetPlayersBtn').addEventListener('click', async () => {
+  await fetch('/reset/players', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+});
+
+document.getElementById('resetTeamsBtn').addEventListener('click', async () => {
+  await fetch('/reset/teams', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+});
+
+document.getElementById('resetAllBtn').addEventListener('click', async () => {
+  await fetch('/reset/all', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+});
+
+//////////// UI-only reset functions
+
+function uiOnly_Set(el, val) {
+  if (!el) return;
+  el.value = val;
+  el.dispatchEvent(new Event('input', { bubbles: true }));
+  el.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
+// Reset a player image button to the default icon (UI only)
+function uiOnly_ResetPlayerImageButton(player) {
+  const { btn, hidden } = playerEls(player);
+  if (btn) {
+    btn.innerHTML = '';
+    const icon = document.createElement('i');
+    icon.className = 'fa-regular fa-image';
+    icon.style.color = '#f1f1f1';
+    btn.appendChild(icon);
+  }
+  if (hidden) hidden.value = '';
+  selectedImageByPlayer[player] = null;
+}
+
+// Reset a team image button to the default icon (UI only)
+function uiOnly_ResetTeamImageButton(team) {
+  const { btn, hidden } = teamEls(team);
+  if (btn) {
+    btn.innerHTML = '';
+    const icon = document.createElement('i');
+    icon.className = 'fa-regular fa-image';
+    icon.style.color = '#f1f1f1';
+    btn.appendChild(icon);
+  }
+  if (hidden) hidden.value = '';
+  selectedImageByTeam[team] = null;
+}
+
 function resetPValues() {
-   const defaults = {
-      player1_name: "",
-      player1_clan: "",
-      player1_wl: "",
-      player1_score: 0,
-      player2_name: "",
-      player2_clan: "",
-      player2_wl: "",
-      player2_score: 0,
-      team1_name: "",
-      team2_name: "",
-   };
+  // Mute emits while we touch the DOM
+  const prevHydrating = isHydrating;
+  isHydrating = true;
 
-   for (const [key, value] of Object.entries(defaults)) {
-      const el = document.getElementsByName(key)[0];
-      if (el) el.value = value;
-   }
+  try {
+    // Names / clans / W/L
+    uiOnly_Set(document.querySelector('[name="player1_name"]'), '');
+    uiOnly_Set(document.querySelector('[name="player1_clan"]'), '');
+    uiOnly_Set(document.getElementById('player1_wl'), '');
 
-   // Untoggle all W/L sub buttons
-   document.querySelectorAll(".WLside button").forEach((btn) => btn.classList.remove("active"));
+    uiOnly_Set(document.querySelector('[name="player2_name"]'), '');
+    uiOnly_Set(document.querySelector('[name="player2_clan"]'), '');
+    uiOnly_Set(document.getElementById('player2_wl'), '');
 
-   // Reset player image
-   resetImageSelectionFor(1);
-   resetImageSelectionFor(2);
+    // W/L buttons visual state
+    document.querySelectorAll(".WLside button").forEach((btn) => btn.classList.remove("active"));
 
-   // Reset team scores & images
-   resetTeamScore(1);
-   resetTeamScore(2);
-   resetTeamImageSelection(1);
-   resetTeamImageSelection(2);
+    // Scores
+    uiOnly_Set(document.getElementById('player1_score'), 0);
+    uiOnly_Set(document.getElementById('player2_score'), 0);
 
-   updateTeamToggleColors();
+    // Player images (icon reset + hidden input clear)
+    uiOnly_ResetPlayerImageButton(1);
+    uiOnly_ResetPlayerImageButton(2);
 
-   emitUpdate();
+    // Recompute visuals (colors, indicators)
+    updateTagIconColors(1);
+    updateTagIconColors(2);
+    // Team buttons color
+    updateTeamToggleColors();
+
+  } finally {
+    isHydrating = prevHydrating;
+  }
+}
+
+function resetTValues() {
+  // Mute emits while we touch the DOM
+  const prevHydrating = isHydrating;
+  isHydrating = true;
+
+  try {
+    // Teams (names, scores, images)
+    uiOnly_Set(document.querySelector('[name="team1_name"]'), '');
+    uiOnly_Set(document.querySelector('[name="team2_name"]'), '');
+
+    uiOnly_Set(document.querySelector('[name="team1_score"]'), 0);
+    uiOnly_Set(document.querySelector('[name="team2_score"]'), 0);
+
+    uiOnly_ResetTeamImageButton(1);
+    uiOnly_ResetTeamImageButton(2);
+
+    updateTeamToggleColors();
+	
+  } finally {
+    isHydrating = prevHydrating;
+  }
 }
 
 function resetAll() {
-   const defaults = {
-      player1_name: "",
-      player1_clan: "",
-      player1_wl: "",
-      player1_score: 0,
-      player2_name: "",
-      player2_clan: "",
-      player2_wl: "",
-      player2_score: 0,
-      caster1_name: "",
-      caster1_twitch: "",
-      caster1_twitter: "",
-      caster2_name: "",
-      caster2_twitch: "",
-      caster2_twitter: "",
-      topText: "",
-   };
+  const prevHydrating = isHydrating;
+  isHydrating = true;
 
-   for (const [key, value] of Object.entries(defaults)) {
-      const el = document.getElementsByName(key)[0];
-      if (el) el.value = value;
-   }
+  try {
+    // 1) Players
+    resetPValues();
 
-   // Untoggle all W/L sub buttons
-   document.querySelectorAll(".WLside button").forEach((btn) => btn.classList.remove("active"));
+    // 2) Teams (names, scores, images)
+    uiOnly_Set(document.querySelector('[name="team1_name"]'), '');
+    uiOnly_Set(document.querySelector('[name="team2_name"]'), '');
 
-   // Clear stageMain and stageSub state
-   stageMain = "";
-   stageSub = "";
+    uiOnly_Set(document.querySelector('[name="team1_score"]'), 0);
+    uiOnly_Set(document.querySelector('[name="team2_score"]'), 0);
 
-   // Untoggle all stage main buttons
-   document.querySelectorAll(".stage-main button").forEach((btn) => btn.classList.remove("active"));
+    uiOnly_ResetTeamImageButton(1);
+    uiOnly_ResetTeamImageButton(2);
 
-   // Untoggle all stage sub buttons
-   document.querySelectorAll(".stage-sub button").forEach((btn) => btn.classList.remove("active"));
+    updateTeamToggleColors();
 
-   // Hide round selector and reset it
-   document.getElementById("roundControlWrapper").style.display = "none";
-   document.getElementById("stageRoundNum").value = 1;
+    // 3) Top text block
+    uiOnly_Set(document.getElementById('topText'), '');
+    updateTopTextButtonColor();
 
-   // Reset and hide custom stage input
-   const customInput = document.getElementById("customStageInput");
-   if (customInput) {
-      customInput.value = "";
-      customInput.style.display = "none";
-   }
+    // Hide all extra fields (Top text, C1, C2), and sync toggle states
+    document.querySelectorAll('.extraField').forEach(el => { el.style.display = 'none'; });
+    syncExtraToggleStates();
 
-   // Make sure sub-stage buttons are visible again
-   document.querySelector(".stage-sub").style.display = "";
+    // 4) Casters
+    uiOnly_Set(document.getElementById('caster1Name'), '');
+    uiOnly_Set(document.getElementById('caster1Twitch'), '');
+    uiOnly_Set(document.getElementById('caster1Twitter'), '');
+    uiOnly_Set(document.getElementById('caster2Name'), '');
+    uiOnly_Set(document.getElementById('caster2Twitch'), '');
+    uiOnly_Set(document.getElementById('caster2Twitter'), '');
+    // turn off caster platform toggles’ active styles
+    document.querySelectorAll('.casterToggles').forEach(b => b.classList.remove('active'));
+    updateTagIconColors(1);
+    updateTagIconColors(2);
 
-   // Reset match type
-   resetMatchType();
+    // 5) Stage & Match Type (UI only)
+    // Clear stage buttons (main/sub), round control, custom text
+    document.querySelectorAll('.stage-main .btn, .stage-sub .btn').forEach(b => b.classList.remove('active'));
+    uiOnly_Set(document.getElementById('StageData'), '');
+    uiOnly_Set(document.getElementById('customStageInput'), '');
+    const roundWrap = document.getElementById('roundControlWrapper');
+    if (roundWrap) roundWrap.style.display = 'none';
+    uiOnly_Set(document.getElementById('stageRoundNum'), 1);
 
-   // Reset player image
-   resetImageSelectionFor(1);
-   resetImageSelectionFor(2);
+    // Match type preset/custom
+    resetMatchType();            // this is UI-only (doesn't POST) in your file
+    updateMatchTypeUI();         // keep the view consistent
+    uiOnly_Set(document.getElementById('customMatchTypeInput'), '');
 
-   // Reset team scores & images
-   setInputValue("team1_name", "");
-   setInputValue("team1_score", 0);
-   resetTeamImageSelection(1);
-
-   setInputValue("team2_name", "");
-   setInputValue("team2_score", 0);
-   resetTeamImageSelection(2);
-
-   updateTopTextButtonColor();
-   updateTagIconColors(1);
-   updateTagIconColors(2);
-   updateTeamToggleColors();
-   syncExtraToggleStates();
-
-   emitUpdate();
+  } finally {
+    isHydrating = prevHydrating;
+  }
 }
 
 document.querySelectorAll("#scoreForm input").forEach((input) => {
