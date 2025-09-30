@@ -1,7 +1,7 @@
 
 # 🥊🕹️🎥 FGCaster Overlay
 
-A stream overlay app for software like OBS, designed for broadcasting fighting game events.
+A stream overlay app for software like OBS, designed for broadcasting fighting game matches and events.
 
 ## Why?
 
