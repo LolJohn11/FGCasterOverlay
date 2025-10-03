@@ -1,659 +1,664 @@
 <html lang="en">
 
 <head>
-   <meta charset="UTF-8" />
-   <title>FGCaster Controller UI</title>
-   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" />
-   <link rel="stylesheet" href="/static/controller.css" />
-   <link rel="stylesheet" href="./static/fa/css/all.min.css" />
-   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
-   <script>
-      (function() {
-         try {
-            var s = localStorage.getItem('ui_scale');
-            if (!s) return;
-            var scale = Math.max(0.5, Math.min(2, parseFloat(s) || 1));
-            var style = document.createElement('style');
-            style.textContent =
-               ':root{--ui-scale:' + scale + '}' +
-               '#uiRoot{transform:scale(' + scale + ');transform-origin:top left;width:calc(100% / ' + scale + ');}';
-            document.head.appendChild(style);
-         } catch (e) {
-            /* ignore */
-         }
-      })();
-   </script>
-<script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-..." crossorigin="anonymous"></script>
-<script>
-  const socket = io();
-  socket.on('connect', () => socket.emit('identify', { role: 'controller' }));
-</script>
+    <meta charset="UTF-8" />
+    <title>FGCaster Controller UI</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/static/controller.css" />
+    <link rel="stylesheet" href="./static/fa/css/all.min.css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function() {
+            try {
+                var s = localStorage.getItem('ui_scale');
+                if (!s) return;
+                var scale = Math.max(0.5, Math.min(2, parseFloat(s) || 1));
+                var style = document.createElement('style');
+                style.textContent =
+                    ':root{--ui-scale:' + scale + '}' +
+                    '#uiRoot{transform:scale(' + scale + ');transform-origin:top left;width:calc(100% / ' + scale + ');}';
+                document.head.appendChild(style);
+            } catch (e) {
+                /* ignore */
+            }
+        })();
+    </script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-..." crossorigin="anonymous"></script>
+    <script>
+        const socket = io();
+        socket.on('connect', () => socket.emit('identify', {
+            role: 'controller'
+        }));
+    </script>
 </head>
 
 <body>
-   <div id="uiRoot">
-      <form id="scoreForm" style="margin-bottom: 0px; width: max-content;" onsubmit="return false;">
-         <div class="form-section d-flex" style="margin-bottom: 0px;">
-            <div class="player-box mr-3 col" style="align-content: center;">
-               <div class="form-inline sb-2 row" style="width: 203px;">
-                  <div style="position: relative; display: inline-block;">
-                     <button id="imgSelect" class="btn btn-outline-secondary btn-sm img-select" data-player="1" data-bs-toggle="tooltip" data-bs-placement="bottom" title="P1 Image" onclick="openImageMenuFor(1)"><i class="fa-regular fa-image" style="color:#f1f1f1;"></i></button>
-                     <div id="imgSelectDropdown" class="hidden" data-player="1"></div>
-                  </div>
-                  <input type="file" id="customImageInput" data-player="1" accept="image/*" style="display: none;">
-                  <input type="hidden" name="player1Img" id="player1Img" data-player="1" value="" />
-                  <input name="player1_clan" placeholder="Tag" class="inputTeam form-control sr-1" value="" />
-                  <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="P1 Team Info">
-                     <button type="button" id="team1toggle" class="btn btn-sm btn-outline-secondary team-popover" data-bs-placement="right" data-popover-content="team1Popover"><i class="fa-solid fa-user-group fa-xs"></i></button>
-                  </span>
-                  <input name="player1_name" placeholder="P1 Name" class="inputPlayer form-control sr-2" value="" />
-               </div>
-               <div class="form-inline sb-2 row" style="width: 203px;">
-                  <div class="btn-group btn-group-sm WLside mr-2" style="margin-right: 4px !important;" role="group">
-                     <button id="player1_w_btn" type="button" class="btn btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Winner's Side" style="height: 30px; width: 30px;" onclick="toggleWL('player1', '[W]', this)">W</button>
-                     <button id="player1_l_btn" type="button" class="btn btn-outline-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Loser's Side" style="height: 30px; width: 30px;" onclick="toggleWL('player1', '[L]', this)">L</button>
-                  </div>
-                  <input type="hidden" name="player1_wl" id="player1_wl" value="" />
-                  <div class="score-group sb-2">
-                     <input type="number" name="player1_score" id="player1_score" class="form-control" style="width: 39px; height: 30px;" value="" />
-                     <button type="button" class="btn btn-outline-success score-btn" style="height: 30px; width: 30px; padding-bottom: 0px;" onclick="adjustScore('player1_score', 1)"><i class="fa-solid fa-plus fa-2xs"></i></button>
-                     <button type="button" class="btn btn-outline-secondary score-btn" style="height: 30px; padding-bottom: 0px;" data-bs-toggle="tooltip" data-bs-placement="top" title="Reset Score" onclick="resetSingleScore('player1_score')">
-                        <i class="fa-solid fa-rotate-left fa-xs"></i>
-                     </button>
-                     <button type="button" class="btn btn-outline-danger score-btn" style="height: 30px; width: 30px; padding-bottom: 0px;" onclick="adjustScore('player1_score', -1)"><i class="fa-solid fa-minus fa-2xs"></i></button>
-                  </div>
-               </div>
-            </div>
-            <div class="form-section d-flex align-items-start" style="margin-bottom: 0px;">
-               <div class="d-flex flex-wrap" style="width: 108px; gap: 4px;">
-                  <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Swap Players" style="width: 50px; height: 31px;" onclick="swapPlayers()">
-                     <i class="fa-solid fa-arrow-right-arrow-left fa-sm"></i><i class="fa-solid fa-font fa-sm"></i>
-                  </button>
-                  <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Swap Teams" style="width: 50px; height: 31px;" onclick="swapTeams()">
-                     <i class="fa-solid fa-arrow-right-arrow-left fa-sm"></i><i class="fa-solid fa-user-group fa-sm"></i>
-                  </button>
-                  <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Swap Player Scores" style="width: 50px; height: 31px;" onclick="swapScores()">
-                     <i class="fa-solid fa-arrow-right-arrow-left fa-sm"></i><i class="fa-solid fa-crown fa-sm"></i>
-                  </button>
-                  <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Swap All" style="width: 50px; height: 31px;" onclick="swapAll()">
-                     <i class="fa-solid fa-arrow-right-arrow-left fa-sm"></i><i class="fa-solid fa-infinity fa-sm"></i>
-                  </button>
-               </div>
-               	  <div class="btn-group-vertical" role="group">
-					  <button id="resetPlayersBtn" type="button" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Reset Player Values" class="btn btn-warning" onclick="resetPValues()"><i class="fa-solid fa-xmark fa-xs"></i></button>
-					  <button id="resetTeamsBtn" type="button" data-bs-toggle="tooltip" data-bs-placement="right" title="Reset Teams Values" class="btn btn-primary" onclick="resetTValues()"><i class="fa-solid fa-xmark fa-xs"></i></button>
-					  <button id="resetAllBtn" type="button" data-bs-toggle="tooltip" data-bs-placement="top" title="Reset All Values" class="btn btn-danger" onclick="resetAll()"><i class="fa-solid fa-xmark fa-xs"></i></button>
-				  </div>
-			   <!--
-			   <div class="d-flex flex-column ml-3" style="gap: 4px; margin-left: 0px !important;">
-                  <button id="resetPlayersBtn" type="button" class="btn btn-warning btn-sm" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Reset Player Values" style="height: 31px; border-color: #6c757d !important;" onclick="resetPValues()">
-                     <i class="fa-solid fa-trash fa-sm"></i>
-                  </button>
-                  <button id="resetAllBtn" type="button" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Reset All Values" style="height: 31px; border-color: #6c757d !important;" onclick="resetAll()">
-                     <i class="fa-solid fa-trash fa-sm"></i>
-                  </button>
-               </div>
-			   -->
-            </div>
-            <div class="player-box mr-3 col" style="margin-left: 4px; align-content: center;">
-               <div class="form-inline sb-2 row" style="width: 203px;">
-                  <div style="position: relative; display: inline-block;">
-                     <button id="imgSelect2" class="btn btn-outline-secondary btn-sm img-select" data-player="2" data-bs-toggle="tooltip" data-bs-placement="bottom" title="P2 Image" onclick="openImageMenuFor(2)"><i class="fa-regular fa-image" style="color:#f1f1f1;"></i></button>
-                     <div id="imgSelectDropdown2" class="hidden" data-player="2"></div>
-                  </div>
-                  <input type="file" id="customImageInput2" data-player="2" accept="image/*" style="display: none;">
-                  <input type="hidden" name="player2Img" id="player2Img" data-player="2" value="" />
-                  <input name="player2_clan" placeholder="Tag" class="form-control sr-1 inputTeam" value="" />
-                  <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="P2 Team Info">
-                     <button type="button" id="team2toggle" class="btn btn-sm btn-outline-secondary team-popover" data-bs-placement="right" data-popover-content="team2Popover"><i class="fa-solid fa-user-group fa-xs"></i></button>
-                  </span>
-                  <input name="player2_name" placeholder="P2 Name" class="form-control sr-2 inputPlayer" value="" />
-               </div>
-               <div class="form-inline sb-2 row" style="width: 203px;">
-                  <div class="btn-group btn-group-sm WLside mr-2" style="margin-right: 4px !important;" role="group">
-                     <button id="player2_w_btn" type="button" class="btn btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Winner's Side" style="height: 30px; width: 30px;" onclick="toggleWL('player2', '[W]', this)">W</button>
-                     <button id="player2_l_btn" type="button" class="btn btn-outline-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Loser's Side" style="height: 30px; width: 30px;" onclick="toggleWL('player2', '[L]', this)">L</button>
-                  </div>
-                  <input type="hidden" name="player2_wl" id="player2_wl" value="" />
-                  <div class="score-group sb-2">
-                     <input type="number" name="player2_score" id="player2_score" class="form-control" style="width: 39px; height: 30px;" value="" />
-                     <button type="button" class="btn btn-outline-success score-btn" style="height: 30px; width: 30px; padding-bottom: 0px;" onclick="adjustScore('player2_score', 1)"><i class="fa-solid fa-plus fa-2xs"></i></button>
-                     <button type="button" class="btn btn-outline-secondary score-btn" style="height: 30px; padding-bottom: 0px;" data-bs-toggle="tooltip" data-bs-placement="top" title="Reset Score" onclick="resetSingleScore('player2_score')">
-                        <i class="fa-solid fa-rotate-left fa-xs"></i>
-                     </button>
-                     <button type="button" class="btn btn-outline-danger score-btn" style="height: 30px; width: 30px; padding-bottom: 0px;" onclick="adjustScore('player2_score', -1)"><i class="fa-solid fa-minus fa-2xs"></i></button>
-                  </div>
-               </div>
-            </div>
-            <div class="form-section align-items-start" style="margin-bottom: 0px; margin-right: 4px; max-width: 100px;">
-               <div class="form-inline sb-2">
-                  <div class="btn-group btn-group-sm mr-2" id="matchTypeButtons">
-                     <button id="boBtn" type="button" class="btn btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Best of #" onclick="setMatchType('Best of')">BO</button>
-                     <button id="ftBtn" type="button" class="btn btn-outline-success" data-bs-toggle="tooltip" data-bs-placement="bottom" title="First to #" onclick="setMatchType('First to')">FT</button>
-                     <button id="shortToggleBtn" type="button" class="btn btn-outline-secondary" style="width: 27px;" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Toggle Acronym" onclick="toggleShortLabel()">S</button>
-                  </div>
-                  <input type="hidden" name="MatchTypeData" id="MatchTypeData" value="" />
-                  <input type="checkbox" id="shortMatchLabel" style="display: none;" />
-                  <div class="score-group sr-3" id="matchWinsGroup" style="display: none;">
-                     <input type="number" name="matchWinsNum" id="matchWinsNum" class="form-control" value="3" style="width: 40px; height: 31px;" />
-                     <button class="btn btn-outline-secondary btn-sm" style="width: 22px; height: 31px; padding-left: 0px; padding-right: 0px;" onclick="changeMatchWins(1)"><i class="fa-solid fa-arrow-up-long fa-xs"></i></button>
-                     <button class="btn btn-outline-secondary btn-sm" style="width: 22px; height: 31px; padding-left: 0px; padding-right: 0px;" onclick="changeMatchWins(-1)"><i class="fa-solid fa-arrow-down-long fa-xs"></i></button>
-                  </div>
-                  <input id="customMatchTypeInput" class="form-control form-control-sm" type="text" placeholder="Custom text" style="display:none;" />
-               </div>
-            </div>
-            <div class="form-section align-items-start" style="margin-bottom: 0px; margin-right: 4px;">
-               <div class="mainstage-button-wrapper stage-main">
-                  <div class="btn-row">
-                     <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Pools" onclick="setStageMain('Pools')">P</button>
-                     <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Round-Robin" onclick="setStageMain('Round-Robin')">RR</button>
-                     <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Grand Finals" onclick="setStageMain('Grand Finals')">GF</button>
-                  </div>
-                  <div class="btn-row">
-                     <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="Winners" onclick="setStageMain('Winners')">W</button>
-                     <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="Losers" onclick="setStageMain('Losers')">L</button>
-                     <button type="button" class="btn btn-sm btn-outline-secondary cusTogBtn" data-bs-toggle="tooltip" data-bs-placement="top" title="Custom" onclick="setStageMain('')">C</button>
-                  </div>
-               </div>
-            </div>
-            <div class="form-section align-items-start" style="margin-bottom: 0px;">
-               <div class="substage-button-wrapper stage-sub" style="margin-right: 4px">
-                  <div class="btn-row">
-                     <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Quarterfinal" onclick="setStageSub('Quarterfinal')">Q</button>
-                     <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Semifinal" onclick="setStageSub('Semifinal')">S</button>
-                     <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Final" onclick="setStageSub('Final')">F</button>
-                  </div>
-                  <div class="btn-row">
-                     <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="Round" onclick="setStageSub('Round')">R</button>
-                     <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="Bracket Reset" onclick="setStageSub('Reset')">BR</button>
-                  </div>
-               </div>
-               <input type="text" id="customStageInput" class="form-control" placeholder="Custom text" onblur="updateStageField()" onkeydown="if(event.key === 'Enter'){ this.blur(); }" />
-            </div>
-            <input type="hidden" name="StageData" id="StageData" value="" />
-            <div class="form-section align-items-start roundSelectorWrapper" style="margin-bottom: 0px; min-width: 33px;">
-               <div class="form-group d-flex" style="margin-bottom: 0px;">
-                  <div class="round-control" id="roundControlWrapper" style="display: none; justify-content: center;">
-                     <button id="roundUp" class="btn btn-outline-secondary btn-sm" onclick="changeRoundNum(1)"><i class="fa-solid fa-caret-up fa-xs"></i></button>
-                     <input type="number" id="stageRoundNum" class="form-control text-center" value="1" />
-                     <button id="roundDown" class="btn btn-outline-secondary btn-sm" onclick="changeRoundNum(-1)"><i class="fa-solid fa-caret-down fa-xs"></i></button>
-                  </div>
-               </div>
-            </div>
-            <div class="box mr-3" style="margin-right: 0px !important; margin-left: 4px;">
-               <div class="extra-button-wrapper extra-fields">
-                  <div class="row" style="margin-left: 0px;margin-right: 0px;">
-                     <div class="btn-row" style="padding-left: 0px;">
-                        <button id="toggleTopText" type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Top Text" onclick="toggleExtraField('topTextWrapper')">T</button>
-                        <button id="toggleCaster1" type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Caster 1" onclick="toggleExtraField('inputCaster1')">C1<div class="square squareTwitch"></div>
-                           <div class="square squareTwitter"></div>
+    <div id="uiRoot">
+        <form id="scoreForm" style="margin-bottom: 0px; width: max-content;" onsubmit="return false;">
+            <div class="form-section d-flex" style="margin-bottom: 0px;">
+                <div class="player-box mr-3 col" style="align-content: center;">
+                    <div class="form-inline sb-2 row" style="width: 203px;">
+                        <div style="position: relative; display: inline-block;">
+                            <button id="imgSelect" class="btn btn-outline-secondary btn-sm img-select" data-player="1" data-bs-toggle="tooltip" data-bs-placement="bottom" title="P1 Image" onclick="openImageMenuFor(1)"><i class="fa-regular fa-image" style="color:#f1f1f1;"></i></button>
+                            <div id="imgSelectDropdown" class="hidden" data-player="1"></div>
+                        </div>
+                        <input type="file" id="customImageInput" data-player="1" accept="image/*" style="display: none;">
+                        <input type="hidden" name="player1Img" id="player1Img" data-player="1" value="" />
+                        <input name="player1_clan" placeholder="Tag" class="inputTeam form-control sr-1" value="" />
+                        <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="P1 Team Info">
+                            <button type="button" id="team1toggle" class="btn btn-sm btn-outline-secondary team-popover" data-bs-placement="right" data-popover-content="team1Popover"><i class="fa-solid fa-user-group fa-xs"></i></button>
+                        </span>
+                        <input name="player1_name" placeholder="P1 Name" class="inputPlayer form-control sr-2" value="" />
+                    </div>
+                    <div class="form-inline sb-2 row" style="width: 203px;">
+                        <div class="btn-group btn-group-sm WLside mr-2" style="margin-right: 4px !important;" role="group">
+                            <button id="player1_w_btn" type="button" class="btn btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Winner's Side" style="height: 30px; width: 30px;" onclick="toggleWL('player1', '[W]', this)">W</button>
+                            <button id="player1_l_btn" type="button" class="btn btn-outline-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Loser's Side" style="height: 30px; width: 30px;" onclick="toggleWL('player1', '[L]', this)">L</button>
+                        </div>
+                        <input type="hidden" name="player1_wl" id="player1_wl" value="" />
+                        <div class="score-group sb-2">
+                            <input type="number" name="player1_score" id="player1_score" class="form-control" style="width: 39px; height: 30px;" value="" />
+                            <button type="button" class="btn btn-outline-success score-btn" style="height: 30px; width: 30px; padding-bottom: 0px;" onclick="adjustScore('player1_score', 1)"><i class="fa-solid fa-plus fa-2xs"></i></button>
+                            <button type="button" class="btn btn-outline-secondary score-btn" style="height: 30px; padding-bottom: 0px;" data-bs-toggle="tooltip" data-bs-placement="top" title="Reset Score" onclick="resetSingleScore('player1_score')">
+                                <i class="fa-solid fa-rotate-left fa-xs"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-danger score-btn" style="height: 30px; width: 30px; padding-bottom: 0px;" onclick="adjustScore('player1_score', -1)"><i class="fa-solid fa-minus fa-2xs"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-section d-flex align-items-start" style="margin-bottom: 0px;">
+                    <div class="d-flex flex-wrap" style="width: 108px; gap: 4px;">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Swap Players" style="width: 50px; height: 31px;" onclick="swapPlayers()">
+                            <i class="fa-solid fa-arrow-right-arrow-left fa-sm"></i><i class="fa-solid fa-font fa-sm"></i>
                         </button>
-                        <button id="toggleCaster2" type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Caster 2" onclick="toggleExtraField('inputCaster2')">C2<div class="square squareTwitch"></div>
-                           <div class="square squareTwitter"></div>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Swap Teams" style="width: 50px; height: 31px;" onclick="swapTeams()">
+                            <i class="fa-solid fa-arrow-right-arrow-left fa-sm"></i><i class="fa-solid fa-user-group fa-sm"></i>
                         </button>
-                     </div>
-                     <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="Settings" style="padding: 0px; margin-left: 12px;">
-                        <button class="btn btn-outline-secondary" style="padding: 6px 12px;" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvas" aria-controls="offcanvas"><i class="fa-solid fa-gear"></i></button>
-                     </span>
-                  </div>
-                  <div id="topTextWrapper" class="form-inline sb-2 extraField" style="display: none;">
-                     <input id="topText" name="topText" style="width: 150px;" placeholder="Stream name, etc..." class="form-control mb-1" oninput="updateTopTextButtonColor()" value="" />
-                  </div>
-                  <div id="inputCaster1" class="form-inline sb-2 extraField" style="display: none;">
-                     <button id="caster1TwitchToggle" type="button" class="btn btn-sm btn-outline-secondary casterToggles" data-bs-toggle="tooltip" data-bs-placement="top" title="Twitch" onclick="toggleTagFields('1', 'Twitch')"><i class="fa-brands fa-twitch fa-sm" style="color:#f1f1f1; margin-top: 2px"></i></button>
-                     <button id="caster1TwitterToggle" type="button" class="btn btn-sm btn-outline-secondary casterToggles" data-bs-toggle="tooltip" data-bs-placement="top" title="X" onclick="toggleTagFields('1', 'Twitter')"><i class="fa-brands fa-x-twitter fa-sm" style="color:#f1f1f1; margin-top: 2px"></i></button>
-                     <input id="caster1Name" name="caster1_name" placeholder="C1 Name" class="form-control mb-1 casterInput" oninput="updateTagIconColors(1)" value="" />
-                     <input id="caster1Twitch" name="caster1_twitch" style="display: none;" placeholder="C1 Twitch Tag" class="form-control mb-1 casterInput" oninput="updateTagIconColors(1)" value="" />
-                     <input id="caster1Twitter" name="caster1_twitter" style="display: none;" placeholder="C1 X Tag" class="form-control mb-1 casterInput" oninput="updateTagIconColors(1)" value="" />
-                  </div>
-                  <div id="inputCaster2" class="form-inline sb-2 extraField" style="display: none;">
-                     <button id="caster2TwitchToggle" type="button" class="btn btn-sm btn-outline-secondary casterToggles" data-bs-toggle="tooltip" data-bs-placement="top" title="Twitch" onclick="toggleTagFields('2', 'Twitch')"><i class="fa-brands fa-twitch fa-sm" style="color:#f1f1f1; margin-top: 2px"></i></button>
-                     <button id="caster2TwitterToggle" type="button" class="btn btn-sm btn-outline-secondary casterToggles" data-bs-toggle="tooltip" data-bs-placement="top" title="X" onclick="toggleTagFields('2', 'Twitter')"><i class="fa-brands fa-x-twitter fa-sm" style="color:#f1f1f1; margin-top: 2px"></i></button>
-                     <input id="caster2Name" name="caster2_name" placeholder="C2 Name" class="form-control mb-1 casterInput" oninput="updateTagIconColors(2)" value="" />
-                     <input id="caster2Twitch" name="caster2_twitch" style="display: none;" placeholder="C2 Twitch Tag" class="form-control mb-1 casterInput" oninput="updateTagIconColors(2)" value="" />
-                     <input id="caster2Twitter" name="caster2_twitter" style="display: none;" placeholder="C2 X Tag" class="form-control mb-1 casterInput" oninput="updateTagIconColors(2)" value="" />
-                  </div>
-               </div>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Swap Player Scores" style="width: 50px; height: 31px;" onclick="swapScores()">
+                            <i class="fa-solid fa-arrow-right-arrow-left fa-sm"></i><i class="fa-solid fa-crown fa-sm"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Swap All" style="width: 50px; height: 31px;" onclick="swapAll()">
+                            <i class="fa-solid fa-arrow-right-arrow-left fa-sm"></i><i class="fa-solid fa-infinity fa-sm"></i>
+                        </button>
+                    </div>
+                    <div class="btn-group-vertical" role="group">
+                        <button id="resetPlayersBtn" type="button" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Reset Player Values" class="btn btn-warning" onclick="confirmResetPlayers()"><i class="fa-solid fa-xmark fa-xs"></i></button>
+                        <button id="resetTeamsBtn" type="button" data-bs-toggle="tooltip" data-bs-placement="right" title="Reset Teams Values" class="btn btn-primary" onclick="confirmResetTeams()"><i class="fa-solid fa-xmark fa-xs"></i></button>
+                        <button id="resetAllBtn" type="button" data-bs-toggle="tooltip" data-bs-placement="top" title="Reset All Values" class="btn btn-danger" onclick="confirmResetAll()"><i class="fa-solid fa-xmark fa-xs"></i></button>
+                    </div>
+                </div>
+                <div class="player-box mr-3 col" style="margin-left: 4px; align-content: center;">
+                    <div class="form-inline sb-2 row" style="width: 203px;">
+                        <div style="position: relative; display: inline-block;">
+                            <button id="imgSelect2" class="btn btn-outline-secondary btn-sm img-select" data-player="2" data-bs-toggle="tooltip" data-bs-placement="bottom" title="P2 Image" onclick="openImageMenuFor(2)"><i class="fa-regular fa-image" style="color:#f1f1f1;"></i></button>
+                            <div id="imgSelectDropdown2" class="hidden" data-player="2"></div>
+                        </div>
+                        <input type="file" id="customImageInput2" data-player="2" accept="image/*" style="display: none;">
+                        <input type="hidden" name="player2Img" id="player2Img" data-player="2" value="" />
+                        <input name="player2_clan" placeholder="Tag" class="form-control sr-1 inputTeam" value="" />
+                        <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="P2 Team Info">
+                            <button type="button" id="team2toggle" class="btn btn-sm btn-outline-secondary team-popover" data-bs-placement="right" data-popover-content="team2Popover"><i class="fa-solid fa-user-group fa-xs"></i></button>
+                        </span>
+                        <input name="player2_name" placeholder="P2 Name" class="form-control sr-2 inputPlayer" value="" />
+                    </div>
+                    <div class="form-inline sb-2 row" style="width: 203px;">
+                        <div class="btn-group btn-group-sm WLside mr-2" style="margin-right: 4px !important;" role="group">
+                            <button id="player2_w_btn" type="button" class="btn btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Winner's Side" style="height: 30px; width: 30px;" onclick="toggleWL('player2', '[W]', this)">W</button>
+                            <button id="player2_l_btn" type="button" class="btn btn-outline-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Loser's Side" style="height: 30px; width: 30px;" onclick="toggleWL('player2', '[L]', this)">L</button>
+                        </div>
+                        <input type="hidden" name="player2_wl" id="player2_wl" value="" />
+                        <div class="score-group sb-2">
+                            <input type="number" name="player2_score" id="player2_score" class="form-control" style="width: 39px; height: 30px;" value="" />
+                            <button type="button" class="btn btn-outline-success score-btn" style="height: 30px; width: 30px; padding-bottom: 0px;" onclick="adjustScore('player2_score', 1)"><i class="fa-solid fa-plus fa-2xs"></i></button>
+                            <button type="button" class="btn btn-outline-secondary score-btn" style="height: 30px; padding-bottom: 0px;" data-bs-toggle="tooltip" data-bs-placement="top" title="Reset Score" onclick="resetSingleScore('player2_score')">
+                                <i class="fa-solid fa-rotate-left fa-xs"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-danger score-btn" style="height: 30px; width: 30px; padding-bottom: 0px;" onclick="adjustScore('player2_score', -1)"><i class="fa-solid fa-minus fa-2xs"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-section align-items-start" style="margin-bottom: 0px; margin-right: 4px; max-width: 100px;">
+                    <div class="form-inline sb-2">
+                        <div class="btn-group btn-group-sm mr-2" id="matchTypeButtons">
+                            <button id="boBtn" type="button" class="btn btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Best of #" onclick="setMatchType('Best of')">BO</button>
+                            <button id="ftBtn" type="button" class="btn btn-outline-success" data-bs-toggle="tooltip" data-bs-placement="bottom" title="First to #" onclick="setMatchType('First to')">FT</button>
+                            <button id="shortToggleBtn" type="button" class="btn btn-outline-secondary" style="width: 27px;" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Toggle Acronym" onclick="toggleShortLabel()">S</button>
+                        </div>
+                        <input type="hidden" name="MatchTypeData" id="MatchTypeData" value="" />
+                        <input type="checkbox" id="shortMatchLabel" style="display: none;" />
+                        <div class="score-group sr-3" id="matchWinsGroup" style="display: none;">
+                            <input type="number" name="matchWinsNum" id="matchWinsNum" class="form-control" value="3" style="width: 40px; height: 31px;" />
+                            <button class="btn btn-outline-secondary btn-sm" style="width: 22px; height: 31px; padding-left: 0px; padding-right: 0px;" onclick="changeMatchWins(1)"><i class="fa-solid fa-arrow-up-long fa-xs"></i></button>
+                            <button class="btn btn-outline-secondary btn-sm" style="width: 22px; height: 31px; padding-left: 0px; padding-right: 0px;" onclick="changeMatchWins(-1)"><i class="fa-solid fa-arrow-down-long fa-xs"></i></button>
+                        </div>
+                        <input id="customMatchTypeInput" class="form-control form-control-sm" type="text" placeholder="Custom text" style="display:none;" />
+                    </div>
+                </div>
+                <div class="form-section align-items-start" style="margin-bottom: 0px; margin-right: 4px;">
+                    <div class="mainstage-button-wrapper stage-main">
+                        <div class="btn-row">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Pools" onclick="setStageMain('Pools')">P</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Round-Robin" onclick="setStageMain('Round-Robin')">RR</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Grand Finals" onclick="setStageMain('Grand Finals')">GF</button>
+                        </div>
+                        <div class="btn-row">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="Winners" onclick="setStageMain('Winners')">W</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="Losers" onclick="setStageMain('Losers')">L</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary cusTogBtn" data-bs-toggle="tooltip" data-bs-placement="top" title="Custom" onclick="setStageMain('')">C</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-section align-items-start" style="margin-bottom: 0px;">
+                    <div class="substage-button-wrapper stage-sub" style="margin-right: 4px">
+                        <div class="btn-row">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Quarterfinal" onclick="setStageSub('Quarterfinal')">Q</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Semifinal" onclick="setStageSub('Semifinal')">S</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Final" onclick="setStageSub('Final')">F</button>
+                        </div>
+                        <div class="btn-row">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="Round" onclick="setStageSub('Round')">R</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="Bracket Reset" onclick="setStageSub('Reset')">BR</button>
+                        </div>
+                    </div>
+                    <input type="text" id="customStageInput" class="form-control" placeholder="Custom text" onblur="updateStageField()" onkeydown="if(event.key === 'Enter'){ this.blur(); }" />
+                </div>
+                <input type="hidden" name="StageData" id="StageData" value="" />
+                <div class="form-section align-items-start roundSelectorWrapper" style="margin-bottom: 0px; min-width: 33px;">
+                    <div class="form-group d-flex" style="margin-bottom: 0px;">
+                        <div class="round-control" id="roundControlWrapper" style="display: none; justify-content: center;">
+                            <button id="roundUp" class="btn btn-outline-secondary btn-sm" onclick="changeRoundNum(1)"><i class="fa-solid fa-caret-up fa-xs"></i></button>
+                            <input type="number" id="stageRoundNum" class="form-control text-center" value="1" />
+                            <button id="roundDown" class="btn btn-outline-secondary btn-sm" onclick="changeRoundNum(-1)"><i class="fa-solid fa-caret-down fa-xs"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="box mr-3" style="margin-right: 0px !important; margin-left: 4px;">
+                    <div class="extra-button-wrapper extra-fields">
+                        <div class="row" style="margin-left: 0px;margin-right: 0px;">
+                            <div class="btn-row" style="padding-left: 0px;">
+                                <button id="toggleTopText" type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Top Text" onclick="toggleExtraField('topTextWrapper')">T</button>
+                                <button id="toggleCaster1" type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Caster 1" onclick="toggleExtraField('inputCaster1')">C1<div class="square squareTwitch"></div>
+                                    <div class="square squareTwitter"></div>
+                                </button>
+                                <button id="toggleCaster2" type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Caster 2" onclick="toggleExtraField('inputCaster2')">C2<div class="square squareTwitch"></div>
+                                    <div class="square squareTwitter"></div>
+                                </button>
+                            </div>
+                            <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="Settings" style="padding: 0px; margin-left: 12px;">
+                                <button class="btn btn-outline-secondary" style="padding: 6px 12px;" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvas" aria-controls="offcanvas"><i class="fa-solid fa-gear"></i></button>
+                            </span>
+                        </div>
+                        <div id="topTextWrapper" class="form-inline sb-2 extraField" style="display: none;">
+                            <input id="topText" name="topText" style="width: 150px;" placeholder="Stream name, etc..." class="form-control mb-1" oninput="updateTopTextButtonColor()" value="" />
+                        </div>
+                        <div id="inputCaster1" class="form-inline sb-2 extraField" style="display: none;">
+                            <button id="caster1TwitchToggle" type="button" class="btn btn-sm btn-outline-secondary casterToggles" data-bs-toggle="tooltip" data-bs-placement="top" title="Twitch" onclick="toggleTagFields('1', 'Twitch')"><i class="fa-brands fa-twitch fa-sm" style="color:#f1f1f1; margin-top: 2px"></i></button>
+                            <button id="caster1TwitterToggle" type="button" class="btn btn-sm btn-outline-secondary casterToggles" data-bs-toggle="tooltip" data-bs-placement="top" title="X" onclick="toggleTagFields('1', 'Twitter')"><i class="fa-brands fa-x-twitter fa-sm" style="color:#f1f1f1; margin-top: 2px"></i></button>
+                            <input id="caster1Name" name="caster1_name" placeholder="C1 Name" class="form-control mb-1 casterInput" oninput="updateTagIconColors(1)" value="" />
+                            <input id="caster1Twitch" name="caster1_twitch" style="display: none;" placeholder="C1 Twitch Tag" class="form-control mb-1 casterInput" oninput="updateTagIconColors(1)" value="" />
+                            <input id="caster1Twitter" name="caster1_twitter" style="display: none;" placeholder="C1 X Tag" class="form-control mb-1 casterInput" oninput="updateTagIconColors(1)" value="" />
+                        </div>
+                        <div id="inputCaster2" class="form-inline sb-2 extraField" style="display: none;">
+                            <button id="caster2TwitchToggle" type="button" class="btn btn-sm btn-outline-secondary casterToggles" data-bs-toggle="tooltip" data-bs-placement="top" title="Twitch" onclick="toggleTagFields('2', 'Twitch')"><i class="fa-brands fa-twitch fa-sm" style="color:#f1f1f1; margin-top: 2px"></i></button>
+                            <button id="caster2TwitterToggle" type="button" class="btn btn-sm btn-outline-secondary casterToggles" data-bs-toggle="tooltip" data-bs-placement="top" title="X" onclick="toggleTagFields('2', 'Twitter')"><i class="fa-brands fa-x-twitter fa-sm" style="color:#f1f1f1; margin-top: 2px"></i></button>
+                            <input id="caster2Name" name="caster2_name" placeholder="C2 Name" class="form-control mb-1 casterInput" oninput="updateTagIconColors(2)" value="" />
+                            <input id="caster2Twitch" name="caster2_twitch" style="display: none;" placeholder="C2 Twitch Tag" class="form-control mb-1 casterInput" oninput="updateTagIconColors(2)" value="" />
+                            <input id="caster2Twitter" name="caster2_twitter" style="display: none;" placeholder="C2 X Tag" class="form-control mb-1 casterInput" oninput="updateTagIconColors(2)" value="" />
+                        </div>
+                    </div>
+                </div>
             </div>
-         </div>
-         <!-- Parking spot to hold popover content when not shown -->
-         <div id="popoverStash" hidden></div>
-         <!-- Team 1 popover content -->
-         <div id="team1Popover" hidden class="team-popover-content ui-scaled">
-            <div class="teamRow form-inline sb-2 row" style="">
-               <div style="position: relative; display: inline-block;">
-                  <button id="imgSelectTeam1" class="btn btn-outline-secondary btn-sm" style="height: -webkit-fill-available;" data-team="1" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Team 1 Image" onclick="openTeamImageMenu(1)"><i class="fa-regular fa-image" style="color:#f1f1f1;"></i></button>
-                  <div id="imgSelectDropdownTeam1" class="hidden" data-team="1"></div>
-               </div>
-               <input type="file" id="customImgTeam1" data-team="1" accept="image/*" style="display: none;">
-               <input type="hidden" name="team1Img" id="team1Img" data-team="1" value="" />
-               <input type="text" name="team1_name" placeholder="Team 1 Name" class="form-control sr-2 teamName" value="" />
+            <!-- Parking spot to hold popover content when not shown -->
+            <div id="popoverStash" hidden></div>
+            <!-- Team 1 popover content -->
+            <div id="team1Popover" hidden class="team-popover-content ui-scaled">
+                <div class="teamRow form-inline sb-2 row" style="">
+                    <div style="position: relative; display: inline-block;">
+                        <button id="imgSelectTeam1" class="btn btn-outline-secondary btn-sm" style="height: -webkit-fill-available;" data-team="1" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Team 1 Image" onclick="openTeamImageMenu(1)"><i class="fa-regular fa-image" style="color:#f1f1f1;"></i></button>
+                        <div id="imgSelectDropdownTeam1" class="hidden" data-team="1"></div>
+                    </div>
+                    <input type="file" id="customImgTeam1" data-team="1" accept="image/*" style="display: none;">
+                    <input type="hidden" name="team1Img" id="team1Img" data-team="1" value="" />
+                    <input type="text" name="team1_name" placeholder="Team 1 Name" class="form-control sr-2 teamName" value="" />
+                </div>
+                <div class="teamRow sb-2 row" style="margin-top: 4px; gap: 4px;">
+                    <input type="number" name="team1_score" id="team1_score" class="form-control teamScore" value="" inputmode="numeric" pattern="[0-9]*" />
+                    <button type="button" class="btn btn-outline-success score-btn" style="height: 30px; width: 30px; padding-bottom: 0px;" onclick=""><i class="fa-solid fa-plus fa-2xs"></i></button>
+                    <button type="button" class="btn btn-outline-secondary score-btn" style="height: 30px; padding-bottom: 0px;" data-bs-toggle="tooltip" data-bs-placement="top" title="Reset Score" onclick=""><i class="fa-solid fa-rotate-left fa-xs"></i></button>
+                    <button type="button" class="btn btn-outline-danger score-btn" style="height: 30px; width: 30px; padding-bottom: 0px;" onclick=""><i class="fa-solid fa-minus fa-2xs"></i></button>
+                </div>
             </div>
-            <div class="teamRow sb-2 row" style="margin-top: 4px; gap: 4px;">
-               <input type="number" name="team1_score" id="team1_score" class="form-control teamScore" value="" inputmode="numeric" pattern="[0-9]*" />
-               <button type="button" class="btn btn-outline-success score-btn" style="height: 30px; width: 30px; padding-bottom: 0px;" onclick=""><i class="fa-solid fa-plus fa-2xs"></i></button>
-               <button type="button" class="btn btn-outline-secondary score-btn" style="height: 30px; padding-bottom: 0px;" data-bs-toggle="tooltip" data-bs-placement="top" title="Reset Score" onclick=""><i class="fa-solid fa-rotate-left fa-xs"></i></button>
-               <button type="button" class="btn btn-outline-danger score-btn" style="height: 30px; width: 30px; padding-bottom: 0px;" onclick=""><i class="fa-solid fa-minus fa-2xs"></i></button>
+            <!-- Team 2 popover content -->
+            <div id="team2Popover" hidden class="team-popover-content ui-scaled">
+                <div class="teamRow form-inline sb-2 row" style="">
+                    <div style="position: relative; display: inline-block;">
+                        <button id="imgSelectTeam2" class="btn btn-outline-secondary btn-sm" style="height: -webkit-fill-available;" data-team="2" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Team 2 Image" onclick="openTeamImageMenu(2)"><i class="fa-regular fa-image" style="color:#f1f1f1;"></i></button>
+                        <div id="imgSelectDropdownTeam2" class="hidden" data-team="2"></div>
+                    </div>
+                    <input type="file" id="customImgTeam2" data-team="2" accept="image/*" style="display: none;">
+                    <input type="hidden" name="team2Img" id="team2Img" data-team="2" value="" />
+                    <input type="text" name="team2_name" placeholder="Team 2 Name" class="form-control sr-2 teamName" value="" />
+                </div>
+                <div class="teamRow sb-2 row" style="margin-top: 4px; gap: 4px;">
+                    <input type="number" name="team2_score" id="team2_score" class="form-control teamScore" value="" inputmode="numeric" pattern="[0-9]*" />
+                    <button type="button" class="btn btn-outline-success score-btn" style="height: 30px; width: 30px; padding-bottom: 0px;" onclick=""><i class="fa-solid fa-plus fa-2xs"></i></button>
+                    <button type="button" class="btn btn-outline-secondary score-btn" style="height: 30px; padding-bottom: 0px;" data-bs-toggle="tooltip" data-bs-placement="top" title="Reset Score" onclick=""><i class="fa-solid fa-rotate-left fa-xs"></i></button>
+                    <button type="button" class="btn btn-outline-danger score-btn" style="height: 30px; width: 30px; padding-bottom: 0px;" onclick=""><i class="fa-solid fa-minus fa-2xs"></i></button>
+                </div>
             </div>
-         </div>
-         <!-- Team 2 popover content -->
-         <div id="team2Popover" hidden class="team-popover-content ui-scaled">
-            <div class="teamRow form-inline sb-2 row" style="">
-               <div style="position: relative; display: inline-block;">
-                  <button id="imgSelectTeam2" class="btn btn-outline-secondary btn-sm" style="height: -webkit-fill-available;" data-team="2" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Team 2 Image" onclick="openTeamImageMenu(2)"><i class="fa-regular fa-image" style="color:#f1f1f1;"></i></button>
-                  <div id="imgSelectDropdownTeam2" class="hidden" data-team="2"></div>
-               </div>
-               <input type="file" id="customImgTeam2" data-team="2" accept="image/*" style="display: none;">
-               <input type="hidden" name="team2Img" id="team2Img" data-team="2" value="" />
-               <input type="text" name="team2_name" placeholder="Team 2 Name" class="form-control sr-2 teamName" value="" />
+        </form>
+    </div>
+    <div class="offcanvas offcanvas-end" id="offcanvas" data-bs-backdrop="static">
+        <div class="offcanvas-body ui-scaled">
+            <div class="form-floating">
+                <select id="uiZoomSelect" class="form-select form-select-sm" aria-label="UI Scale">
+                    <option value="0.5">50%</option>
+                    <option value="0.6">60%</option>
+                    <option value="0.7">70%</option>
+                    <option value="0.8">80%</option>
+                    <option value="0.9">90%</option>
+                    <option selected value="1">100%</option>
+                    <option value="1.1">110%</option>
+                    <option value="1.2">120%</option>
+                    <option value="1.3">130%</option>
+                    <option value="1.4">140%</option>
+                    <option value="1.5">150%</option>
+                </select>
+                <label id="uiZoomSelectLabel" for="uiZoomSelect">UI Scale</label>
             </div>
-            <div class="teamRow sb-2 row" style="margin-top: 4px; gap: 4px;">
-               <input type="number" name="team2_score" id="team2_score" class="form-control teamScore" value="" inputmode="numeric" pattern="[0-9]*" />
-               <button type="button" class="btn btn-outline-success score-btn" style="height: 30px; width: 30px; padding-bottom: 0px;" onclick=""><i class="fa-solid fa-plus fa-2xs"></i></button>
-               <button type="button" class="btn btn-outline-secondary score-btn" style="height: 30px; padding-bottom: 0px;" data-bs-toggle="tooltip" data-bs-placement="top" title="Reset Score" onclick=""><i class="fa-solid fa-rotate-left fa-xs"></i></button>
-               <button type="button" class="btn btn-outline-danger score-btn" style="height: 30px; width: 30px; padding-bottom: 0px;" onclick=""><i class="fa-solid fa-minus fa-2xs"></i></button>
+            <div class="form-floating" style="margin-left: 12px;">
+                <select id="templateSelect" class="form-select form-select-sm" aria-label="Overlay Template">
+                    <option selected value="default">Default</option>
+                </select>
+                <label id="templateSelectLabel" for="templateSelect">Overlay Template</label>
             </div>
-         </div>
-      </form>
-   </div>
-   <div class="offcanvas offcanvas-end" id="offcanvas" data-bs-backdrop="static">
-      <div class="offcanvas-body ui-scaled">
-         <div class="form-floating">
-            <select id="uiZoomSelect" class="form-select form-select-sm" aria-label="UI Scale">
-               <option value="0.5">50%</option>
-               <option value="0.6">60%</option>
-               <option value="0.7">70%</option>
-               <option value="0.8">80%</option>
-               <option value="0.9">90%</option>
-               <option selected value="1">100%</option>
-               <option value="1.1">110%</option>
-               <option value="1.2">120%</option>
-               <option value="1.3">130%</option>
-               <option value="1.4">140%</option>
-               <option value="1.5">150%</option>
-            </select>
-            <label id="uiZoomSelectLabel" for="uiZoomSelect">UI Scale</label>
-         </div>
-         <div class="form-floating" style="margin-left: 12px;">
-            <select id="templateSelect" class="form-select form-select-sm" aria-label="Overlay Template">
-               <option selected value="default">Default</option>
-            </select>
-            <label id="templateSelectLabel" for="templateSelect">Overlay Template</label>
-         </div>
-         <button type="button" class="btn-close btn-close-white" style="margin-left: 10px;margin-right: 16px;" data-bs-dismiss="offcanvas"></button>
-      </div>
-   </div>
-
+            <button type="button" class="btn-close btn-close-white" style="margin-left: 10px;margin-right: 16px;" data-bs-dismiss="offcanvas"></button>
+        </div>
+    </div>
+    <!-- Confirm Reset Modal -->
+    <div class="modal fade ui-scaled" id="confirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content bg-dark text-white border-secondary">
+                <div class="modal-header py-2" style="display:none;">
+                    <h6 class="modal-title" id="confirmTitle">Confirm</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-3">
+                    <p id="confirmBody" class="mb-0">Are you sure?</p>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button id="confirmOkBtn" type="button" class="btn btn-danger btn-sm" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
 <script>
-
 (function initExplicitTeamPopovers() {
-   const stash = document.getElementById('popoverStash');
+    const stash = document.getElementById('popoverStash');
 
-   function getContentNode(id) {
-      const el = document.getElementById(id);
-      if (!el) return null;
-      el.hidden = false;
-      el.removeAttribute('hidden');
-      return el;
-   }
+    function getContentNode(id) {
+        const el = document.getElementById(id);
+        if (!el) return null;
+        el.hidden = false;
+        el.removeAttribute('hidden');
+        return el;
+    }
 
-   function stashContentNode(id) {
-      const el = document.getElementById(id);
-      if (el && stash && stash !== el.parentNode) {
-         el.hidden = true;
-         stash.appendChild(el);
-      }
-   }
+    function stashContentNode(id) {
+        const el = document.getElementById(id);
+        if (el && stash && stash !== el.parentNode) {
+            el.hidden = true;
+            stash.appendChild(el);
+        }
+    }
 
-   // Measure scaled inner content and set tip width to match
-   function sizePopover(pop) {
-      const tip = pop.tip;
-      if (!tip) return;
-      const body = tip.querySelector('.popover-body');
-      if (!body) return;
-      const scaled = body.querySelector('.ui-scaled'); // inner wrapper
-      if (!scaled) return;
+    // Measure scaled inner content and set tip width to match
+    function sizePopover(pop) {
+        const tip = pop.tip;
+        if (!tip) return;
+        const body = tip.querySelector('.popover-body');
+        if (!body) return;
+        const scaled = body.querySelector('.ui-scaled'); // inner wrapper
+        if (!scaled) return;
 
-      // reset any previous sizing
-      tip.style.width = '';
-      body.style.width = '';
+        // reset any previous sizing
+        tip.style.width = '';
+        body.style.width = '';
 
-      // visual size (includes transform scale)
-      const rect = scaled.getBoundingClientRect();
+        // visual size (includes transform scale)
+        const rect = scaled.getBoundingClientRect();
 
-      // add body paddings/borders so nothing gets clipped
-      const cs = getComputedStyle(body);
-      const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) +
-         parseFloat(cs.borderLeftWidth) + parseFloat(cs.borderRightWidth);
+        // add body paddings/borders so nothing gets clipped
+        const cs = getComputedStyle(body);
+        const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) +
+            parseFloat(cs.borderLeftWidth) + parseFloat(cs.borderRightWidth);
 
-      // set the width to the visual content width + padding
-      tip.style.width = Math.ceil(rect.width + padX) + 'px';
-      // height usually auto-works; set minHeight if tall content:
-      const padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth);
-      body.style.height = Math.ceil(rect.height + padY) + 'px';
-   }
+        // set the width to the visual content width + padding
+        tip.style.width = Math.ceil(rect.width + padX) + 'px';
+        // height usually auto-works; set minHeight if tall content:
+        const padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth);
+        body.style.height = Math.ceil(rect.height + padY) + 'px';
+    }
 
-   // Init all team popovers
-   document.querySelectorAll('.team-popover').forEach(btn => {
-      const contentId = btn.getAttribute('data-popover-content');
+    // Init all team popovers
+    document.querySelectorAll('.team-popover').forEach(btn => {
+        const contentId = btn.getAttribute('data-popover-content');
 
-      const pop = new bootstrap.Popover(btn, {
-         container: document.documentElement,
-         trigger: 'click',
-         placement: btn.getAttribute('data-bs-placement') || 'bottom',
-         html: true,
-         sanitize: false,
-         customClass: 'popover-scale-scope',
-         content: () => getContentNode(contentId)
-      });
-      btn._popover = pop;
+        const pop = new bootstrap.Popover(btn, {
+            container: document.documentElement,
+            trigger: 'click',
+            placement: btn.getAttribute('data-bs-placement') || 'bottom',
+            html: true,
+            sanitize: false,
+            customClass: 'popover-scale-scope',
+            content: () => getContentNode(contentId)
+        });
+        btn._popover = pop;
 
-      // Size after Bootstrap inserts the tip into the DOM
-      btn.addEventListener('inserted.bs.popover', () => sizePopover(pop));
+        // Size after Bootstrap inserts the tip into the DOM
+        btn.addEventListener('inserted.bs.popover', () => sizePopover(pop));
 
-      // Return the node to the stash BEFORE the tip is removed
-      btn.addEventListener('hide.bs.popover', () => {
-         const tip = pop.tip;
-         if (!tip) return;
-         const node = tip.querySelector(`#${contentId}`);
-         if (node && stash) {
-            node.hidden = true;
-            stash.appendChild(node);
-         }
-      });
+        // Return the node to the stash BEFORE the tip is removed
+        btn.addEventListener('hide.bs.popover', () => {
+            const tip = pop.tip;
+            if (!tip) return;
+            const node = tip.querySelector(`#${contentId}`);
+            if (node && stash) {
+                node.hidden = true;
+                stash.appendChild(node);
+            }
+        });
 
-      // Click-outside to close
+        // Click-outside to close
 
-      document.addEventListener('click', (e) => {
-         const tip = pop.tip;
-         if (!tip) return;
-         if (!btn.contains(e.target) && !tip.contains(e.target)) {
-            pop.hide();
-         }
-      });
+        document.addEventListener('click', (e) => {
+            const tip = pop.tip;
+            if (!tip) return;
+            if (!btn.contains(e.target) && !tip.contains(e.target)) {
+                pop.hide();
+            }
+        });
 
-   });
+    });
 
 })();
 
 function setInputValue(nameOrId, val) {
-   const el = document.getElementById(nameOrId) || document.querySelector(`[name="${nameOrId}"]`);
-   if (!el) return;
-   el.value = val;
-   el.dispatchEvent(new Event('change', {
-      bubbles: true
-   }));
-   el.dispatchEvent(new Event('input', {
-      bubbles: true
-   }));
+    const el = document.getElementById(nameOrId) || document.querySelector(`[name="${nameOrId}"]`);
+    if (!el) return;
+    el.value = val;
+    el.dispatchEvent(new Event('change', {
+        bubbles: true
+    }));
+    el.dispatchEvent(new Event('input', {
+        bubbles: true
+    }));
 }
 
 function adjustTeamScore(team, delta) {
-   const name = team === 1 ? 'team1_score' : 'team2_score';
-   const el = document.querySelector(`[name="${name}"]`);
-   const next = Math.max(0, (parseInt(el?.value) || 0) + delta);
-   setInputValue(name, next);
-   emitUpdate();
+    const name = team === 1 ? 'team1_score' : 'team2_score';
+    const el = document.querySelector(`[name="${name}"]`);
+    const next = Math.max(0, (parseInt(el?.value) || 0) + delta);
+    setInputValue(name, next);
+    emitUpdate();
 }
 
 function resetTeamScore(team) {
-   const name = team === 1 ? 'team1_score' : 'team2_score';
-   setInputValue(name, 0);
-   emitUpdate();
+    const name = team === 1 ? 'team1_score' : 'team2_score';
+    setInputValue(name, 0);
+    emitUpdate();
 }
 
 function bindTeamPopoverControls() {
-   // Team 1 row
-   const t1Row = document.querySelector('#team1Popover .teamRow + .teamRow'); // second row
-   if (t1Row) {
-      const [num, plus, reset, minus] = [
-t1Row.querySelector('[name="team1_score"]'),
-t1Row.querySelector('.btn-outline-success'),
-t1Row.querySelector('.btn-outline-secondary'),
-t1Row.querySelector('.btn-outline-danger')
-];
-      plus?.addEventListener('click', () => {
-         adjustTeamScore(1, +1);
-         updateTeamToggleColors();
-      });
-      minus?.addEventListener('click', () => {
-         adjustTeamScore(1, -1);
-         updateTeamToggleColors();
-      });
-      reset?.addEventListener('click', () => {
-         resetTeamScore(1);
-         updateTeamToggleColors();
-      });
-      num?.addEventListener('input', emitUpdate);
-      num?.addEventListener('change', () => {
-         updateTeamToggleColors();
-      });
-   }
+    // Team 1 row
+    const t1Row = document.querySelector('#team1Popover .teamRow + .teamRow'); // second row
+    if (t1Row) {
+        const [num, plus, reset, minus] = [
+            t1Row.querySelector('[name="team1_score"]'),
+            t1Row.querySelector('.btn-outline-success'),
+            t1Row.querySelector('.btn-outline-secondary'),
+            t1Row.querySelector('.btn-outline-danger')
+        ];
+        plus?.addEventListener('click', () => {
+            adjustTeamScore(1, +1);
+            updateTeamToggleColors();
+        });
+        minus?.addEventListener('click', () => {
+            adjustTeamScore(1, -1);
+            updateTeamToggleColors();
+        });
+        reset?.addEventListener('click', () => {
+            resetTeamScore(1);
+            updateTeamToggleColors();
+        });
+        num?.addEventListener('input', emitUpdate);
+        num?.addEventListener('change', () => {
+            updateTeamToggleColors();
+        });
+    }
 
-   // Team 2 row
-   const t2Row = document.querySelector('#team2Popover .teamRow + .teamRow');
-   if (t2Row) {
-      const [num, plus, reset, minus] = [
-t2Row.querySelector('[name="team2_score"]'),
-t2Row.querySelector('.btn-outline-success'),
-t2Row.querySelector('.btn-outline-secondary'),
-t2Row.querySelector('.btn-outline-danger')
-];
-      plus?.addEventListener('click', () => {
-         adjustTeamScore(2, +1);
-         updateTeamToggleColors();
-      });
-      minus?.addEventListener('click', () => {
-         adjustTeamScore(2, -1);
-         updateTeamToggleColors();
-      });
-      reset?.addEventListener('click', () => {
-         resetTeamScore(2);
-         updateTeamToggleColors();
-      });
-      num?.addEventListener('input', emitUpdate);
-      num?.addEventListener('change', () => {
-         updateTeamToggleColors();
-      });
-   }
+    // Team 2 row
+    const t2Row = document.querySelector('#team2Popover .teamRow + .teamRow');
+    if (t2Row) {
+        const [num, plus, reset, minus] = [
+            t2Row.querySelector('[name="team2_score"]'),
+            t2Row.querySelector('.btn-outline-success'),
+            t2Row.querySelector('.btn-outline-secondary'),
+            t2Row.querySelector('.btn-outline-danger')
+        ];
+        plus?.addEventListener('click', () => {
+            adjustTeamScore(2, +1);
+            updateTeamToggleColors();
+        });
+        minus?.addEventListener('click', () => {
+            adjustTeamScore(2, -1);
+            updateTeamToggleColors();
+        });
+        reset?.addEventListener('click', () => {
+            resetTeamScore(2);
+            updateTeamToggleColors();
+        });
+        num?.addEventListener('input', emitUpdate);
+        num?.addEventListener('change', () => {
+            updateTeamToggleColors();
+        });
+    }
 
-   // update on Enter or when the input loses focus
-   const commitOnDone = (el) => {
-      if (!el) return;
-      // Enter commits
-      el.addEventListener('keydown', (e) => {
-         if (e.key === 'Enter') {
-            e.preventDefault();
-            el.blur();
-         }
-      });
-      // Blur commits
-      el.addEventListener('blur', () => {
-         updateTeamToggleColors();
-         emitUpdate();
-      });
-   };
+    // update on Enter or when the input loses focus
+    const commitOnDone = (el) => {
+        if (!el) return;
+        // Enter commits
+        el.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                el.blur();
+            }
+        });
+        // Blur commits
+        el.addEventListener('blur', () => {
+            updateTeamToggleColors();
+            emitUpdate();
+        });
+    };
 
-   const t1Name = document.querySelector('#team1Popover [name="team1_name"]');
-   const t2Name = document.querySelector('#team2Popover [name="team2_name"]');
+    const t1Name = document.querySelector('#team1Popover [name="team1_name"]');
+    const t2Name = document.querySelector('#team2Popover [name="team2_name"]');
 
-   commitOnDone(t1Name);
-   commitOnDone(t2Name);
+    commitOnDone(t1Name);
+    commitOnDone(t2Name);
 }
 
 function updateTeamToggleColors() {
-   const t1Name = (document.querySelector('[name="team1_name"]')?.value || '').trim();
-   const t1Score = parseInt(document.querySelector('[name="team1_score"]')?.value || '0', 10) || 0;
-   const t1Img = (document.getElementById('team1Img')?.value || '').trim();
+    const t1Name = (document.querySelector('[name="team1_name"]')?.value || '').trim();
+    const t1Score = parseInt(document.querySelector('[name="team1_score"]')?.value || '0', 10) || 0;
+    const t1Img = (document.getElementById('team1Img')?.value || '').trim();
 
-   const t2Name = (document.querySelector('[name="team2_name"]')?.value || '').trim();
-   const t2Score = parseInt(document.querySelector('[name="team2_score"]')?.value || '0', 10) || 0;
-   const t2Img = (document.getElementById('team2Img')?.value || '').trim();
+    const t2Name = (document.querySelector('[name="team2_name"]')?.value || '').trim();
+    const t2Score = parseInt(document.querySelector('[name="team2_score"]')?.value || '0', 10) || 0;
+    const t2Img = (document.getElementById('team2Img')?.value || '').trim();
 
-   const team1Btn = document.getElementById('team1toggle');
-   const team2Btn = document.getElementById('team2toggle');
+    const team1Btn = document.getElementById('team1toggle');
+    const team2Btn = document.getElementById('team2toggle');
 
-   const hasAny1 = !!(t1Name || t1Score > 0 || t1Img);
-   const hasAny2 = !!(t2Name || t2Score > 0 || t2Img);
+    const hasAny1 = !!(t1Name || t1Score > 0 || t1Img);
+    const hasAny2 = !!(t2Name || t2Score > 0 || t2Img);
 
-   if (team1Btn) team1Btn.style.color = hasAny1 ? '#0ead00' : '#f1f1f1';
-   if (team2Btn) team2Btn.style.color = hasAny2 ? '#0ead00' : '#f1f1f1';
+    if (team1Btn) team1Btn.style.color = hasAny1 ? '#0ead00' : '#f1f1f1';
+    if (team2Btn) team2Btn.style.color = hasAny2 ? '#0ead00' : '#f1f1f1';
 }
 
 ////////////////////////////////////////////////////			
 
 function toggleExtraField(value) {
-   const input = document.getElementById(value);
-   const otherInputs = document.querySelectorAll(`.extraField:not(#${value})`);
+    const input = document.getElementById(value);
+    const otherInputs = document.querySelectorAll(`.extraField:not(#${value})`);
 
-   // Determine what the target will become
-   const willShow = (input.style.display === "none" || input.style.display === "");
+    // Determine what the target will become
+    const willShow = (input.style.display === "none" || input.style.display === "");
 
-   // Hide others
-   otherInputs.forEach(el => {
-      el.style.display = "none";
-   });
+    // Hide others
+    otherInputs.forEach(el => {
+        el.style.display = "none";
+    });
 
-   // Deactivate all toggle buttons first
-   document.querySelectorAll('#toggleTopText, #toggleCaster1, #toggleCaster2').forEach(btn => {
-      btn.classList.remove('active');
-      btn.setAttribute('aria-pressed', 'false');
-   });
+    // Deactivate all toggle buttons first
+    document.querySelectorAll('#toggleTopText, #toggleCaster1, #toggleCaster2').forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-pressed', 'false');
+    });
 
-   // Toggle the target
-   if (willShow) {
-      input.style.display = "inline-flex";
-      // Map input -> toggle button id
-      const map = {
-         topTextWrapper: 'toggleTopText',
-         inputCaster1: 'toggleCaster1',
-         inputCaster2: 'toggleCaster2'
-      };
-      const btn = document.getElementById(map[value]);
-      if (btn) {
-         btn.classList.add('active');
-         btn.setAttribute('aria-pressed', 'true');
-      }
-   } else {
-      input.style.display = "none";
-      // none active
-   }
+    // Toggle the target
+    if (willShow) {
+        input.style.display = "inline-flex";
+        // Map input -> toggle button id
+        const map = {
+            topTextWrapper: 'toggleTopText',
+            inputCaster1: 'toggleCaster1',
+            inputCaster2: 'toggleCaster2'
+        };
+        const btn = document.getElementById(map[value]);
+        if (btn) {
+            btn.classList.add('active');
+            btn.setAttribute('aria-pressed', 'true');
+        }
+    } else {
+        input.style.display = "none";
+        // none active
+    }
 }
 
 function syncExtraToggleStates() {
-   const pairs = [
-      {
-         input: 'topTextWrapper',
-         btn: 'toggleTopText'
-      },
-      {
-         input: 'inputCaster1',
-         btn: 'toggleCaster1'
-      },
-      {
-         input: 'inputCaster2',
-         btn: 'toggleCaster2'
-      }
-];
-   // clear all
-   document.querySelectorAll('#toggleTopText, #toggleCaster1, #toggleCaster2').forEach(btn => {
-      btn.classList.remove('active');
-      btn.setAttribute('aria-pressed', 'false');
-   });
-   // set active for any visible block
-   pairs.forEach(({
-      input,
-      btn
-   }) => {
-      const el = document.getElementById(input);
-      const b = document.getElementById(btn);
-      if (!el || !b) return;
-      const shown = getComputedStyle(el).display !== 'none';
-      if (shown) {
-         b.classList.add('active');
-         b.setAttribute('aria-pressed', 'true');
-      }
-   });
+    const pairs = [{
+            input: 'topTextWrapper',
+            btn: 'toggleTopText'
+        },
+        {
+            input: 'inputCaster1',
+            btn: 'toggleCaster1'
+        },
+        {
+            input: 'inputCaster2',
+            btn: 'toggleCaster2'
+        }
+    ];
+    // clear all
+    document.querySelectorAll('#toggleTopText, #toggleCaster1, #toggleCaster2').forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-pressed', 'false');
+    });
+    // set active for any visible block
+    pairs.forEach(({
+        input,
+        btn
+    }) => {
+        const el = document.getElementById(input);
+        const b = document.getElementById(btn);
+        if (!el || !b) return;
+        const shown = getComputedStyle(el).display !== 'none';
+        if (shown) {
+            b.classList.add('active');
+            b.setAttribute('aria-pressed', 'true');
+        }
+    });
 }
 
 function toggleTagFields(casterNum, tagType) {
-   const platforms = ["Twitch", "Twitter"];
-   const nameField = document.getElementById(`caster${casterNum}Name`);
+    const platforms = ["Twitch", "Twitter"];
+    const nameField = document.getElementById(`caster${casterNum}Name`);
 
-   platforms.forEach(platform => {
-      const btn = document.getElementById(`caster${casterNum}${platform}Toggle`);
-      const input = document.getElementById(`caster${casterNum}${platform}`);
+    platforms.forEach(platform => {
+        const btn = document.getElementById(`caster${casterNum}${platform}Toggle`);
+        const input = document.getElementById(`caster${casterNum}${platform}`);
 
-      if (platform === tagType) {
-         const isActive = btn.classList.contains("active");
+        if (platform === tagType) {
+            const isActive = btn.classList.contains("active");
 
-         // If button was active, deactivate and show name field
-         if (isActive) {
+            // If button was active, deactivate and show name field
+            if (isActive) {
+                btn.classList.remove("active");
+                input.style.display = "none";
+                nameField.style.display = "inline-flex";
+            } else {
+                // Activate this button and deactivate the other
+                btn.classList.add("active");
+                input.style.display = "inline-flex";
+                nameField.style.display = "none";
+            }
+        } else {
+            // Always deactivate the other button/input
             btn.classList.remove("active");
             input.style.display = "none";
-            nameField.style.display = "inline-flex";
-         } else {
-            // Activate this button and deactivate the other
-            btn.classList.add("active");
-            input.style.display = "inline-flex";
-            nameField.style.display = "none";
-         }
-      } else {
-         // Always deactivate the other button/input
-         btn.classList.remove("active");
-         input.style.display = "none";
-      }
-   });
+        }
+    });
 }
 
 function updateTagIconColors(casterNum) {
-   const platforms = {
-      Twitch: "#772CE8",
-      Twitter: "#1DA1F2"
-   };
+    const platforms = {
+        Twitch: "#772CE8",
+        Twitter: "#1DA1F2"
+    };
 
-   for (const [platform, color] of Object.entries(platforms)) {
-      const input = document.getElementById(`caster${casterNum}${platform}`);
-      const icon = document.querySelector(`#caster${casterNum}${platform}Toggle i`);
-      const casterToggle = document.getElementById(`toggleCaster${casterNum}`);
-      const indicator = document.querySelector(`#toggleCaster${casterNum} .square${platform}`)
+    for (const [platform, color] of Object.entries(platforms)) {
+        const input = document.getElementById(`caster${casterNum}${platform}`);
+        const icon = document.querySelector(`#caster${casterNum}${platform}Toggle i`);
+        const casterToggle = document.getElementById(`toggleCaster${casterNum}`);
+        const indicator = document.querySelector(`#toggleCaster${casterNum} .square${platform}`)
 
-      if (input && icon) {
-         if (input.value.trim() !== "") {
-            icon.style.color = color;
-            indicator.style.display = "block";
-         } else {
-            icon.style.color = "#f1f1f1"; // Default color
-            indicator.style.display = "none";
-         }
-      }
-   }
+        if (input && icon) {
+            if (input.value.trim() !== "") {
+                icon.style.color = color;
+                indicator.style.display = "block";
+            } else {
+                icon.style.color = "#f1f1f1"; // Default color
+                indicator.style.display = "none";
+            }
+        }
+    }
 
-   const nameInput = document.getElementById(`caster${casterNum}Name`);
-   const casterToggle = document.getElementById(`toggleCaster${casterNum}`);
+    const nameInput = document.getElementById(`caster${casterNum}Name`);
+    const casterToggle = document.getElementById(`toggleCaster${casterNum}`);
 
-   if (nameInput && casterToggle) {
-      if (nameInput.value.trim() !== "") {
-         casterToggle.style.color = "#0ead00";
-      } else {
-         casterToggle.style.color = "#f1f1f1";
-      }
-   }
+    if (nameInput && casterToggle) {
+        if (nameInput.value.trim() !== "") {
+            casterToggle.style.color = "#0ead00";
+        } else {
+            casterToggle.style.color = "#f1f1f1";
+        }
+    }
 }
 
 function updateTopTextButtonColor() {
 
-   const textInput = document.getElementById("topText");
-   const topTextBtn = document.getElementById("toggleTopText");
+    const textInput = document.getElementById("topText");
+    const topTextBtn = document.getElementById("toggleTopText");
 
-   if (textInput && topTextBtn) {
-      if (textInput.value.trim() !== "") {
-         topTextBtn.style.color = "#0ead00";
-      } else {
-         topTextBtn.style.color = "#f1f1f1";
-      }
-   }
+    if (textInput && topTextBtn) {
+        if (textInput.value.trim() !== "") {
+            topTextBtn.style.color = "#0ead00";
+        } else {
+            topTextBtn.style.color = "#f1f1f1";
+        }
+    }
 
 }
 
@@ -662,483 +667,483 @@ function updateTopTextButtonColor() {
 
 // per-player state
 const selectedImageByPlayer = {
-   1: null,
-   2: null
+    1: null,
+    2: null
 };
 
 // cache the country list once
 let countryListCache = null;
 async function fetchCountriesOnce() {
-   if (countryListCache) return countryListCache;
-   const res = await fetch("/static/flags/country.json");
-   countryListCache = await res.json();
-   return countryListCache;
+    if (countryListCache) return countryListCache;
+    const res = await fetch("/static/flags/country.json");
+    countryListCache = await res.json();
+    return countryListCache;
 }
 
 // small helpers scoped by data-player
 function qByPlayer(selectors, player) {
-   for (const sel of selectors) {
-      const el = document.querySelector(`${sel}[data-player="${player}"]`);
-      if (el) return el;
-   }
-   return null;
+    for (const sel of selectors) {
+        const el = document.querySelector(`${sel}[data-player="${player}"]`);
+        if (el) return el;
+    }
+    return null;
 }
 
 function playerEls(player) {
-   return {
-      btn: qByPlayer(['#imgSelect', '#imgSelect2'], player),
-      dropdown: qByPlayer(['#imgSelectDropdown', '#imgSelectDropdown2'], player),
-      fileInput: qByPlayer(['#customImageInput', '#customImageInput2'], player),
-      hidden: document.getElementById(player === 1 ? 'player1Img' : 'player2Img')
-   };
+    return {
+        btn: qByPlayer(['#imgSelect', '#imgSelect2'], player),
+        dropdown: qByPlayer(['#imgSelectDropdown', '#imgSelectDropdown2'], player),
+        fileInput: qByPlayer(['#customImageInput', '#customImageInput2'], player),
+        hidden: document.getElementById(player === 1 ? 'player1Img' : 'player2Img')
+    };
 }
 
 // build or toggle the menu for a given player
 async function openImageMenuFor(player) {
-   const {
-      dropdown
-   } = playerEls(player);
-   if (!dropdown) return;
+    const {
+        dropdown
+    } = playerEls(player);
+    if (!dropdown) return;
 
-   // toggle if already built
-   if (dropdown.dataset.loaded === "true") {
-      dropdown.classList.toggle("hidden");
-      if (!dropdown.classList.contains('hidden')) {
-         dropdown.scrollTop = 0;
-         setActiveImgDropdown(dropdown);
-      }
-      return;
-   }
+    // toggle if already built
+    if (dropdown.dataset.loaded === "true") {
+        dropdown.classList.toggle("hidden");
+        if (!dropdown.classList.contains('hidden')) {
+            dropdown.scrollTop = 0;
+            setActiveImgDropdown(dropdown);
+        }
+        return;
+    }
 
-   try {
-      const countries = await fetchCountriesOnce();
-      dropdown.innerHTML = "";
+    try {
+        const countries = await fetchCountriesOnce();
+        dropdown.innerHTML = "";
 
-      // "Remove Image" if something is selected
-      if (selectedImageByPlayer[player]) {
-         const remove = document.createElement("div");
-         remove.className = "dropdown-item cusImgUpload";
-         remove.textContent = "Remove Image";
-         remove.onclick = () => resetImageSelectionFor(player);
-         dropdown.appendChild(remove);
-      }
+        // "Remove Image" if something is selected
+        if (selectedImageByPlayer[player]) {
+            const remove = document.createElement("div");
+            remove.className = "dropdown-item cusImgUpload";
+            remove.textContent = "Remove Image";
+            remove.onclick = () => resetImageSelectionFor(player);
+            dropdown.appendChild(remove);
+        }
 
-      // Upload custom image
-      const upload = document.createElement("div");
-      upload.className = "dropdown-item cusImgUpload";
-      upload.textContent = "Upload Custom Image";
-      upload.onclick = () => playerEls(player).fileInput.click();
-      dropdown.appendChild(upload);
+        // Upload custom image
+        const upload = document.createElement("div");
+        upload.className = "dropdown-item cusImgUpload";
+        upload.textContent = "Upload Custom Image";
+        upload.onclick = () => playerEls(player).fileInput.click();
+        dropdown.appendChild(upload);
 
-      // Divider
-      dropdown.appendChild(Object.assign(document.createElement("hr"), {
-         className: "dropdown-divider"
-      }));
+        // Divider
+        dropdown.appendChild(Object.assign(document.createElement("hr"), {
+            className: "dropdown-divider"
+        }));
 
-      // Countries
-      countries.forEach(({
-         code,
-         name
-      }) => {
-         const item = document.createElement("div");
-         item.className = "dropdown-item flag-option";
-         item.onclick = () => selectFlagFor(player, code, name);
+        // Countries
+        countries.forEach(({
+            code,
+            name
+        }) => {
+            const item = document.createElement("div");
+            item.className = "dropdown-item flag-option";
+            item.onclick = () => selectFlagFor(player, code, name);
 
-         const img = document.createElement("img");
-         img.src = `/static/flags/flags/1x1/${code}.svg`;
-         img.alt = code;
-         img.className = "flag-icon";
+            const img = document.createElement("img");
+            img.src = `/static/flags/flags/1x1/${code}.svg`;
+            img.alt = code;
+            img.className = "flag-icon";
 
-         const labelWrap = document.createElement("span");
-         labelWrap.className = "country-name-wrapper";
+            const labelWrap = document.createElement("span");
+            labelWrap.className = "country-name-wrapper";
 
-         const label = document.createElement("span");
-         label.className = "country-name";
-         label.textContent = name;
+            const label = document.createElement("span");
+            label.className = "country-name";
+            label.textContent = name;
 
-         labelWrap.appendChild(label);
-         item.appendChild(img);
-         item.appendChild(labelWrap);
-         dropdown.appendChild(item);
-      });
+            labelWrap.appendChild(label);
+            item.appendChild(img);
+            item.appendChild(labelWrap);
+            dropdown.appendChild(item);
+        });
 
-      markOverflowingLabels();
+        markOverflowingLabels();
 
-      dropdown.dataset.loaded = "true";
-      dropdown.classList.remove("hidden");
-      dropdown.scrollTop = 0;
-      setActiveImgDropdown(dropdown);
-   } catch (err) {
-      console.error("Failed to load country list:", err);
-   }
+        dropdown.dataset.loaded = "true";
+        dropdown.classList.remove("hidden");
+        dropdown.scrollTop = 0;
+        setActiveImgDropdown(dropdown);
+    } catch (err) {
+        console.error("Failed to load country list:", err);
+    }
 }
 
 // select a flag for a specific player
 function selectFlagFor(player, code, name) {
-   const {
-      btn,
-      dropdown,
-      hidden
-   } = playerEls(player);
-   if (!btn || !dropdown || !hidden) return;
+    const {
+        btn,
+        dropdown,
+        hidden
+    } = playerEls(player);
+    if (!btn || !dropdown || !hidden) return;
 
-   btn.innerHTML = `<img src="/static/flags/flags/1x1/${code}.svg" alt="${name}" class="image-selected">`;
-   selectedImageByPlayer[player] = code;
+    btn.innerHTML = `<img src="/static/flags/flags/1x1/${code}.svg" alt="${name}" class="image-selected">`;
+    selectedImageByPlayer[player] = code;
 
-   // use 4x3 in data for overlay
-   hidden.value = `/static/flags/flags/4x3/${code}.svg`;
+    // use 4x3 in data for overlay
+    hidden.value = `/static/flags/flags/4x3/${code}.svg`;
 
-   dropdown.classList.add("hidden");
-   dropdown.dataset.loaded = "false";
-   emitUpdate();
+    dropdown.classList.add("hidden");
+    dropdown.dataset.loaded = "false";
+    emitUpdate();
 }
 
 // reset a player's image selection
 function resetImageSelectionFor(player) {
-   const {
-      btn,
-      dropdown,
-      fileInput,
-      hidden
-   } = playerEls(player);
-   if (!btn || !dropdown || !fileInput || !hidden) return;
+    const {
+        btn,
+        dropdown,
+        fileInput,
+        hidden
+    } = playerEls(player);
+    if (!btn || !dropdown || !fileInput || !hidden) return;
 
-   const icon = document.createElement("i");
-   icon.className = "fa-regular fa-image";
-   icon.style.color = "#f1f1f1";
+    const icon = document.createElement("i");
+    icon.className = "fa-regular fa-image";
+    icon.style.color = "#f1f1f1";
 
-   btn.innerHTML = ""; // Clear existing content
-   btn.appendChild(icon);
-   selectedImageByPlayer[player] = null;
+    btn.innerHTML = ""; // Clear existing content
+    btn.appendChild(icon);
+    selectedImageByPlayer[player] = null;
 
-   dropdown.classList.add("hidden");
-   dropdown.dataset.loaded = "false";
+    dropdown.classList.add("hidden");
+    dropdown.dataset.loaded = "false";
 
-   fileInput.value = ""; // clear file input
-   hidden.value = "";
+    fileInput.value = ""; // clear file input
+    hidden.value = "";
 
-   emitUpdate();
+    emitUpdate();
 }
 
 // restore button state from saved hidden input (called on load)
 function restoreImageButtonStateFor(player) {
-   const {
-      btn,
-      hidden
-   } = playerEls(player);
-   if (!btn || !hidden) return;
+    const {
+        btn,
+        hidden
+    } = playerEls(player);
+    if (!btn || !hidden) return;
 
-   const val = hidden.value?.trim();
-   if (!val) return;
+    const val = hidden.value?.trim();
+    if (!val) return;
 
-   // if it’s a flag path, switch 4x3 to 1x1 for the button icon
-   const iconSrc = val.includes("/flags/flags/4x3/") ?
-      val.replace("/4x3/", "/1x1/") :
-      val; // custom data URL or other path
+    // if it’s a flag path, switch 4x3 to 1x1 for the button icon
+    const iconSrc = val.includes("/flags/flags/4x3/") ?
+        val.replace("/4x3/", "/1x1/") :
+        val; // custom data URL or other path
 
-   btn.innerHTML = `<img src="${iconSrc}" class="image-selected">`;
-   selectedImageByPlayer[player] = val;
+    btn.innerHTML = `<img src="${iconSrc}" class="image-selected">`;
+    selectedImageByPlayer[player] = val;
 }
 
 // file input binding (custom images)
 function bindCustomImageInput(player) {
-   const {
-      fileInput,
-      btn,
-      dropdown,
-      hidden
-   } = playerEls(player);
-   if (!fileInput) return;
-   fileInput.addEventListener("change", (e) => {
-      const file = e.target.files?.[0];
-      if (!file || !file.type.startsWith("image/")) return;
+    const {
+        fileInput,
+        btn,
+        dropdown,
+        hidden
+    } = playerEls(player);
+    if (!fileInput) return;
+    fileInput.addEventListener("change", (e) => {
+        const file = e.target.files?.[0];
+        if (!file || !file.type.startsWith("image/")) return;
 
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-         const src = ev.target.result; // data URL
-         if (btn) btn.innerHTML = `<img src="${src}" class="image-selected">`;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const src = ev.target.result; // data URL
+            if (btn) btn.innerHTML = `<img src="${src}" class="image-selected">`;
 
-         selectedImageByPlayer[player] = "custom";
-         if (dropdown) dropdown.dataset.loaded = "false"; // force rebuild next time
+            selectedImageByPlayer[player] = "custom";
+            if (dropdown) dropdown.dataset.loaded = "false"; // force rebuild next time
 
-         if (hidden) hidden.value = src;
-         emitUpdate();
-      };
-      reader.readAsDataURL(file);
-   });
+            if (hidden) hidden.value = src;
+            emitUpdate();
+        };
+        reader.readAsDataURL(file);
+    });
 }
 
 // one-time global click handler to close any open dropdowns
 document.addEventListener("click", (e) => {
-   document.querySelectorAll('#imgSelectDropdown, #imgSelectDropdown2').forEach(dd => {
-      const player = dd.getAttribute('data-player');
-      const {
-         btn
-      } = playerEls(player);
-      if (!dd.contains(e.target) && !btn?.contains(e.target)) {
-         dd.classList.add('hidden');
-         if (activeImgDropdown === dd) activeImgDropdown = null;
-      }
-   });
+    document.querySelectorAll('#imgSelectDropdown, #imgSelectDropdown2').forEach(dd => {
+        const player = dd.getAttribute('data-player');
+        const {
+            btn
+        } = playerEls(player);
+        if (!dd.contains(e.target) && !btn?.contains(e.target)) {
+            dd.classList.add('hidden');
+            if (activeImgDropdown === dd) activeImgDropdown = null;
+        }
+    });
 });
 
 // public entry point for buttons (if you keep inline onclick, call this)
 function openImageMenu(btnEl) {
-   const player = parseInt(btnEl.getAttribute('data-player'), 10) || 1;
-   openImageMenuFor(player);
+    const player = parseInt(btnEl.getAttribute('data-player'), 10) || 1;
+    openImageMenuFor(player);
 }
 
 // init: bind both players
 function initPlayerImageSelectors() {
-[1, 2].forEach(player => {
-      bindCustomImageInput(player);
-      restoreImageButtonStateFor(player);
-   });
+    [1, 2].forEach(player => {
+        bindCustomImageInput(player);
+        restoreImageButtonStateFor(player);
+    });
 }
 
 function markOverflowingLabels() {
-   setTimeout(() => {
-      const wrappers = document.querySelectorAll('.dropdown-item .country-name-wrapper');
+    setTimeout(() => {
+        const wrappers = document.querySelectorAll('.dropdown-item .country-name-wrapper');
 
-      wrappers.forEach(wrapper => {
-         const labelText = wrapper.querySelector('.country-name');
-         if (!labelText) return;
+        wrappers.forEach(wrapper => {
+            const labelText = wrapper.querySelector('.country-name');
+            if (!labelText) return;
 
-         const scroll = labelText.scrollWidth;
-         const container = 155;
-         //console.log(`Label text: "${labelText.textContent}", scrollWidth: ${scroll}, clientWidth: ${container}`);
+            const scroll = labelText.scrollWidth;
+            const container = 155;
+            //console.log(`Label text: "${labelText.textContent}", scrollWidth: ${scroll}, clientWidth: ${container}`);
 
-         if (scroll > container) {
-            const overflowAmount = scroll - container + 5;
-            labelText.classList.add('scrollable-text');
-            labelText.style.setProperty('--scroll-distance', `-${overflowAmount}px`);
-            // console.log(`✅ Overflow detected`);
-         } else {
-            labelText.classList.remove('scrollable-text');
-            labelText.style.removeProperty('--scroll-distance');
-            // console.log(`ℹ️ No overflow`);
-         }
-      });
-   }, 100);
+            if (scroll > container) {
+                const overflowAmount = scroll - container + 5;
+                labelText.classList.add('scrollable-text');
+                labelText.style.setProperty('--scroll-distance', `-${overflowAmount}px`);
+                // console.log(`✅ Overflow detected`);
+            } else {
+                labelText.classList.remove('scrollable-text');
+                labelText.style.removeProperty('--scroll-distance');
+                // console.log(`ℹ️ No overflow`);
+            }
+        });
+    }, 100);
 }
 
 /////////Team Image dropdowns
 
 // per-team state
 const selectedImageByTeam = {
-   1: null,
-   2: null
+    1: null,
+    2: null
 };
 
 // helpers scoped by data-team
 function qByTeam(selectors, team) {
-   for (const sel of selectors) {
-      const el = document.querySelector(`${sel}[data-team="${team}"]`);
-      if (el) return el;
-   }
-   return null;
+    for (const sel of selectors) {
+        const el = document.querySelector(`${sel}[data-team="${team}"]`);
+        if (el) return el;
+    }
+    return null;
 }
 
 function teamEls(team) {
-   return {
-      btn: qByTeam(['#imgSelectTeam1', '#imgSelectTeam2'], team),
-      dropdown: qByTeam(['#imgSelectDropdownTeam1', '#imgSelectDropdownTeam2'], team),
-      fileInput: qByTeam(['#customImgTeam1', '#customImgTeam2'], team),
-      hidden: document.getElementById(team === 1 ? 'team1Img' : 'team2Img')
-   };
+    return {
+        btn: qByTeam(['#imgSelectTeam1', '#imgSelectTeam2'], team),
+        dropdown: qByTeam(['#imgSelectDropdownTeam1', '#imgSelectDropdownTeam2'], team),
+        fileInput: qByTeam(['#customImgTeam1', '#customImgTeam2'], team),
+        hidden: document.getElementById(team === 1 ? 'team1Img' : 'team2Img')
+    };
 }
 
 // open/build dropdown
 async function openTeamImageMenu(team) {
-   const {
-      dropdown
-   } = teamEls(team);
-   if (!dropdown) return;
+    const {
+        dropdown
+    } = teamEls(team);
+    if (!dropdown) return;
 
-   if (dropdown.dataset.loaded === "true") {
-      dropdown.classList.toggle("hidden");
-      if (!dropdown.classList.contains('hidden')) {
-         dropdown.scrollTop = 0;
-         setActiveImgDropdown(dropdown);
-      }
-      return;
-   }
+    if (dropdown.dataset.loaded === "true") {
+        dropdown.classList.toggle("hidden");
+        if (!dropdown.classList.contains('hidden')) {
+            dropdown.scrollTop = 0;
+            setActiveImgDropdown(dropdown);
+        }
+        return;
+    }
 
-   try {
-      const countries = await fetchCountriesOnce();
-      dropdown.innerHTML = "";
+    try {
+        const countries = await fetchCountriesOnce();
+        dropdown.innerHTML = "";
 
-      // Remove Image (if any)
-      if (selectedImageByTeam[team]) {
-         const remove = document.createElement("div");
-         remove.className = "dropdown-item cusImgUpload";
-         remove.textContent = "Remove Image";
-         remove.onclick = () => resetTeamImageSelection(team);
-         dropdown.appendChild(remove);
-      }
+        // Remove Image (if any)
+        if (selectedImageByTeam[team]) {
+            const remove = document.createElement("div");
+            remove.className = "dropdown-item cusImgUpload";
+            remove.textContent = "Remove Image";
+            remove.onclick = () => resetTeamImageSelection(team);
+            dropdown.appendChild(remove);
+        }
 
-      // Upload Custom
-      const upload = document.createElement("div");
-      upload.className = "dropdown-item cusImgUpload";
-      upload.textContent = "Upload Custom Image";
-      upload.onclick = () => teamEls(team).fileInput.click();
-      dropdown.appendChild(upload);
+        // Upload Custom
+        const upload = document.createElement("div");
+        upload.className = "dropdown-item cusImgUpload";
+        upload.textContent = "Upload Custom Image";
+        upload.onclick = () => teamEls(team).fileInput.click();
+        dropdown.appendChild(upload);
 
-      dropdown.appendChild(Object.assign(document.createElement("hr"), {
-         className: "dropdown-divider"
-      }));
+        dropdown.appendChild(Object.assign(document.createElement("hr"), {
+            className: "dropdown-divider"
+        }));
 
-      // Countries
-      countries.forEach(({
-         code,
-         name
-      }) => {
-         const item = document.createElement("div");
-         item.className = "dropdown-item flag-option";
-         item.onclick = () => selectFlagForTeam(team, code, name);
+        // Countries
+        countries.forEach(({
+            code,
+            name
+        }) => {
+            const item = document.createElement("div");
+            item.className = "dropdown-item flag-option";
+            item.onclick = () => selectFlagForTeam(team, code, name);
 
-         const img = document.createElement("img");
-         img.src = `/static/flags/flags/1x1/${code}.svg`;
-         img.alt = code;
-         img.className = "flag-icon";
+            const img = document.createElement("img");
+            img.src = `/static/flags/flags/1x1/${code}.svg`;
+            img.alt = code;
+            img.className = "flag-icon";
 
-         const labelWrap = document.createElement("span");
-         labelWrap.className = "country-name-wrapper";
+            const labelWrap = document.createElement("span");
+            labelWrap.className = "country-name-wrapper";
 
-         const label = document.createElement("span");
-         label.className = "country-name";
-         label.textContent = name;
+            const label = document.createElement("span");
+            label.className = "country-name";
+            label.textContent = name;
 
-         labelWrap.appendChild(label);
-         item.appendChild(img);
-         item.appendChild(labelWrap);
-         dropdown.appendChild(item);
-      });
+            labelWrap.appendChild(label);
+            item.appendChild(img);
+            item.appendChild(labelWrap);
+            dropdown.appendChild(item);
+        });
 
-      markOverflowingLabels();
+        markOverflowingLabels();
 
-      dropdown.dataset.loaded = "true";
-      dropdown.classList.remove("hidden");
-      dropdown.scrollTop = 0;
-      setActiveImgDropdown(dropdown);
-   } catch (e) {
-      console.error('Team image dropdown load failed:', e);
-   }
+        dropdown.dataset.loaded = "true";
+        dropdown.classList.remove("hidden");
+        dropdown.scrollTop = 0;
+        setActiveImgDropdown(dropdown);
+    } catch (e) {
+        console.error('Team image dropdown load failed:', e);
+    }
 }
 
 // select flag for team
 function selectFlagForTeam(team, code, name) {
-   const {
-      btn,
-      dropdown,
-      hidden
-   } = teamEls(team);
-   if (!btn || !dropdown || !hidden) return;
+    const {
+        btn,
+        dropdown,
+        hidden
+    } = teamEls(team);
+    if (!btn || !dropdown || !hidden) return;
 
-   btn.innerHTML = `<img src="/static/flags/flags/1x1/${code}.svg" alt="${name}" class="image-selected">`;
-   selectedImageByTeam[team] = code;
-   hidden.value = `/static/flags/flags/4x3/${code}.svg`; // store 4x3 in data
+    btn.innerHTML = `<img src="/static/flags/flags/1x1/${code}.svg" alt="${name}" class="image-selected">`;
+    selectedImageByTeam[team] = code;
+    hidden.value = `/static/flags/flags/4x3/${code}.svg`; // store 4x3 in data
 
-   dropdown.classList.add("hidden");
-   dropdown.dataset.loaded = "false";
-   updateTeamToggleColors();
-   emitUpdate();
+    dropdown.classList.add("hidden");
+    dropdown.dataset.loaded = "false";
+    updateTeamToggleColors();
+    emitUpdate();
 }
 
 // reset team image
 function resetTeamImageSelection(team) {
-   const {
-      btn,
-      dropdown,
-      fileInput,
-      hidden
-   } = teamEls(team);
-   if (!btn || !dropdown || !fileInput || !hidden) return;
+    const {
+        btn,
+        dropdown,
+        fileInput,
+        hidden
+    } = teamEls(team);
+    if (!btn || !dropdown || !fileInput || !hidden) return;
 
-   const icon = document.createElement("i");
-   icon.className = "fa-regular fa-image";
-   icon.style.color = "#f1f1f1";
+    const icon = document.createElement("i");
+    icon.className = "fa-regular fa-image";
+    icon.style.color = "#f1f1f1";
 
-   btn.innerHTML = ""; // Clear existing content
-   btn.appendChild(icon);
-   selectedImageByTeam[team] = null;
+    btn.innerHTML = ""; // Clear existing content
+    btn.appendChild(icon);
+    selectedImageByTeam[team] = null;
 
-   dropdown.classList.add("hidden");
-   dropdown.dataset.loaded = "false";
+    dropdown.classList.add("hidden");
+    dropdown.dataset.loaded = "false";
 
-   fileInput.value = "";
-   hidden.value = "";
-   updateTeamToggleColors();
-   emitUpdate();
+    fileInput.value = "";
+    hidden.value = "";
+    updateTeamToggleColors();
+    emitUpdate();
 }
 
 // restore from hidden value
 function restoreTeamImageButtonState(team) {
-   const {
-      btn,
-      hidden
-   } = teamEls(team);
-   if (!btn || !hidden) return;
+    const {
+        btn,
+        hidden
+    } = teamEls(team);
+    if (!btn || !hidden) return;
 
-   const val = hidden.value?.trim();
-   if (!val) return;
+    const val = hidden.value?.trim();
+    if (!val) return;
 
-   const iconSrc = val.includes("/flags/flags/4x3/") ?
-      val.replace("/4x3/", "/1x1/") :
-      val;
+    const iconSrc = val.includes("/flags/flags/4x3/") ?
+        val.replace("/4x3/", "/1x1/") :
+        val;
 
-   btn.innerHTML = `<img src="${iconSrc}" class="image-selected">`;
-   selectedImageByTeam[team] = val;
+    btn.innerHTML = `<img src="${iconSrc}" class="image-selected">`;
+    selectedImageByTeam[team] = val;
 }
 
 // bind file inputs
 function bindCustomTeamImageInput(team) {
-   const {
-      fileInput,
-      btn,
-      dropdown,
-      hidden
-   } = teamEls(team);
-   if (!fileInput) return;
+    const {
+        fileInput,
+        btn,
+        dropdown,
+        hidden
+    } = teamEls(team);
+    if (!fileInput) return;
 
-   fileInput.addEventListener("change", (e) => {
-      const file = e.target.files?.[0];
-      if (!file || !file.type.startsWith("image/")) return;
+    fileInput.addEventListener("change", (e) => {
+        const file = e.target.files?.[0];
+        if (!file || !file.type.startsWith("image/")) return;
 
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-         const src = ev.target.result;
-         if (btn) btn.innerHTML = `<img src="${src}" class="image-selected">`;
-         selectedImageByTeam[team] = "custom";
-         if (dropdown) dropdown.dataset.loaded = "false";
-         if (hidden) hidden.value = src;
-         updateTeamToggleColors();
-         emitUpdate();
-      };
-      reader.readAsDataURL(file);
-   });
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const src = ev.target.result;
+            if (btn) btn.innerHTML = `<img src="${src}" class="image-selected">`;
+            selectedImageByTeam[team] = "custom";
+            if (dropdown) dropdown.dataset.loaded = "false";
+            if (hidden) hidden.value = src;
+            updateTeamToggleColors();
+            emitUpdate();
+        };
+        reader.readAsDataURL(file);
+    });
 }
 
 // init both teams
 function initTeamImageSelectors() {
-[1, 2].forEach(team => {
-      bindCustomTeamImageInput(team);
-      restoreTeamImageButtonState(team);
-   });
+    [1, 2].forEach(team => {
+        bindCustomTeamImageInput(team);
+        restoreTeamImageButtonState(team);
+    });
 }
 
 // close any open team dropdown on outside click
 document.addEventListener('click', (e) => {
-   document.querySelectorAll('#imgSelectDropdownTeam1, #imgSelectDropdownTeam2').forEach(dd => {
-      const team = dd.getAttribute('data-team');
-      const {
-         btn
-      } = teamEls(team);
-      if (!dd.contains(e.target) && !btn?.contains(e.target)) {
-         dd.classList.add('hidden');
-         if (activeImgDropdown === dd) activeImgDropdown = null;
-      }
-   });
+    document.querySelectorAll('#imgSelectDropdownTeam1, #imgSelectDropdownTeam2').forEach(dd => {
+        const team = dd.getAttribute('data-team');
+        const {
+            btn
+        } = teamEls(team);
+        if (!dd.contains(e.target) && !btn?.contains(e.target)) {
+            dd.classList.add('hidden');
+            if (activeImgDropdown === dd) activeImgDropdown = null;
+        }
+    });
 });
 
 // --- Type-to-jump for the open image dropdowns (players & teams) ---
@@ -1146,1132 +1151,1234 @@ let activeImgDropdown = null;
 
 // call when you open/show a dropdown
 function setActiveImgDropdown(dd) {
-   activeImgDropdown = dd;
-   // reset cycling state
-   dd.dataset.typeaheadKey = '';
-   dd.dataset.typeaheadIndex = '-1';
-   dd.dataset.typeaheadTs = '0';
+    activeImgDropdown = dd;
+    // reset cycling state
+    dd.dataset.typeaheadKey = '';
+    dd.dataset.typeaheadIndex = '-1';
+    dd.dataset.typeaheadTs = '0';
 }
 
 // jump to first (or next) country starting with `ch`
 function alphaJump(dd, ch) {
-   if (!dd || dd.classList.contains('hidden')) return;
+    if (!dd || dd.classList.contains('hidden')) return;
 
-   // Only search country items
-   const labels = dd.querySelectorAll('.flag-option .country-name');
-   if (!labels.length) return;
+    // Only search country items
+    const labels = dd.querySelectorAll('.flag-option .country-name');
+    if (!labels.length) return;
 
-   const now = Date.now();
-   const lastKey = dd.dataset.typeaheadKey || '';
-   const lastIndex = parseInt(dd.dataset.typeaheadIndex || '-1', 10);
-   const lastTs = parseInt(dd.dataset.typeaheadTs || '0', 10);
+    const now = Date.now();
+    const lastKey = dd.dataset.typeaheadKey || '';
+    const lastIndex = parseInt(dd.dataset.typeaheadIndex || '-1', 10);
+    const lastTs = parseInt(dd.dataset.typeaheadTs || '0', 10);
 
-   const sameKeyAndRecent = (lastKey === ch) && (now - lastTs < 800);
+    const sameKeyAndRecent = (lastKey === ch) && (now - lastTs < 800);
 
-   // Build list of indexes that match the letter
-   const matches = [];
-   labels.forEach((el, i) => {
-      const txt = (el.textContent || '').trim().toLowerCase();
-      if (txt.startsWith(ch)) matches.push(i);
-   });
-   if (!matches.length) return;
+    // Build list of indexes that match the letter
+    const matches = [];
+    labels.forEach((el, i) => {
+        const txt = (el.textContent || '').trim().toLowerCase();
+        if (txt.startsWith(ch)) matches.push(i);
+    });
+    if (!matches.length) return;
 
-   // If repeating the same key soon, cycle to next match; else pick first match
-   let targetIdx;
-   if (sameKeyAndRecent) {
-      const posInMatches = Math.max(0, matches.indexOf(lastIndex));
-      targetIdx = matches[(posInMatches + 1) % matches.length];
-   } else {
-      targetIdx = matches[0];
-   }
+    // If repeating the same key soon, cycle to next match; else pick first match
+    let targetIdx;
+    if (sameKeyAndRecent) {
+        const posInMatches = Math.max(0, matches.indexOf(lastIndex));
+        targetIdx = matches[(posInMatches + 1) % matches.length];
+    } else {
+        targetIdx = matches[0];
+    }
 
-   // Scroll the dropdown so the item is visible
-   const targetItem = labels[targetIdx]?.closest('.dropdown-item');
-   if (!targetItem) return;
+    // Scroll the dropdown so the item is visible
+    const targetItem = labels[targetIdx]?.closest('.dropdown-item');
+    if (!targetItem) return;
 
-   // Smooth-ish, reliable scroll within the menu
-   targetItem.scrollIntoView({
-      block: 'nearest'
-   });
+    // Smooth-ish, reliable scroll within the menu
+    targetItem.scrollIntoView({
+        block: 'nearest'
+    });
 
-   // Save state for cycling
-   dd.dataset.typeaheadKey = ch;
-   dd.dataset.typeaheadIndex = String(targetIdx);
-   dd.dataset.typeaheadTs = String(now);
+    // Save state for cycling
+    dd.dataset.typeaheadKey = ch;
+    dd.dataset.typeaheadIndex = String(targetIdx);
+    dd.dataset.typeaheadTs = String(now);
 }
 
 // Global key listener: route letters to the *active* image dropdown
 document.addEventListener('keydown', (e) => {
-   if (!activeImgDropdown || activeImgDropdown.classList.contains('hidden')) return;
-   // ignore when typing in inputs/textareas or with modifiers
-   const t = e.target;
-   if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
-   if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (!activeImgDropdown || activeImgDropdown.classList.contains('hidden')) return;
+    // ignore when typing in inputs/textareas or with modifiers
+    const t = e.target;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
 
-   const key = e.key;
-   if (key && key.length === 1) {
-      const ch = key.toLowerCase();
-      if (ch >= 'a' && ch <= 'z') {
-         e.preventDefault();
-         alphaJump(activeImgDropdown, ch);
-      }
-   }
+    const key = e.key;
+    if (key && key.length === 1) {
+        const ch = key.toLowerCase();
+        if (ch >= 'a' && ch <= 'z') {
+            e.preventDefault();
+            alphaJump(activeImgDropdown, ch);
+        }
+    }
 });
 
 ////////////////////////////////////////////////////
 
 function setUiScale(scale) {
-   document.documentElement.style.setProperty('--ui-scale', String(scale));
-   const root = document.getElementById('uiRoot');
-   if (root) {
-      root.style.transform = `scale(${scale})`;
-      root.style.transformOrigin = 'top left';
-      root.style.width = `calc(100% / ${scale})`;
-   }
-   try {
-      localStorage.setItem('ui_scale', String(scale));
-   } catch (e) {}
+    document.documentElement.style.setProperty('--ui-scale', String(scale));
+    const root = document.getElementById('uiRoot');
+    if (root) {
+        root.style.transform = `scale(${scale})`;
+        root.style.transformOrigin = 'top left';
+        root.style.width = `calc(100% / ${scale})`;
+    }
+    try {
+        localStorage.setItem('ui_scale', String(scale));
+    } catch (e) {}
 
-   // if a popover is open, resize it to the new scale
-   document.querySelectorAll('.popover.show').forEach(tip => {
-      const btn = [...document.querySelectorAll('.team-popover')].find(b => b._popover?.tip === tip);
-      if (btn?._popover) {
-         setTimeout(() => sizePopover(btn._popover), 0);
-      }
-   });
+    // if a popover is open, resize it to the new scale
+    document.querySelectorAll('.popover.show').forEach(tip => {
+        const btn = [...document.querySelectorAll('.team-popover')].find(b => b._popover?.tip === tip);
+        if (btn?._popover) {
+            setTimeout(() => sizePopover(btn._popover), 0);
+        }
+    });
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-   document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
-      const t = new bootstrap.Tooltip(el, {
-         delay: {
-            show: 500,
-            hide: 50
-         },
-         trigger: 'hover',
-         boundary: 'window',
-         container: document.documentElement // or 'body'
-      });
-      el.addEventListener('click', () => t.hide());
-      el.addEventListener('mouseleave', () => t.hide());
-   });
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+        const t = new bootstrap.Tooltip(el, {
+            delay: {
+                show: 500,
+                hide: 50
+            },
+            trigger: 'hover',
+            boundary: 'window',
+            container: document.documentElement // or 'body'
+        });
+        el.addEventListener('click', () => t.hide());
+        el.addEventListener('mouseleave', () => t.hide());
+    });
 
-   // --- INIT UI SCALE FROM SAVED DATA (defaults to 1) ---
-   const savedScale = parseFloat("{{ (data.ui_scale or 1) | safe }}") || 1;
-   const uiSelect = document.getElementById('uiZoomSelect');
-   //setUiScale(savedScale);
-   if (uiSelect) uiSelect.value = String(savedScale);
+    // --- INIT UI SCALE FROM SAVED DATA (defaults to 1) ---
+    const savedScale = parseFloat("{{ (data.ui_scale or 1) | safe }}") || 1;
+    const uiSelect = document.getElementById('uiZoomSelect');
+    //setUiScale(savedScale);
+    if (uiSelect) uiSelect.value = String(savedScale);
 
-   // --- CHANGE HANDLER: update scale + persist via /emit ---
-   if (uiSelect) {
-      uiSelect.addEventListener('change', () => {
-         const scale = parseFloat(uiSelect.value) || 1;
-         setUiScale(scale);
-         emitUpdate(); // will include ui_scale after step C
-      });
-   }
+    // --- CHANGE HANDLER: update scale + persist via /emit ---
+    if (uiSelect) {
+        uiSelect.addEventListener('change', () => {
+            const scale = parseFloat(uiSelect.value) || 1;
+            setUiScale(scale);
+            emitUpdate(); // will include ui_scale after step C
+        });
+    }
 
-   // restrict numeric-only inputs
-   document.querySelectorAll('.numeric-only').forEach(input => {
-      input.addEventListener('input', function() {
-         this.value = this.value.replace(/\D/g, '');
-      });
-   });
+    // restrict numeric-only inputs
+    document.querySelectorAll('.numeric-only').forEach(input => {
+        input.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '');
+        });
+    });
 
-   // make the image buttons reflect saved values and wire the file inputs
-   initPlayerImageSelectors();
-   initTeamImageSelectors();
-   bindTeamPopoverControls();
+    // make the image buttons reflect saved values and wire the file inputs
+    initPlayerImageSelectors();
+    initTeamImageSelectors();
+    bindTeamPopoverControls();
 
-   populateTemplateSelect().then(bindTemplateSelect);
+    populateTemplateSelect().then(bindTemplateSelect);
 });
 
 //// Populate template selection dropdown
 async function populateTemplateSelect() {
-   const sel = document.getElementById('templateSelect');
-   if (!sel) return;
+    const sel = document.getElementById('templateSelect');
+    if (!sel) return;
 
-   // fetch list from server
-   const res = await fetch('/templates/list', {
-      cache: 'no-store'
-   });
-   const {
-      templates,
-      active
-   } = await res.json();
+    // fetch list from server
+    const res = await fetch('/templates/list', {
+        cache: 'no-store'
+    });
+    const {
+        templates,
+        active
+    } = await res.json();
 
-   // build options
-   sel.innerHTML = ''; // clear existing
-   for (const name of templates) {
-      const opt = document.createElement('option');
-      opt.value = name;
-      opt.textContent = name;
-      sel.appendChild(opt);
-   }
+    // build options
+    sel.innerHTML = ''; // clear existing
+    for (const name of templates) {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        sel.appendChild(opt);
+    }
 
-   // prefer the value saved in data.json if present
-   const saved = (window.__savedData && window.__savedData.active_template) || null;
-   sel.value = saved || active || (templates[0] || '');
+    // prefer the value saved in data.json if present
+    const saved = (window.__savedData && window.__savedData.active_template) || null;
+    sel.value = saved || active || (templates[0] || '');
 }
 
 // when the user changes, tell the server and persist to data.json
 function bindTemplateSelect() {
-   const sel = document.getElementById('templateSelect');
-   if (!sel) return;
-   sel.addEventListener('change', async () => {
-      const choice = sel.value;
-      try {
-         // switch overlays now
-         await fetch('/set-template', {
-            method: 'POST',
-            headers: {
-               'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-               template: choice
-            })
-         });
+    const sel = document.getElementById('templateSelect');
+    if (!sel) return;
+    sel.addEventListener('change', async () => {
+        const choice = sel.value;
+        try {
+            // switch overlays now
+            await fetch('/set-template', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    template: choice
+                })
+            });
 
-         // also persist into data.json so it stays selected on reloads
-         emitUpdate(); // getFormData() will include it
-      } catch (e) {
-         console.error('Failed to set template', e);
-      }
-   });
+            // also persist into data.json so it stays selected on reloads
+            emitUpdate(); // getFormData() will include it
+        } catch (e) {
+            console.error('Failed to set template', e);
+        }
+    });
 }
 
 let matchType = "";
 let matchWins = 3;
 
 function setMatchType(type) {
-   const buttons = document.querySelectorAll("#matchTypeButtons button");
-   buttons.forEach((btn) => {
-      if (btn.id === "shortToggleBtn") return;
+    const buttons = document.querySelectorAll("#matchTypeButtons button");
+    buttons.forEach((btn) => {
+        if (btn.id === "shortToggleBtn") return;
 
-      const isActive = btn.classList.contains("active");
-      btn.classList.remove("active");
-      if (btn.textContent === getMatchTypeLabel(type)) {
-         if (!isActive) {
-            matchType = type;
-            btn.classList.add("active");
-         } else {
-            matchType = "";
-         }
-      }
-   });
+        const isActive = btn.classList.contains("active");
+        btn.classList.remove("active");
+        if (btn.textContent === getMatchTypeLabel(type)) {
+            if (!isActive) {
+                matchType = type;
+                btn.classList.add("active");
+            } else {
+                matchType = "";
+            }
+        }
+    });
 
-   updateMatchTypeUI();
-   emitUpdate();
+    updateMatchTypeUI();
+    emitUpdate();
 }
 
 function changeMatchWins(delta) {
-   matchWins = Math.max(1, matchWins + delta);
-   document.getElementById("matchWinsNum").value = matchWins;
-   emitUpdate();
+    matchWins = Math.max(1, matchWins + delta);
+    document.getElementById("matchWinsNum").value = matchWins;
+    emitUpdate();
 }
 
 function updateMatchTypeUI() {
-   const winsGroup = document.getElementById("matchWinsGroup");
-   const customMT = document.getElementById("customMatchTypeInput");
+    const winsGroup = document.getElementById("matchWinsGroup");
+    const customMT = document.getElementById("customMatchTypeInput");
 
-   const hasPreset = !!matchType; // BO/FT selected?
-   if (winsGroup) winsGroup.style.display = hasPreset ? "flex" : "none";
-   if (customMT) customMT.style.display = hasPreset ? "none" : "block";
+    const hasPreset = !!matchType; // BO/FT selected?
+    if (winsGroup) winsGroup.style.display = hasPreset ? "flex" : "none";
+    if (customMT) customMT.style.display = hasPreset ? "none" : "block";
 }
 
 // commit on Enter or blur
 (function bindCustomMatchType() {
-   const input = document.getElementById('customMatchTypeInput');
-   if (!input) return;
+    const input = document.getElementById('customMatchTypeInput');
+    if (!input) return;
 
-   const commit = () => {
-      const v = input.value.trim();
-      document.getElementById('MatchTypeData').value = v;
-      emitUpdate();
-   };
+    const commit = () => {
+        const v = input.value.trim();
+        document.getElementById('MatchTypeData').value = v;
+        emitUpdate();
+    };
 
-   input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-         e.preventDefault();
-         input.blur();
-      }
-   });
-   input.addEventListener('blur', commit);
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            input.blur();
+        }
+    });
+    input.addEventListener('blur', commit);
 })();
 
 function getMatchTypeLabel(type) {
-   switch (type) {
-      case "Best of":
-         return "BO";
-      case "First to":
-         return "FT";
-      default:
-         return "";
-   }
+    switch (type) {
+        case "Best of":
+            return "BO";
+        case "First to":
+            return "FT";
+        default:
+            return "";
+    }
 }
 
 function getMatchTypeString() {
-   const isShort = document.getElementById("shortMatchLabel").checked;
-   // If no preset, use the custom input value
-	  if (!matchType) {
-		const v = (document.getElementById('customMatchTypeInput')?.value || '').trim();
-		document.getElementById('MatchTypeData').value = v;
-		return v;
-	  }
+    const isShort = document.getElementById("shortMatchLabel").checked;
+    // If no preset, use the custom input value
+    if (!matchType) {
+        const v = (document.getElementById('customMatchTypeInput')?.value || '').trim();
+        document.getElementById('MatchTypeData').value = v;
+        return v;
+    }
 
-	  if (!matchWins) return "";
+    if (!matchWins) return "";
 
-   const label = isShort ? (matchType === "Best of" ? "BO" : "FT") : matchType;
-   const space = isShort ? "" : " ";
-   const s = `${label}${space}${matchWins}`;
-   document.getElementById("MatchTypeData").value = s;
-   return s;
+    const label = isShort ? (matchType === "Best of" ? "BO" : "FT") : matchType;
+    const space = isShort ? "" : " ";
+    const s = `${label}${space}${matchWins}`;
+    document.getElementById("MatchTypeData").value = s;
+    return s;
 }
 
 function resetMatchType() {
-   matchType = "";
-   matchWins = 3;
+    matchType = "";
+    matchWins = 3;
 
-   const winsGroup = document.getElementById("matchWinsGroup");
-   const winsInput = document.getElementById("matchWinsNum");
-   const shortToggle = document.getElementById("shortMatchLabel");
+    const winsGroup = document.getElementById("matchWinsGroup");
+    const winsInput = document.getElementById("matchWinsNum");
+    const shortToggle = document.getElementById("shortMatchLabel");
 
-   if (winsInput) winsInput.value = matchWins;
-   if (winsGroup) winsGroup.style.display = "none";
-   if (shortToggle) shortToggle.checked = false;
+    if (winsInput) winsInput.value = matchWins;
+    if (winsGroup) winsGroup.style.display = "none";
+    if (shortToggle) shortToggle.checked = false;
 
-   const buttons = document.querySelectorAll("#matchTypeButtons button");
-   buttons.forEach((btn) => btn.classList.remove("active"));
-   document.getElementById("MatchTypeData").value = "";
+    const buttons = document.querySelectorAll("#matchTypeButtons button");
+    buttons.forEach((btn) => btn.classList.remove("active"));
+    document.getElementById("MatchTypeData").value = "";
 }
 
 function restoreMatchTypeButtons() {
-   const match = document.getElementById('MatchTypeData').value.trim() || '';
-   const boBtn = document.getElementById('boBtn');
-   const ftBtn = document.getElementById('ftBtn');
-   const shortBtn = document.getElementById('shortToggleBtn');
+    const match = document.getElementById('MatchTypeData').value.trim() || '';
+    const boBtn = document.getElementById('boBtn');
+    const ftBtn = document.getElementById('ftBtn');
+    const shortBtn = document.getElementById('shortToggleBtn');
 
-   // Clear all active states
-   boBtn.classList.remove('active');
-   ftBtn.classList.remove('active');
-   shortBtn.classList.remove('active');
+    // Clear all active states
+    boBtn.classList.remove('active');
+    ftBtn.classList.remove('active');
+    shortBtn.classList.remove('active');
 
-   const matchLower = match.toLowerCase();
+    const matchLower = match.toLowerCase();
 
-   if (matchLower.startsWith('best of')) {
-      matchType = 'Best of';
-      boBtn.classList.add('active');
-   } else if (matchLower.startsWith('first to')) {
-      matchType = 'First to';
-      ftBtn.classList.add('active');
-   } else if (match.startsWith('FT')) {
-      matchType = 'First to';
-      ftBtn.classList.add('active');
-      shortBtn.classList.add('active');
-      document.getElementById("shortMatchLabel").checked = true;
-   } else if (match.startsWith('BO')) {
-      matchType = 'Best of';
-      boBtn.classList.add('active');
-      shortBtn.classList.add('active');
-      document.getElementById("shortMatchLabel").checked = true;
-   } else {
-      matchType = '';
-   }
+    if (matchLower.startsWith('best of')) {
+        matchType = 'Best of';
+        boBtn.classList.add('active');
+    } else if (matchLower.startsWith('first to')) {
+        matchType = 'First to';
+        ftBtn.classList.add('active');
+    } else if (match.startsWith('FT')) {
+        matchType = 'First to';
+        ftBtn.classList.add('active');
+        shortBtn.classList.add('active');
+        document.getElementById("shortMatchLabel").checked = true;
+    } else if (match.startsWith('BO')) {
+        matchType = 'Best of';
+        boBtn.classList.add('active');
+        shortBtn.classList.add('active');
+        document.getElementById("shortMatchLabel").checked = true;
+    } else {
+        matchType = '';
+    }
 
-   // Parse the number and set it back in the numeric input
-   const numberMatch = match.match(/\d+$/);
-   if (numberMatch) {
-      matchWins = parseInt(numberMatch[0]);
-      document.getElementById('matchWinsNum').value = numberMatch[0];
-      document.getElementById('matchWinsGroup').style.display = "flex";
-   } else {
-      matchWins = 3;
-   }
+    // Parse the number and set it back in the numeric input
+    const numberMatch = match.match(/\d+$/);
+    if (numberMatch) {
+        matchWins = parseInt(numberMatch[0]);
+        document.getElementById('matchWinsNum').value = numberMatch[0];
+        document.getElementById('matchWinsGroup').style.display = "flex";
+    } else {
+        matchWins = 3;
+    }
 
-   // If no preset detected, show any saved custom text
-   const customMT = document.getElementById('customMatchTypeInput');
-   const saved = document.getElementById('MatchTypeData').value.trim();
-   if (customMT) {
-      customMT.value = (!matchType ? saved : '');
-   }
-   updateMatchTypeUI();
+    // If no preset detected, show any saved custom text
+    const customMT = document.getElementById('customMatchTypeInput');
+    const saved = document.getElementById('MatchTypeData').value.trim();
+    if (customMT) {
+        customMT.value = (!matchType ? saved : '');
+    }
+    updateMatchTypeUI();
 }
 
 let isShortLabel = false;
 
 function toggleShortLabel() {
-   const checkbox = document.getElementById("shortMatchLabel");
-   const btn = document.getElementById("shortToggleBtn");
-   checkbox.checked = !checkbox.checked;
-   btn.classList.toggle("active", checkbox.checked);
-   emitUpdate();
+    const checkbox = document.getElementById("shortMatchLabel");
+    const btn = document.getElementById("shortToggleBtn");
+    checkbox.checked = !checkbox.checked;
+    btn.classList.toggle("active", checkbox.checked);
+    emitUpdate();
 }
 
 function getFormData() {
-   const form = document.getElementById("scoreForm");
-   const formData = new FormData(form);
-   const json = {};
-   for (const [key, value] of formData.entries()) {
-      json[key] = key.includes("score") ? (parseInt(value) || 0) : value.trim();
-   }
+    const form = document.getElementById("scoreForm");
+    const formData = new FormData(form);
+    const json = {};
+    for (const [key, value] of formData.entries()) {
+        json[key] = key.includes("score") ? (parseInt(value) || 0) : value.trim();
+    }
 
-   // Helpers that work whether the field is in the form, the stash, or the open tip
-   const getStr = (sel) => (document.querySelector(sel)?.value ?? '').trim();
-   const getNum = (sel) => {
-      const v = parseInt(document.querySelector(sel)?.value, 10);
-      return Number.isFinite(v) ? v : 0;
-   };
+    // Helpers that work whether the field is in the form, the stash, or the open tip
+    const getStr = (sel) => (document.querySelector(sel)?.value ?? '').trim();
+    const getNum = (sel) => {
+        const v = parseInt(document.querySelector(sel)?.value, 10);
+        return Number.isFinite(v) ? v : 0;
+    };
 
-   return {
-      ui_scale: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ui-scale')) || 1,
-      active_template: (document.getElementById('templateSelect')?.value || 'default'),
+    return {
+        ui_scale: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ui-scale')) || 1,
+        active_template: (document.getElementById('templateSelect')?.value || 'default'),
 
-      player1: {
-         name: json.player1_name,
-         clan: json.player1_clan,
-         wl: json.player1_wl,
-         score: json.player1_score,
-         img: json.player1Img || ''
-      },
-      player2: {
-         name: json.player2_name,
-         clan: json.player2_clan,
-         wl: json.player2_wl,
-         score: json.player2_score,
-         img: json.player2Img || ''
-      },
+        player1: {
+            name: json.player1_name,
+            clan: json.player1_clan,
+            wl: json.player1_wl,
+            score: json.player1_score,
+            img: json.player1Img || ''
+        },
+        player2: {
+            name: json.player2_name,
+            clan: json.player2_clan,
+            wl: json.player2_wl,
+            score: json.player2_score,
+            img: json.player2Img || ''
+        },
 
-      // Read team fields by selector so they’re captured even while popovers are open
-      team1: {
-         name: getStr('[name="team1_name"]'),
-         score: getNum('[name="team1_score"]'),
-         img: getStr('[name="team1Img"]')
-      },
-      team2: {
-         name: getStr('[name="team2_name"]'),
-         score: getNum('[name="team2_score"]'),
-         img: getStr('[name="team2Img"]')
-      },
+        // Read team fields by selector so they’re captured even while popovers are open
+        team1: {
+            name: getStr('[name="team1_name"]'),
+            score: getNum('[name="team1_score"]'),
+            img: getStr('[name="team1Img"]')
+        },
+        team2: {
+            name: getStr('[name="team2_name"]'),
+            score: getNum('[name="team2_score"]'),
+            img: getStr('[name="team2Img"]')
+        },
 
-      stage: getCurrentStage(),
-      match_type: getMatchTypeString(),
-      caster1: {
-         name: json.caster1_name,
-         twitch: json.caster1_twitch,
-         twitter: json.caster1_twitter
-      },
-      caster2: {
-         name: json.caster2_name,
-         twitch: json.caster2_twitch,
-         twitter: json.caster2_twitter
-      },
-      toptext: json.topText,
-   };
+        stage: getCurrentStage(),
+        match_type: getMatchTypeString(),
+        caster1: {
+            name: json.caster1_name,
+            twitch: json.caster1_twitch,
+            twitter: json.caster1_twitter
+        },
+        caster2: {
+            name: json.caster2_name,
+            twitch: json.caster2_twitch,
+            twitter: json.caster2_twitter
+        },
+        toptext: json.topText,
+    };
 }
 
 let isHydrating = true;
 
 function emitUpdate() {
-   const data = getFormData();
-   if (isHydrating) return;
-   fetch("/emit", {
-      method: "POST",
-      headers: {
-         "Content-Type": "application/json"
-      },
-      body: JSON.stringify(data),
-   }).catch((err) => {
-      console.warn("[Controller] Failed to connect to server. Changes saved locally, will retry when server is up.");
-   });
+    const data = getFormData();
+    if (isHydrating) return;
+    fetch("/emit", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data),
+    }).catch((err) => {
+        console.warn("[Controller] Failed to connect to server. Changes saved locally, will retry when server is up.");
+    });
 }
 
 async function loadDataAndHydrate() {
-   try {
-      const res = await fetch('/data.json', {
-         cache: 'no-store'
-      });
-      if (!res.ok) throw new Error('no data.json yet');
-      const data = await res.json();
-      window.__savedData = data;
+    try {
+        const res = await fetch('/data.json', {
+            cache: 'no-store'
+        });
+        if (!res.ok) throw new Error('no data.json yet');
+        const data = await res.json();
+        window.__savedData = data;
 
-      document.querySelector('[name="player1_name"]').value = data.player1?.name ?? '';
-      document.querySelector('[name="player1_clan"]').value = data.player1?.clan ?? '';
-      document.querySelector('[name="player1_wl"]').value = data.player1?.wl ?? '';
-      document.querySelector('[name="player1_score"]').value = data.player1?.score ?? 0;
-      document.querySelector('[name="player1Img"]').value = data.player1?.img ?? '';
+        document.querySelector('[name="player1_name"]').value = data.player1?.name ?? '';
+        document.querySelector('[name="player1_clan"]').value = data.player1?.clan ?? '';
+        document.querySelector('[name="player1_wl"]').value = data.player1?.wl ?? '';
+        document.querySelector('[name="player1_score"]').value = data.player1?.score ?? 0;
+        document.querySelector('[name="player1Img"]').value = data.player1?.img ?? '';
 
-      document.querySelector('[name="player2_name"]').value = data.player2?.name ?? '';
-      document.querySelector('[name="player2_clan"]').value = data.player2?.clan ?? '';
-      document.querySelector('[name="player2_wl"]').value = data.player2?.wl ?? '';
-      document.querySelector('[name="player2_score"]').value = data.player2?.score ?? 0;
-      document.querySelector('[name="player2Img"]').value = data.player2?.img ?? '';
+        document.querySelector('[name="player2_name"]').value = data.player2?.name ?? '';
+        document.querySelector('[name="player2_clan"]').value = data.player2?.clan ?? '';
+        document.querySelector('[name="player2_wl"]').value = data.player2?.wl ?? '';
+        document.querySelector('[name="player2_score"]').value = data.player2?.score ?? 0;
+        document.querySelector('[name="player2Img"]').value = data.player2?.img ?? '';
 
-      document.querySelector('[name="MatchTypeData"]').value = data.match_type ?? '';
-      document.querySelector('[name="StageData"]').value = data.stage ?? '';
-      document.querySelector('[name="topText"]').value = data.toptext ?? '';
+        document.querySelector('[name="MatchTypeData"]').value = data.match_type ?? '';
+        document.querySelector('[name="StageData"]').value = data.stage ?? '';
+        document.querySelector('[name="topText"]').value = data.toptext ?? '';
 
-      document.querySelector('[name="caster1_name"]').value = data.caster1?.name ?? '';
-      document.querySelector('[name="caster1_twitch"]').value = data.caster1?.twitch ?? '';
-      document.querySelector('[name="caster1_twitter"]').value = data.caster1?.twitter ?? '';
-      document.querySelector('[name="caster2_name"]').value = data.caster2?.name ?? '';
-      document.querySelector('[name="caster2_twitch"]').value = data.caster2?.twitch ?? '';
-      document.querySelector('[name="caster2_twitter"]').value = data.caster2?.twitter ?? '';
+        document.querySelector('[name="caster1_name"]').value = data.caster1?.name ?? '';
+        document.querySelector('[name="caster1_twitch"]').value = data.caster1?.twitch ?? '';
+        document.querySelector('[name="caster1_twitter"]').value = data.caster1?.twitter ?? '';
+        document.querySelector('[name="caster2_name"]').value = data.caster2?.name ?? '';
+        document.querySelector('[name="caster2_twitch"]').value = data.caster2?.twitch ?? '';
+        document.querySelector('[name="caster2_twitter"]').value = data.caster2?.twitter ?? '';
 
-      document.querySelector('[name="team1Img"]').value = data.team1?.img ?? '';
-      document.querySelector('[name="team1_name"]').value = data.team1?.name ?? '';
-      document.querySelector('[name="team1_score"]').value = data.team1?.score ?? 0;
+        document.querySelector('[name="team1Img"]').value = data.team1?.img ?? '';
+        document.querySelector('[name="team1_name"]').value = data.team1?.name ?? '';
+        document.querySelector('[name="team1_score"]').value = data.team1?.score ?? 0;
 
-      document.querySelector('[name="team2Img"]').value = data.team2?.img ?? '';
-      document.querySelector('[name="team2_name"]').value = data.team2?.name ?? '';
-      document.querySelector('[name="team2_score"]').value = data.team2?.score ?? 0;
+        document.querySelector('[name="team2Img"]').value = data.team2?.img ?? '';
+        document.querySelector('[name="team2_name"]').value = data.team2?.name ?? '';
+        document.querySelector('[name="team2_score"]').value = data.team2?.score ?? 0;
 
-      // restore various UI states you already have helpers for:
-      restoreWLButtons();
-      restoreMatchTypeButtons();
-      restoreStageButtons();
-      restoreImageButtonStateFor?.(1);
-      restoreImageButtonStateFor?.(2);
-      restoreTeamImageButtonState?.(1);
-      restoreTeamImageButtonState?.(2);
-      updateTopTextButtonColor();
-      updateTagIconColors(1);
-      updateTagIconColors(2);
-      updateTeamToggleColors();
-      syncExtraToggleStates();
+        // restore various UI states you already have helpers for:
+        restoreWLButtons();
+        restoreMatchTypeButtons();
+        restoreStageButtons();
+        restoreImageButtonStateFor?.(1);
+        restoreImageButtonStateFor?.(2);
+        restoreTeamImageButtonState?.(1);
+        restoreTeamImageButtonState?.(2);
+        updateTopTextButtonColor();
+        updateTagIconColors(1);
+        updateTagIconColors(2);
+        updateTeamToggleColors();
+        syncExtraToggleStates();
 
-      // UI scale
-      const scale = parseFloat(data.ui_scale || 1) || 1;
-      //setUiScale?.(scale);
-      const uiSelect = document.getElementById('uiZoomSelect');
-      if (uiSelect) {
-         const ls = parseFloat(localStorage.getItem('ui_scale') || '1') || 1;
-         uiSelect.value = String(ls);
-      }
-   } catch (e) {
-      // no saved data yet – fine, keep defaults
-   } finally {
-      isHydrating = false; // ⬅️ allow emits again
-      emitUpdate(); // ⬅️ optional: save normalized structure once
-   }
+        // UI scale
+        const scale = parseFloat(data.ui_scale || 1) || 1;
+        //setUiScale?.(scale);
+        const uiSelect = document.getElementById('uiZoomSelect');
+        if (uiSelect) {
+            const ls = parseFloat(localStorage.getItem('ui_scale') || '1') || 1;
+            uiSelect.value = String(ls);
+        }
+    } catch (e) {
+        // no saved data yet – fine, keep defaults
+    } finally {
+        isHydrating = false; // ⬅️ allow emits again
+        emitUpdate(); // ⬅️ optional: save normalized structure once
+    }
 }
 
 function toggleWL(player, value, clickedBtn) {
-   const hiddenInput = document.getElementById(`${player}_wl`);
-   const buttons = clickedBtn.parentElement.querySelectorAll("button");
+    const hiddenInput = document.getElementById(`${player}_wl`);
+    const buttons = clickedBtn.parentElement.querySelectorAll("button");
 
-   const isAlreadySelected = hiddenInput.value === value;
+    const isAlreadySelected = hiddenInput.value === value;
 
-   buttons.forEach((btn) => btn.classList.remove("active"));
+    buttons.forEach((btn) => btn.classList.remove("active"));
 
-   if (!isAlreadySelected) {
-      hiddenInput.value = value;
-      clickedBtn.classList.add("active");
-   } else {
-      hiddenInput.value = "";
-   }
+    if (!isAlreadySelected) {
+        hiddenInput.value = value;
+        clickedBtn.classList.add("active");
+    } else {
+        hiddenInput.value = "";
+    }
 
-   emitUpdate();
+    emitUpdate();
 }
 
 function restoreWLButtons() {
-   const mappings = [
-      {
-         player: 'player1',
-         value: document.getElementsByName('player1_wl')[0].value
-      },
-      {
-         player: 'player2',
-         value: document.getElementsByName('player2_wl')[0].value
-      }
-];
+    const mappings = [{
+            player: 'player1',
+            value: document.getElementsByName('player1_wl')[0].value
+        },
+        {
+            player: 'player2',
+            value: document.getElementsByName('player2_wl')[0].value
+        }
+    ];
 
-   mappings.forEach(({
-      player,
-      value
-   }) => {
-      const wBtn = document.querySelector(`#${player}_w_btn`);
-      const lBtn = document.querySelector(`#${player}_l_btn`);
+    mappings.forEach(({
+        player,
+        value
+    }) => {
+        const wBtn = document.querySelector(`#${player}_w_btn`);
+        const lBtn = document.querySelector(`#${player}_l_btn`);
 
-      // Clear existing active states
-      wBtn.classList.remove('active');
-      lBtn.classList.remove('active');
+        // Clear existing active states
+        wBtn.classList.remove('active');
+        lBtn.classList.remove('active');
 
-      // Restore based on value
-      if (value === '[W]') {
-         wBtn.classList.add('active');
-      } else if (value === '[L]') {
-         lBtn.classList.add('active');
-      }
-   });
+        // Restore based on value
+        if (value === '[W]') {
+            wBtn.classList.add('active');
+        } else if (value === '[L]') {
+            lBtn.classList.add('active');
+        }
+    });
 }
 
 let stageMain = "";
 let stageSub = "";
 
 function setStageMain(value) {
-   const buttons = document.querySelectorAll(".stage-main button");
-   const toggledLabel = getButtonLabel(value);
-   let wasAlreadyActive = false;
+    const buttons = document.querySelectorAll(".stage-main button");
+    const toggledLabel = getButtonLabel(value);
+    let wasAlreadyActive = false;
 
-   buttons.forEach((btn) => {
-      const isActive = btn.classList.contains("active");
-      const isThisButton = btn.textContent === toggledLabel;
+    buttons.forEach((btn) => {
+        const isActive = btn.classList.contains("active");
+        const isThisButton = btn.textContent === toggledLabel;
 
-      if (isThisButton && isActive) {
-         wasAlreadyActive = true;
-      }
+        if (isThisButton && isActive) {
+            wasAlreadyActive = true;
+        }
 
-      btn.classList.remove("active");
-   });
+        btn.classList.remove("active");
+    });
 
-   const customInput = document.getElementById("customStageInput");
-   const stageSubGroup = document.querySelector(".stage-sub");
-   const roundNum = document.getElementById("stageRoundNum");
-   const roundUp = document.getElementById("roundUp");
-   const roundDown = document.getElementById("roundDown");
+    const customInput = document.getElementById("customStageInput");
+    const stageSubGroup = document.querySelector(".stage-sub");
+    const roundNum = document.getElementById("stageRoundNum");
+    const roundUp = document.getElementById("roundUp");
+    const roundDown = document.getElementById("roundDown");
 
-   if (!wasAlreadyActive) {
-      buttons.forEach((btn) => {
-         if (btn.textContent === toggledLabel) {
-            btn.classList.add("active");
-         }
-      });
-      stageMain = value;
+    if (!wasAlreadyActive) {
+        buttons.forEach((btn) => {
+            if (btn.textContent === toggledLabel) {
+                btn.classList.add("active");
+            }
+        });
+        stageMain = value;
 
-      if (toggledLabel === "C") {
-         customInput.style.display = "inline-block";
-         stageSubGroup.style.display = "none";
-         document.querySelector('.roundSelectorWrapper').style.minWidth = ""; // Remove min-width
+        if (toggledLabel === "C") {
+            customInput.style.display = "inline-block";
+            stageSubGroup.style.display = "none";
+            document.querySelector('.roundSelectorWrapper').style.minWidth = ""; // Remove min-width
 
-         // CLEAR all sub-stage buttons
-         const subButtons = document.querySelectorAll(".stage-sub button");
-         subButtons.forEach((btn) => btn.classList.remove("active"));
-         stageSub = "";
-      } else {
-         customInput.style.display = "none";
-         customInput.value = "";
-         stageSubGroup.style.display = "";
-         document.querySelector('.roundSelectorWrapper').style.minWidth = "33px"; // Restore min-width
-      }
-   } else {
-      stageMain = "";
-      customInput.style.display = "none";
-      customInput.value = "";
-      stageSubGroup.style.display = "";
-      document.querySelector('.roundSelectorWrapper').style.minWidth = "33px"; // Restore min-width
+            // CLEAR all sub-stage buttons
+            const subButtons = document.querySelectorAll(".stage-sub button");
+            subButtons.forEach((btn) => btn.classList.remove("active"));
+            stageSub = "";
+        } else {
+            customInput.style.display = "none";
+            customInput.value = "";
+            stageSubGroup.style.display = "";
+            document.querySelector('.roundSelectorWrapper').style.minWidth = "33px"; // Restore min-width
+        }
+    } else {
+        stageMain = "";
+        customInput.style.display = "none";
+        customInput.value = "";
+        stageSubGroup.style.display = "";
+        document.querySelector('.roundSelectorWrapper').style.minWidth = "33px"; // Restore min-width
+    }
 
-      // CLEAR sub-stage buttons when main stage is toggled off
-      /*
-      const subButtons = document.querySelectorAll(".stage-sub button");
-      subButtons.forEach((btn) => btn.classList.remove("active"));
-      stageSub = "";
-      */
-   }
+    // Fix: re-evaluate round control visibility after toggling Custom
+    const showRound = stageSub === "Round" && toggledLabel !== "C";
+    document.getElementById("roundControlWrapper").style.display = showRound ? "flex" : "none";
 
-   // Fix: re-evaluate round control visibility after toggling Custom
-   const showRound = stageSub === "Round" && toggledLabel !== "C";
-   document.getElementById("roundControlWrapper").style.display = showRound ? "flex" : "none";
-
-   updateRoundControlVisibility();
-   updateStageField();
+    updateRoundControlVisibility();
+    updateStageField();
 }
 
 function setStageSub(value) {
-   const buttons = document.querySelectorAll(".stage-sub button");
-   const toggledLabel = getButtonLabel(value);
-   let wasAlreadyActive = false;
+    const buttons = document.querySelectorAll(".stage-sub button");
+    const toggledLabel = getButtonLabel(value);
+    let wasAlreadyActive = false;
 
-   buttons.forEach((btn) => {
-      const isActive = btn.classList.contains("active");
-      const isThisButton = btn.textContent === toggledLabel;
+    buttons.forEach((btn) => {
+        const isActive = btn.classList.contains("active");
+        const isThisButton = btn.textContent === toggledLabel;
 
-      if (isThisButton && isActive) {
-         wasAlreadyActive = true;
-      }
+        if (isThisButton && isActive) {
+            wasAlreadyActive = true;
+        }
 
-      btn.classList.remove("active");
-   });
+        btn.classList.remove("active");
+    });
 
-   if (!wasAlreadyActive) {
-      buttons.forEach((btn) => {
-         if (btn.textContent === toggledLabel) {
-            btn.classList.add("active");
-         }
-      });
-      stageSub = value;
-   } else {
-      stageSub = "";
-   }
+    if (!wasAlreadyActive) {
+        buttons.forEach((btn) => {
+            if (btn.textContent === toggledLabel) {
+                btn.classList.add("active");
+            }
+        });
+        stageSub = value;
+    } else {
+        stageSub = "";
+    }
 
-   const customButton = document.querySelector(".cusTogBtn");
-   const customIsActive = customButton.classList.contains("active");
-   const showRound = stageSub === "Round" && !customIsActive;
+    const customButton = document.querySelector(".cusTogBtn");
+    const customIsActive = customButton.classList.contains("active");
+    const showRound = stageSub === "Round" && !customIsActive;
 
-   document.getElementById("roundControlWrapper").style.display = showRound ? "flex" : "none";
+    document.getElementById("roundControlWrapper").style.display = showRound ? "flex" : "none";
 
-   updateRoundControlVisibility();
-   updateStageField();
+    updateRoundControlVisibility();
+    updateStageField();
 }
 
 function updateRoundControlVisibility() {
-   const showRound = stageSub === "Round" && stageMain !== "Custom";
-   document.getElementById("roundControlWrapper").style.display = showRound ? "flex" : "none";
+    const showRound = stageSub === "Round" && stageMain !== "Custom";
+    document.getElementById("roundControlWrapper").style.display = showRound ? "flex" : "none";
 }
 
 function changeRoundNum(delta) {
-   const input = document.getElementById("stageRoundNum");
-   let val = parseInt(input.value) || 1;
-   val = Math.max(1, val + delta);
-   input.value = val;
-   updateStageField();
+    const input = document.getElementById("stageRoundNum");
+    let val = parseInt(input.value) || 1;
+    val = Math.max(1, val + delta);
+    input.value = val;
+    updateStageField();
 }
 
 function updateStageField() {
-   let fullStage = "";
+    let fullStage = "";
 
-   const customInput = document.getElementById("customStageInput");
-   const isCustomMode = customInput.style.display !== "none";
-   const customValue = customInput.value.trim();
+    const customInput = document.getElementById("customStageInput");
+    const isCustomMode = customInput.style.display !== "none";
+    const customValue = customInput.value.trim();
 
-   if (isCustomMode && customValue) {
-      fullStage = customValue;
-   } else if (stageMain && stageSub) {
-      fullStage = `${stageMain} ${stageSub}`;
-      if (stageSub === "Round") {
-         const round = document.getElementById("stageRoundNum").value;
-         fullStage += ` ${round}`;
-      }
-   } else if (stageMain) {
-      fullStage = stageMain;
-   } else if (stageSub) {
-      fullStage = stageSub;
-      if (stageSub === "Round") {
-         const round = document.getElementById("stageRoundNum").value;
-         fullStage += ` ${round}`;
-      }
-   }
+    if (isCustomMode && customValue) {
+        fullStage = customValue;
+    } else if (stageMain && stageSub) {
+        fullStage = `${stageMain} ${stageSub}`;
+        if (stageSub === "Round") {
+            const round = document.getElementById("stageRoundNum").value;
+            fullStage += ` ${round}`;
+        }
+    } else if (stageMain) {
+        fullStage = stageMain;
+    } else if (stageSub) {
+        fullStage = stageSub;
+        if (stageSub === "Round") {
+            const round = document.getElementById("stageRoundNum").value;
+            fullStage += ` ${round}`;
+        }
+    }
 
-   emitUpdate();
+    emitUpdate();
 }
 
 function getCurrentStage() {
-   const customInput = document.getElementById("customStageInput");
-   const isCustomMode = customInput && customInput.style.display !== "none";
-   const customValue = customInput?.value?.trim() || "";
+    const customInput = document.getElementById("customStageInput");
+    const isCustomMode = customInput && customInput.style.display !== "none";
+    const customValue = customInput?.value?.trim() || "";
 
-   if (isCustomMode && customValue) return customValue;
+    if (isCustomMode && customValue) return customValue;
 
-   if (stageMain && stageSub) {
-      let full = `${stageMain} ${stageSub}`;
-      if (stageSub === "Round") {
-         const round = document.getElementById("stageRoundNum").value;
-         full += ` ${round}`;
-      }
-      return full.trim();
-   }
+    if (stageMain && stageSub) {
+        let full = `${stageMain} ${stageSub}`;
+        if (stageSub === "Round") {
+            const round = document.getElementById("stageRoundNum").value;
+            full += ` ${round}`;
+        }
+        return full.trim();
+    }
 
-   if (stageMain) return stageMain;
-   if (stageSub) {
-      let full = stageSub;
-      if (stageSub === "Round") {
-         const round = document.getElementById("stageRoundNum").value;
-         full += ` ${round}`;
-      }
-      return full.trim();
-   }
+    if (stageMain) return stageMain;
+    if (stageSub) {
+        let full = stageSub;
+        if (stageSub === "Round") {
+            const round = document.getElementById("stageRoundNum").value;
+            full += ` ${round}`;
+        }
+        return full.trim();
+    }
 
-   return "";
+    return "";
 }
 
 function getButtonLabel(value) {
-   switch (value) {
-      case "Pools":
-         return "P";
-      case "Round-Robin":
-         return "RR";
-      case "Winners":
-         return "W";
-      case "Losers":
-         return "L";
-      case "Grand Finals":
-         return "GF";
-      case "":
-         return "C";
+    switch (value) {
+        case "Pools":
+            return "P";
+        case "Round-Robin":
+            return "RR";
+        case "Winners":
+            return "W";
+        case "Losers":
+            return "L";
+        case "Grand Finals":
+            return "GF";
+        case "":
+            return "C";
 
-      case "Round":
-         return "R";
-      case "Quarterfinal":
-         return "Q";
-      case "Semifinal":
-         return "S";
-      case "Final":
-         return "F";
-      case "Reset":
-         return "BR";
+        case "Round":
+            return "R";
+        case "Quarterfinal":
+            return "Q";
+        case "Semifinal":
+            return "S";
+        case "Final":
+            return "F";
+        case "Reset":
+            return "BR";
 
-      default:
-         return "";
-   }
+        default:
+            return "";
+    }
 }
 
 function restoreStageButtons() {
-   const fullStage = document.getElementById('StageData').value.trim();
-   const mainButtons = document.querySelectorAll('.stage-main div button[type="button"]');
-   const subButtons = document.querySelectorAll('.stage-sub div button[type="button"]');
-   const roundNum = document.getElementById("stageRoundNum");
-   const roundSelector = document.getElementById("roundControlWrapper");
-   const customInput = document.getElementById("customStageInput");
+    const fullStage = document.getElementById('StageData').value.trim();
+    const mainButtons = document.querySelectorAll('.stage-main div button[type="button"]');
+    const subButtons = document.querySelectorAll('.stage-sub div button[type="button"]');
+    const roundNum = document.getElementById("stageRoundNum");
+    const roundSelector = document.getElementById("roundControlWrapper");
+    const customInput = document.getElementById("customStageInput");
 
-   // Reset all UI states
-   mainButtons.forEach(btn => btn.classList.remove('active'));
-   subButtons.forEach(btn => btn.classList.remove('active'));
-   customInput.style.display = "none";
-   customInput.value = "";
-   roundSelector.style.display = "none";
+    // Reset all UI states
+    mainButtons.forEach(btn => btn.classList.remove('active'));
+    subButtons.forEach(btn => btn.classList.remove('active'));
+    customInput.style.display = "none";
+    customInput.value = "";
+    roundSelector.style.display = "none";
 
-   stageMain = "";
-   stageSub = "";
+    stageMain = "";
+    stageSub = "";
 
-   if (!fullStage) return;
+    if (!fullStage) return;
 
-   // Detect and parse custom stage
-   if (!fullStage.includes("Winners") && !fullStage.includes("Losers") &&
-      !fullStage.includes("Pools") && !fullStage.includes("Round-Robin") &&
-      !fullStage.includes("Grand Finals")) {
-      stageMain = fullStage;
-      document.querySelector('.cusTogBtn').classList.add('active');
-      customInput.style.display = "inline-block";
-      customInput.value = fullStage;
-      const stageSubGroup = document.querySelector(".stage-sub");
-      stageSubGroup.style.display = "none";
-      return;
-   }
+    // Detect and parse custom stage
+    if (!fullStage.includes("Winners") && !fullStage.includes("Losers") &&
+        !fullStage.includes("Pools") && !fullStage.includes("Round-Robin") &&
+        !fullStage.includes("Grand Finals")) {
+        stageMain = fullStage;
+        document.querySelector('.cusTogBtn').classList.add('active');
+        customInput.style.display = "inline-block";
+        customInput.value = fullStage;
+        const stageSubGroup = document.querySelector(".stage-sub");
+        stageSubGroup.style.display = "none";
+        return;
+    }
 
-   // Extract stageMain and stageSub
-   const parts = fullStage.split(' ');
-   if (parts.length > 0) {
-      const firstPart = parts[0];
-      if (firstPart === "Pools" || firstPart === "Winners" || firstPart === "Losers" ||
-         firstPart === "Round-Robin" || firstPart === "Grand") {
-         stageMain = (firstPart === "Grand") ? "Grand Finals" : firstPart;
-      }
-   }
+    // Extract stageMain and stageSub
+    const parts = fullStage.split(' ');
+    if (parts.length > 0) {
+        const firstPart = parts[0];
+        if (firstPart === "Pools" || firstPart === "Winners" || firstPart === "Losers" ||
+            firstPart === "Round-Robin" || firstPart === "Grand") {
+            stageMain = (firstPart === "Grand") ? "Grand Finals" : firstPart;
+        }
+    }
 
-   if (parts.includes("Quarterfinal")) {
-      stageSub = "Quarterfinal";
-   } else if (parts.includes("Semifinal")) {
-      stageSub = "Semifinal";
-   } else if (parts.includes("Final") && !parts.includes("Grand")) {
-      stageSub = "Final";
-   } else if (parts.includes("Round")) {
-      stageSub = "Round";
-      const roundMatch = fullStage.match(/Round (\d+)/);
-      if (roundMatch) {
-         document.getElementById("stageRoundNum").value = parseInt(roundMatch[1]);
-         roundSelector.style.display = "flex";
-      }
-   }
+    if (parts.includes("Quarterfinal")) {
+        stageSub = "Quarterfinal";
+    } else if (parts.includes("Semifinal")) {
+        stageSub = "Semifinal";
+    } else if (parts.includes("Final") && !parts.includes("Grand")) {
+        stageSub = "Final";
+    } else if (parts.includes("Round")) {
+        stageSub = "Round";
+        const roundMatch = fullStage.match(/Round (\d+)/);
+        if (roundMatch) {
+            document.getElementById("stageRoundNum").value = parseInt(roundMatch[1]);
+            roundSelector.style.display = "flex";
+        }
+    }
 
-   // Visually toggle correct buttons
-   mainButtons.forEach(btn => {
-      if (btn.textContent === getButtonLabel(stageMain)) {
-         btn.classList.add('active');
-      }
-   });
+    // Visually toggle correct buttons
+    mainButtons.forEach(btn => {
+        if (btn.textContent === getButtonLabel(stageMain)) {
+            btn.classList.add('active');
+        }
+    });
 
-   subButtons.forEach(btn => {
-      if (btn.textContent === getButtonLabel(stageSub)) {
-         btn.classList.add('active');
-      }
-   });
+    subButtons.forEach(btn => {
+        if (btn.textContent === getButtonLabel(stageSub)) {
+            btn.classList.add('active');
+        }
+    });
 }
 
 function adjustScore(inputId, change) {
-   const field = document.getElementById(inputId);
-   field.value = Math.max(0, parseInt(field.value || "0") + change);
-   emitUpdate();
+    const field = document.getElementById(inputId);
+    field.value = Math.max(0, parseInt(field.value || "0") + change);
+    emitUpdate();
 }
 
 function swapValues(id1, id2) {
-   const a = document.getElementsByName(id1)[0];
-   const b = document.getElementsByName(id2)[0];
-   const temp = a.value;
-   a.value = b.value;
-   b.value = temp;
+    const a = document.getElementsByName(id1)[0];
+    const b = document.getElementsByName(id2)[0];
+    const temp = a.value;
+    a.value = b.value;
+    b.value = temp;
 }
 
 function swapPlayers() {
-   swapValues("player1_name", "player2_name");
-   swapValues("player1_clan", "player2_clan");
-   swapValues("player1_wl", "player2_wl");
-   swapValues("player1Img", "player2Img");
-   restoreImageButtonStateFor(1);
-   restoreImageButtonStateFor(2);
-   
-   // Update button visuals based on swapped hidden input values
-   const wlButtons = ["player1", "player2"];
-   wlButtons.forEach((player) => {
-      const wlValue = document.getElementById(`${player}_wl`).value;
-      const buttons = document.querySelectorAll(`.WLside button[onclick*="${player}"]`);
+    swapValues("player1_name", "player2_name");
+    swapValues("player1_clan", "player2_clan");
+    swapValues("player1_wl", "player2_wl");
+    swapValues("player1Img", "player2Img");
+    restoreImageButtonStateFor(1);
+    restoreImageButtonStateFor(2);
 
-      buttons.forEach((btn) => {
-         btn.classList.remove("active");
-         if (wlValue && btn.textContent === wlValue.replace(/\[|\]/g, "")) {
-            btn.classList.add("active");
-         }
-      });
-   });
-   
-   emitUpdate();
+    // Update button visuals based on swapped hidden input values
+    const wlButtons = ["player1", "player2"];
+    wlButtons.forEach((player) => {
+        const wlValue = document.getElementById(`${player}_wl`).value;
+        const buttons = document.querySelectorAll(`.WLside button[onclick*="${player}"]`);
+
+        buttons.forEach((btn) => {
+            btn.classList.remove("active");
+            if (wlValue && btn.textContent === wlValue.replace(/\[|\]/g, "")) {
+                btn.classList.add("active");
+            }
+        });
+    });
+
+    emitUpdate();
 }
 
 function swapTeams() {
-   swapValues("team1_name", "team2_name");
-   swapValues("team1_score", "team2_score");
+    swapValues("team1_name", "team2_name");
+    swapValues("team1_score", "team2_score");
 
-   swapValues("team1Img", "team2Img");
-   restoreTeamImageButtonState(1);
-   restoreTeamImageButtonState(2);
-   updateTeamToggleColors();
+    swapValues("team1Img", "team2Img");
+    restoreTeamImageButtonState(1);
+    restoreTeamImageButtonState(2);
+    updateTeamToggleColors();
 
-   emitUpdate();
+    emitUpdate();
 }
 
 function swapScores() {
-   swapValues("player1_score", "player2_score");
-   emitUpdate();
+    swapValues("player1_score", "player2_score");
+    emitUpdate();
 }
 
 function swapAll() {
-   // Swap values
-   swapValues("player1_name", "player2_name");
-   swapValues("player1_clan", "player2_clan");
-   swapValues("player1_score", "player2_score");
-   swapValues("player1_wl", "player2_wl");
-   swapValues("player1Img", "player2Img");
-   restoreImageButtonStateFor(1);
-   restoreImageButtonStateFor(2);
+    // Swap values
+    swapValues("player1_name", "player2_name");
+    swapValues("player1_clan", "player2_clan");
+    swapValues("player1_score", "player2_score");
+    swapValues("player1_wl", "player2_wl");
+    swapValues("player1Img", "player2Img");
+    restoreImageButtonStateFor(1);
+    restoreImageButtonStateFor(2);
 
-   swapValues("team1_name", "team2_name");
-   swapValues("team1_score", "team2_score");
+    swapValues("team1_name", "team2_name");
+    swapValues("team1_score", "team2_score");
 
-   swapValues("team1Img", "team2Img");
-   restoreTeamImageButtonState(1);
-   restoreTeamImageButtonState(2);
-   updateTeamToggleColors();
+    swapValues("team1Img", "team2Img");
+    restoreTeamImageButtonState(1);
+    restoreTeamImageButtonState(2);
+    updateTeamToggleColors();
 
-   // Update button visuals based on swapped hidden input values
-   const wlButtons = ["player1", "player2"];
-   wlButtons.forEach((player) => {
-      const wlValue = document.getElementById(`${player}_wl`).value;
-      const buttons = document.querySelectorAll(`.WLside button[onclick*="${player}"]`);
+    // Update button visuals based on swapped hidden input values
+    const wlButtons = ["player1", "player2"];
+    wlButtons.forEach((player) => {
+        const wlValue = document.getElementById(`${player}_wl`).value;
+        const buttons = document.querySelectorAll(`.WLside button[onclick*="${player}"]`);
 
-      buttons.forEach((btn) => {
-         btn.classList.remove("active");
-         if (wlValue && btn.textContent === wlValue.replace(/\[|\]/g, "")) {
-            btn.classList.add("active");
-         }
-      });
-   });
+        buttons.forEach((btn) => {
+            btn.classList.remove("active");
+            if (wlValue && btn.textContent === wlValue.replace(/\[|\]/g, "")) {
+                btn.classList.add("active");
+            }
+        });
+    });
 
-   emitUpdate();
+    emitUpdate();
 }
 
 function resetSingleScore(inputId) {
-   const field = document.getElementById(inputId);
-   field.value = 0;
-   emitUpdate();
+    const field = document.getElementById(inputId);
+    field.value = 0;
+    emitUpdate();
 }
-
+/*
 document.getElementById('resetPlayersBtn').addEventListener('click', async () => {
-  await fetch('/reset/players', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+await fetch('/reset/players', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
 });
 
 document.getElementById('resetTeamsBtn').addEventListener('click', async () => {
-  await fetch('/reset/teams', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+await fetch('/reset/teams', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
 });
 
 document.getElementById('resetAllBtn').addEventListener('click', async () => {
-  await fetch('/reset/all', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+await fetch('/reset/all', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
 });
+*/
+function confirmDialog({
+    title = 'Confirm',
+    message = 'Are you sure?',
+    okClass = 'btn-danger',
+    okText = 'OK'
+} = {}) {
+    return new Promise(resolve => {
+        const modalEl = document.getElementById('confirmModal');
+        //const titleEl = document.getElementById('confirmTitle');
+        const bodyEl = document.getElementById('confirmBody');
+        const okBtn = document.getElementById('confirmOkBtn');
+
+        //titleEl.textContent = title;
+        bodyEl.textContent = message;
+
+        // set button style/text per use-case
+        okBtn.className = 'btn btn-sm ' + okClass;
+        okBtn.textContent = okText;
+
+        const bsModal = new bootstrap.Modal(modalEl, {
+            backdrop: 'static',
+            keyboard: true
+        });
+
+        const onOk = () => {
+            cleanup();
+            resolve(true);
+        };
+        const onHide = () => {
+            cleanup();
+            resolve(false);
+        };
+
+        function cleanup() {
+            okBtn.removeEventListener('click', onOk);
+            modalEl.removeEventListener('hidden.bs.modal', onHide);
+        }
+
+        okBtn.addEventListener('click', onOk);
+        modalEl.addEventListener('hidden.bs.modal', onHide);
+        bsModal.show();
+    });
+}
+
+async function confirmResetPlayers() {
+    const ok = await confirmDialog({
+        //title: 'Reset Player Values',
+        message: 'Are you sure you want to reset all player values?',
+        okClass: 'btn-warning',
+        okText: 'Reset Players'
+    });
+    if (!ok) return;
+
+    await fetch('/reset/players', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+    resetPValues();
+}
+
+async function confirmResetTeams() {
+    const ok = await confirmDialog({
+        //title: 'Reset Team Values',
+        message: 'Are you sure you want to reset all team values?',
+        okClass: 'btn-primary',
+        okText: 'Reset Teams'
+    });
+    if (!ok) return;
+
+    await fetch('/reset/teams', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+    resetTValues();
+}
+
+async function confirmResetAll() {
+    const ok = await confirmDialog({
+        //title: 'Reset All Values',
+        message: 'Are you sure you want to reset ALL data?',
+        okClass: 'btn-danger',
+        okText: 'Reset All'
+    });
+    if (!ok) return;
+
+    await fetch('/reset/all', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+    resetAll();
+}
 
 //////////// UI-only reset functions
 
 function uiOnly_Set(el, val) {
-  if (!el) return;
-  el.value = val;
-  el.dispatchEvent(new Event('input', { bubbles: true }));
-  el.dispatchEvent(new Event('change', { bubbles: true }));
+    if (!el) return;
+    el.value = val;
+    el.dispatchEvent(new Event('input', {
+        bubbles: true
+    }));
+    el.dispatchEvent(new Event('change', {
+        bubbles: true
+    }));
 }
 
 // Reset a player image button to the default icon (UI only)
 function uiOnly_ResetPlayerImageButton(player) {
-  const { btn, hidden } = playerEls(player);
-  if (btn) {
-    btn.innerHTML = '';
-    const icon = document.createElement('i');
-    icon.className = 'fa-regular fa-image';
-    icon.style.color = '#f1f1f1';
-    btn.appendChild(icon);
-  }
-  if (hidden) hidden.value = '';
-  selectedImageByPlayer[player] = null;
+    const {
+        btn,
+        hidden
+    } = playerEls(player);
+    if (btn) {
+        btn.innerHTML = '';
+        const icon = document.createElement('i');
+        icon.className = 'fa-regular fa-image';
+        icon.style.color = '#f1f1f1';
+        btn.appendChild(icon);
+    }
+    if (hidden) hidden.value = '';
+    selectedImageByPlayer[player] = null;
 }
 
 // Reset a team image button to the default icon (UI only)
 function uiOnly_ResetTeamImageButton(team) {
-  const { btn, hidden } = teamEls(team);
-  if (btn) {
-    btn.innerHTML = '';
-    const icon = document.createElement('i');
-    icon.className = 'fa-regular fa-image';
-    icon.style.color = '#f1f1f1';
-    btn.appendChild(icon);
-  }
-  if (hidden) hidden.value = '';
-  selectedImageByTeam[team] = null;
+    const {
+        btn,
+        hidden
+    } = teamEls(team);
+    if (btn) {
+        btn.innerHTML = '';
+        const icon = document.createElement('i');
+        icon.className = 'fa-regular fa-image';
+        icon.style.color = '#f1f1f1';
+        btn.appendChild(icon);
+    }
+    if (hidden) hidden.value = '';
+    selectedImageByTeam[team] = null;
 }
 
 function resetPValues() {
-  // Mute emits while we touch the DOM
-  const prevHydrating = isHydrating;
-  isHydrating = true;
+    // Mute emits while we touch the DOM
+    const prevHydrating = isHydrating;
+    isHydrating = true;
 
-  try {
-    // Names / clans / W/L
-    uiOnly_Set(document.querySelector('[name="player1_name"]'), '');
-    uiOnly_Set(document.querySelector('[name="player1_clan"]'), '');
-    uiOnly_Set(document.getElementById('player1_wl'), '');
+    try {
+        // Names / clans / W/L
+        uiOnly_Set(document.querySelector('[name="player1_name"]'), '');
+        uiOnly_Set(document.querySelector('[name="player1_clan"]'), '');
+        uiOnly_Set(document.getElementById('player1_wl'), '');
 
-    uiOnly_Set(document.querySelector('[name="player2_name"]'), '');
-    uiOnly_Set(document.querySelector('[name="player2_clan"]'), '');
-    uiOnly_Set(document.getElementById('player2_wl'), '');
+        uiOnly_Set(document.querySelector('[name="player2_name"]'), '');
+        uiOnly_Set(document.querySelector('[name="player2_clan"]'), '');
+        uiOnly_Set(document.getElementById('player2_wl'), '');
 
-    // W/L buttons visual state
-    document.querySelectorAll(".WLside button").forEach((btn) => btn.classList.remove("active"));
+        // W/L buttons visual state
+        document.querySelectorAll(".WLside button").forEach((btn) => btn.classList.remove("active"));
 
-    // Scores
-    uiOnly_Set(document.getElementById('player1_score'), 0);
-    uiOnly_Set(document.getElementById('player2_score'), 0);
+        // Scores
+        uiOnly_Set(document.getElementById('player1_score'), 0);
+        uiOnly_Set(document.getElementById('player2_score'), 0);
 
-    // Player images (icon reset + hidden input clear)
-    uiOnly_ResetPlayerImageButton(1);
-    uiOnly_ResetPlayerImageButton(2);
+        // Player images (icon reset + hidden input clear)
+        uiOnly_ResetPlayerImageButton(1);
+        uiOnly_ResetPlayerImageButton(2);
 
-    // Recompute visuals (colors, indicators)
-    updateTagIconColors(1);
-    updateTagIconColors(2);
-    // Team buttons color
-    updateTeamToggleColors();
+        // Recompute visuals (colors, indicators)
+        updateTagIconColors(1);
+        updateTagIconColors(2);
+        // Team buttons color
+        updateTeamToggleColors();
 
-  } finally {
-    isHydrating = prevHydrating;
-  }
+    } finally {
+        isHydrating = prevHydrating;
+    }
 }
 
 function resetTValues() {
-  // Mute emits while we touch the DOM
-  const prevHydrating = isHydrating;
-  isHydrating = true;
+    // Mute emits while we touch the DOM
+    const prevHydrating = isHydrating;
+    isHydrating = true;
 
-  try {
-    // Teams (names, scores, images)
-    uiOnly_Set(document.querySelector('[name="team1_name"]'), '');
-    uiOnly_Set(document.querySelector('[name="team2_name"]'), '');
+    try {
+        // Teams (names, scores, images)
+        uiOnly_Set(document.querySelector('[name="team1_name"]'), '');
+        uiOnly_Set(document.querySelector('[name="team2_name"]'), '');
 
-    uiOnly_Set(document.querySelector('[name="team1_score"]'), 0);
-    uiOnly_Set(document.querySelector('[name="team2_score"]'), 0);
+        uiOnly_Set(document.querySelector('[name="team1_score"]'), 0);
+        uiOnly_Set(document.querySelector('[name="team2_score"]'), 0);
 
-    uiOnly_ResetTeamImageButton(1);
-    uiOnly_ResetTeamImageButton(2);
+        uiOnly_ResetTeamImageButton(1);
+        uiOnly_ResetTeamImageButton(2);
 
-    updateTeamToggleColors();
-	
-  } finally {
-    isHydrating = prevHydrating;
-  }
+        updateTeamToggleColors();
+
+    } finally {
+        isHydrating = prevHydrating;
+    }
 }
 
 function resetAll() {
-  const prevHydrating = isHydrating;
-  isHydrating = true;
+    const prevHydrating = isHydrating;
+    isHydrating = true;
 
-  try {
-    // 1) Players
-    resetPValues();
+    try {
+        // 1) Players
+        resetPValues();
 
-    // 2) Teams (names, scores, images)
-    uiOnly_Set(document.querySelector('[name="team1_name"]'), '');
-    uiOnly_Set(document.querySelector('[name="team2_name"]'), '');
+        // 2) Teams (names, scores, images)
+        uiOnly_Set(document.querySelector('[name="team1_name"]'), '');
+        uiOnly_Set(document.querySelector('[name="team2_name"]'), '');
 
-    uiOnly_Set(document.querySelector('[name="team1_score"]'), 0);
-    uiOnly_Set(document.querySelector('[name="team2_score"]'), 0);
+        uiOnly_Set(document.querySelector('[name="team1_score"]'), 0);
+        uiOnly_Set(document.querySelector('[name="team2_score"]'), 0);
 
-    uiOnly_ResetTeamImageButton(1);
-    uiOnly_ResetTeamImageButton(2);
+        uiOnly_ResetTeamImageButton(1);
+        uiOnly_ResetTeamImageButton(2);
 
-    updateTeamToggleColors();
+        updateTeamToggleColors();
 
-    // 3) Top text block
-    uiOnly_Set(document.getElementById('topText'), '');
-    updateTopTextButtonColor();
+        // 3) Top text block
+        uiOnly_Set(document.getElementById('topText'), '');
+        updateTopTextButtonColor();
 
-    // Hide all extra fields (Top text, C1, C2), and sync toggle states
-    document.querySelectorAll('.extraField').forEach(el => { el.style.display = 'none'; });
-    syncExtraToggleStates();
+        // Hide all extra fields (Top text, C1, C2), and sync toggle states
+        document.querySelectorAll('.extraField').forEach(el => {
+            el.style.display = 'none';
+        });
+        syncExtraToggleStates();
 
-    // 4) Casters
-    uiOnly_Set(document.getElementById('caster1Name'), '');
-    uiOnly_Set(document.getElementById('caster1Twitch'), '');
-    uiOnly_Set(document.getElementById('caster1Twitter'), '');
-    uiOnly_Set(document.getElementById('caster2Name'), '');
-    uiOnly_Set(document.getElementById('caster2Twitch'), '');
-    uiOnly_Set(document.getElementById('caster2Twitter'), '');
-    // turn off caster platform toggles’ active styles
-    document.querySelectorAll('.casterToggles').forEach(b => b.classList.remove('active'));
-    updateTagIconColors(1);
-    updateTagIconColors(2);
+        // 4) Casters
+        uiOnly_Set(document.getElementById('caster1Name'), '');
+        uiOnly_Set(document.getElementById('caster1Twitch'), '');
+        uiOnly_Set(document.getElementById('caster1Twitter'), '');
+        uiOnly_Set(document.getElementById('caster2Name'), '');
+        uiOnly_Set(document.getElementById('caster2Twitch'), '');
+        uiOnly_Set(document.getElementById('caster2Twitter'), '');
+        // turn off caster platform toggles’ active styles
+        document.querySelectorAll('.casterToggles').forEach(b => b.classList.remove('active'));
+        updateTagIconColors(1);
+        updateTagIconColors(2);
 
-    // 5) Stage & Match Type (UI only)
-    // Clear stage buttons (main/sub), round control, custom text
-    document.querySelectorAll('.stage-main .btn, .stage-sub .btn').forEach(b => b.classList.remove('active'));
-    uiOnly_Set(document.getElementById('StageData'), '');
-    uiOnly_Set(document.getElementById('customStageInput'), '');
-    const roundWrap = document.getElementById('roundControlWrapper');
-    if (roundWrap) roundWrap.style.display = 'none';
-    uiOnly_Set(document.getElementById('stageRoundNum'), 1);
+        // 5) Stage & Match Type (UI only)
+        // Clear stage buttons (main/sub), round control, custom text
+        document.querySelectorAll('.stage-main .btn, .stage-sub .btn').forEach(b => b.classList.remove('active'));
+        uiOnly_Set(document.getElementById('StageData'), '');
+        uiOnly_Set(document.getElementById('customStageInput'), '');
+        const roundWrap = document.getElementById('roundControlWrapper');
+        if (roundWrap) roundWrap.style.display = 'none';
+        uiOnly_Set(document.getElementById('stageRoundNum'), 1);
 
-    // Match type preset/custom
-    resetMatchType();            // this is UI-only (doesn't POST) in your file
-    updateMatchTypeUI();         // keep the view consistent
-    uiOnly_Set(document.getElementById('customMatchTypeInput'), '');
+        // Match type preset/custom
+        resetMatchType(); // this is UI-only (doesn't POST) in your file
+        updateMatchTypeUI(); // keep the view consistent
+        uiOnly_Set(document.getElementById('customMatchTypeInput'), '');
 
-  } finally {
-    isHydrating = prevHydrating;
-  }
+    } finally {
+        isHydrating = prevHydrating;
+    }
 }
 
 document.querySelectorAll("#scoreForm input").forEach((input) => {
-   input.addEventListener("blur", emitUpdate);
-   input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-         e.preventDefault();
-         input.blur();
-      }
-   });
+    input.addEventListener("blur", emitUpdate);
+    input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            input.blur();
+        }
+    });
 });
 
 const roundInput = document.getElementById("stageRoundNum");
 roundInput.addEventListener("blur", updateStageField);
 roundInput.addEventListener("keydown", (e) => {
-   if (e.key === "Enter") {
-      e.preventDefault();
-      roundInput.blur();
-   }
+    if (e.key === "Enter") {
+        e.preventDefault();
+        roundInput.blur();
+    }
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-   loadDataAndHydrate();
+    loadDataAndHydrate();
 });
 
 </script>

@@ -1,19 +1,7 @@
 {
   "ui_scale": 1,
-  "player1": {
-    "name": "",
-    "clan": "",
-    "wl": "",
-    "score": 0,
-    "img": ""
-  },
-  "player2": {
-    "name": "",
-    "clan": "",
-    "wl": "",
-    "score": 1,
-    "img": ""
-  },
+  "player1": {},
+  "player2": {},
   "team1": {
     "name": "",
     "score": 0,

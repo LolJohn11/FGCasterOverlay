@@ -26,6 +26,32 @@ body {
    /* width: calc(100% / var(--ui-scale)); */
 }
 
+#confirmModal {
+   transform-origin: top !important;
+}
+
+.modal-dialog {
+   margin-top: 10px;
+   margin-bottom: unset;
+   max-width: 400px;
+}
+
+.modal-body {
+   display: inline-flex;
+   flex-wrap: nowrap;
+   align-items: center;
+   gap: 5px;
+}
+
+.py-3 {
+   padding-top: 8px !important;
+   padding-bottom: 8px !important;
+}
+
+#confirmOkBtn {
+   white-space: nowrap
+}
+
 #offcanvas {
    background-color: #1e1e1e;   /* Dark background */
    color: #f1f1f1;   /* Light text */

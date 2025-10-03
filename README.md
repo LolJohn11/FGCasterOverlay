@@ -38,6 +38,7 @@ FGCaster Overlay  | Other overlay apps
 * Built-in templates come with basic animations, which you can adjust or build upon if needed.
 * Easy to edit or create your own templates using HTML and JS.
 ### Planned Features
+* Localization support
 * Start.gg and Challonge integrations
 * _Submit your feature ideas in the "Issues" tab!_
 
