@@ -35,8 +35,8 @@ FGCaster Overlay  | Other overlay apps
 	* Tekken 8
 	* Street Fighter 6
 	* Guilty Gear -Strive-
-* Built-in templates come with basic animations, which you can adjust or build upon if needed.
-* Easy to edit or create your own templates using HTML and JS.
+* Built-in templates include basic animations, which you can adjust or build upon if needed.
+* Easy to edit or create your own templates using HTML, CSS, and JS.
 ### Planned Features
 * Localization support
 * Start.gg and Challonge integrations
@@ -61,8 +61,8 @@ Simply copy an existing template folder and rename it as desired to get started.
 📁template_name
 ├── 📁fonts
 ├── 📁img
-├── template.html
-└── template.css
+├── 📄template.html
+└── 📄template.css
 ```
 The files in the `img` and `fonts` folders can be named however you like (just don't forget to change the references to said files in the `template.html` and `template.css`.
 Once you have your new template files and folders set up and ready, you can modify the template using HTML, CSS, and JavaScript to achieve the desired look and functionality.
