@@ -313,7 +313,7 @@ input[type="number"] {
 }
 
 input.form-control {
-   max-width: 200px;
+   max-width: 98px;
    max-height: 31px;
    padding: .375rem .5rem .375rem .5rem;
    font-size: 14px;
@@ -472,13 +472,12 @@ input::placeholder {
 .inputTeam {
    border-radius: 0px !important;
    border-right: none !important;
-   width: 53px;
+   width: 38px;
 }
 
 .team-popover {
    height: 31px;
-   padding-left: 2px;
-   padding-right: 2px;
+   padding: 0 2px;
    border-radius: 0px;
    border-color: #444;
 }
@@ -498,6 +497,22 @@ input::placeholder {
    width: 39px;
    height: 30px;
    text-align: center;
+}
+
+.id-toggle {
+  height: 31px;
+  padding: 0 2px;
+  border-radius: 0;
+  border-color: #444;
+  border-left: none;
+}
+.id-toggle:hover {
+   background-color: #444;
+   border-color: #444 !important;
+   color: #fff;
+}
+.id-toggle.active {
+   border-color: #444 !important;
 }
 
 #imgSelect,

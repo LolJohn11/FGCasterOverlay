@@ -1,30 +1,14 @@
 {
-  "ui_scale": 1,
   "player1": {},
   "player2": {},
-  "team1": {
-    "name": "",
-    "score": 0,
-    "img": ""
-  },
-  "team2": {
-    "name": "",
-    "score": 0,
-    "img": ""
-  },
+  "team1": {},
+  "team2": {},
   "stage": "",
   "match_type": "",
-  "caster1": {
-    "name": "",
-    "twitch": "",
-    "twitter": ""
-  },
-  "caster2": {
-    "name": "",
-    "twitch": "",
-    "twitter": ""
-  },
   "toptext": "",
+  "caster1": {},
+  "caster2": {},
+  "ui_scale": 1,
   "port": 8008,
   "active_template": "default"
 }
