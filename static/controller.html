@@ -60,12 +60,12 @@
                         </div>
                         <input type="hidden" name="player1_wl" id="player1_wl" value="" />
                         <div class="score-group sb-2">
-                            <input type="number" name="player1_score" id="player1_score" class="form-control" style="width: 39px; height: 30px;" value="" />
-                            <button type="button" class="btn btn-outline-success score-btn" style="height: 30px; width: 30px; padding-bottom: 0px;" onclick="adjustScore('player1_score', 1)"><i class="fa-solid fa-plus fa-2xs"></i></button>
-                            <button type="button" class="btn btn-outline-secondary score-btn" style="height: 30px; padding-bottom: 0px;" data-bs-toggle="tooltip" data-bs-placement="top" title="Reset Score" onclick="resetSingleScore('player1_score')">
-                                <i class="fa-solid fa-rotate-left fa-xs"></i>
-                            </button>
-                            <button type="button" class="btn btn-outline-danger score-btn" style="height: 30px; width: 30px; padding-bottom: 0px;" onclick="adjustScore('player1_score', -1)"><i class="fa-solid fa-minus fa-2xs"></i></button>
+                            <button type="button" class="btn btn-outline-success score-btn" onclick="adjustScore('player1_score', 1)"><i class="fa-solid fa-plus fa-2xs"></i></button>
+							<input type="number" name="player1_score" id="player1_score" class="form-control" style="width: 39px; height: 30px;" value="" />
+                            <!--
+							<button type="button" class="btn btn-outline-secondary score-btn" style="height: 30px; padding-bottom: 0px;" data-bs-toggle="tooltip" data-bs-placement="top" title="Reset Score" onclick="resetSingleScore('player1_score')"><i class="fa-solid fa-rotate-left fa-xs"></i></button>
+							-->
+                            <button type="button" class="btn btn-outline-danger score-btn" onclick="adjustScore('player1_score', -1)"><i class="fa-solid fa-minus fa-2xs"></i></button>
                         </div>
                     </div>
                 </div>
@@ -113,12 +113,12 @@
                         </div>
                         <input type="hidden" name="player2_wl" id="player2_wl" value="" />
                         <div class="score-group sb-2">
-                            <input type="number" name="player2_score" id="player2_score" class="form-control" style="width: 39px; height: 30px;" value="" />
-                            <button type="button" class="btn btn-outline-success score-btn" style="height: 30px; width: 30px; padding-bottom: 0px;" onclick="adjustScore('player2_score', 1)"><i class="fa-solid fa-plus fa-2xs"></i></button>
-                            <button type="button" class="btn btn-outline-secondary score-btn" style="height: 30px; padding-bottom: 0px;" data-bs-toggle="tooltip" data-bs-placement="top" title="Reset Score" onclick="resetSingleScore('player2_score')">
-                                <i class="fa-solid fa-rotate-left fa-xs"></i>
-                            </button>
-                            <button type="button" class="btn btn-outline-danger score-btn" style="height: 30px; width: 30px; padding-bottom: 0px;" onclick="adjustScore('player2_score', -1)"><i class="fa-solid fa-minus fa-2xs"></i></button>
+                            <button type="button" class="btn btn-outline-success score-btn" onclick="adjustScore('player2_score', 1)"><i class="fa-solid fa-plus fa-2xs"></i></button>
+							<input type="number" name="player2_score" id="player2_score" class="form-control" style="width: 39px; height: 30px;" value="" />
+                            <!--
+							<button type="button" class="btn btn-outline-secondary score-btn" style="height: 30px; padding-bottom: 0px;display: none;" data-bs-toggle="tooltip" data-bs-placement="top" title="Reset Score" onclick="resetSingleScore('player2_score')"><i class="fa-solid fa-rotate-left fa-xs"></i></button>
+							-->
+                            <button type="button" class="btn btn-outline-danger score-btn" onclick="adjustScore('player2_score', -1)"><i class="fa-solid fa-minus fa-2xs"></i></button>
                         </div>
                     </div>
                 </div>

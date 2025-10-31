@@ -285,7 +285,7 @@ input::placeholder,
 .score-group {
    display: flex;
    align-items: center;
-   gap: 4px;
+   gap: 0px;
    height: 40px;
    padding-left: 0px;
 }
@@ -675,11 +675,26 @@ input::placeholder {
    border-radius: 0px .25rem .25rem 0px;
 }
 
-#topText,
-#matchWinsNum,
 #player1_score,
-#player2_score,
+#player2_score {
+   border-radius: 0px;
+}
+
 .score-btn {
+   height: 30px; 
+   padding: 2px 2px 0px 2px;
+}
+
+.score-group .score-btn:first-child {
+   border-radius: .25rem 0px 0px .25rem;
+}
+
+.score-group .score-btn:last-child {
+   border-radius: 0px .25rem .25rem 0px;
+}
+
+#topText,
+#matchWinsNum {
    border-radius: .25rem;
 }
 
