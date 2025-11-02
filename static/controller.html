@@ -533,31 +533,31 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// ===== Dynamic character list loader =====
+// ===== Dynamic character list loader (single source) =====
 let __templateMeta = {};
 
 async function loadCharacterListForActiveGame(preferredTemplateName) {
-    // 1. ask server
+    // 1. ask server for templates + active + game meta
     const res = await fetch('/templates/list', { cache: 'no-store' });
     const { templates = [], active = '', meta = {} } = await res.json();
     __templateMeta = meta || {};
 
     const sel = document.getElementById('templateSelect');
 
-    // 2. decide which template we are actually using
+    // 2. decide which template we should actually use
     let templateName =
-        preferredTemplateName && preferredTemplateName.trim()
-        || (active && active.trim())
-        || (sel && sel.value && sel.value.trim())
-        || (templates[0] || '');
+        (preferredTemplateName && preferredTemplateName.trim()) ||
+        (active && active.trim()) ||
+        (sel && sel.value && sel.value.trim()) ||
+        (templates[0] || '');
 
-    // 3. keep UI in sync with server
+    // 3. keep dropdown in sync, but only if it's different
     if (sel && templateName && sel.value !== templateName) {
         sel.value = templateName;
     }
 
-    // 4. get game for that template
-    const game = (meta[templateName] && meta[templateName].game) ? meta[templateName].game : null;
+    // 4. read game for this template
+    const game = meta[templateName] && meta[templateName].game ? meta[templateName].game : null;
 
     if (!game) {
         console.warn('No game metadata for template:', templateName);
@@ -567,10 +567,11 @@ async function loadCharacterListForActiveGame(preferredTemplateName) {
         return;
     }
 
-    // 5. load character file
-    const url = '/static/characters/characters_' + game + '.json';
+    // 5. fetch characters for that game
     try {
-        const charRes = await fetch(url + '?' + Date.now(), { cache: 'no-store' });
+        const charRes = await fetch('/static/characters/characters_' + game + '.json?' + Date.now(), {
+            cache: 'no-store'
+        });
         const json = await charRes.json();
         if (json && Array.isArray(json.characters)) {
             window.__characterList = json.characters.map(c => ({ id: c, label: c }));
@@ -582,7 +583,7 @@ async function loadCharacterListForActiveGame(preferredTemplateName) {
         window.__characterList = [];
     }
 
-    // 6. rebuild
+    // 6. rebuild menus
     buildCharMenu(1);
     buildCharMenu(2);
 }
@@ -590,14 +591,6 @@ async function loadCharacterListForActiveGame(preferredTemplateName) {
 // initial load
 document.addEventListener('DOMContentLoaded', () => {
     loadCharacterListForActiveGame();
-
-    // also re-load when template changes from the UI
-    const sel = document.getElementById('templateSelect');
-    if (sel) {
-        sel.addEventListener('change', () => {
-            loadCharacterListForActiveGame();
-        });
-    }
 });
 
 // ===== Player ID toggle helpers =====
@@ -1552,13 +1545,9 @@ document.addEventListener("DOMContentLoaded", function() {
     initTeamImageSelectors();
     bindTeamPopoverControls();
 
-    populateTemplateSelect().then(() => {
-        bindTemplateSelect();
-        // also build the char list for the template that ended up selected
-        const sel = document.getElementById('templateSelect');
-        const current = sel ? sel.value : null;
-        loadCharacterListForActiveGame(current);
-    });
+    populateTemplateSelect()
+    .then(bindTemplateSelect)
+    .then(() => loadCharacterListForActiveGame());
 });
 
 //// Populate template selection dropdown
@@ -1593,21 +1582,17 @@ async function populateTemplateSelect() {
 function bindTemplateSelect() {
     const sel = document.getElementById('templateSelect');
     if (!sel) return;
-
     sel.addEventListener('change', async () => {
         const choice = sel.value;
         try {
-            // 1) tell backend to switch overlay
             await fetch('/set-template', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ template: choice })
             });
-
-            // 2) now that the backend actually switched → load the right character list
+            // now refresh char list for the chosen template
             await loadCharacterListForActiveGame(choice);
-
-            // 3) and finally persist the whole form (so data.json also knows the template)
+            // and re-emit full data
             emitUpdate();
         } catch (e) {
             console.error('Failed to set template', e);
