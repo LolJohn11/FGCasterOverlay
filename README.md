@@ -37,10 +37,8 @@ FGCaster Overlay  | Other overlay apps
 	* Guilty Gear -Strive-
 * Built-in templates include basic animations, which you can adjust or build upon if needed.
 * Easy to edit or create your own templates using HTML, CSS, and JS.
-### Planned Features
-* Localization support
-* Start.gg and Challonge integrations
-* _Submit your feature ideas in the "Issues" tab!_
+### Have an idea for a new feature?
+Submit your thoughts in the "Issues" tab!
 
 ## Screenshots
 | Tekken 8  | Street Fighter 6 | Guilty Gear -Strive- |

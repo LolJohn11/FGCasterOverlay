@@ -429,47 +429,62 @@
 
 // ===== Player character picker =====
 
-// We will fill this in step 2 from a dynamic source.
-// For now, just offer an empty menu + "Clear".
+// fallback when there is no per-game list
 const FALLBACK_CHARACTER_LIST = [
     { id: '', label: '— No character —' }
 ];
 
+// this is filled by loadCharacterListForActiveGame()
+window.__characterList = window.__characterList || [];
+
+// return whichever list we currently have
 function getCharacterSource() {
     return (window.__characterList && Array.isArray(window.__characterList) && window.__characterList.length)
         ? window.__characterList
         : FALLBACK_CHARACTER_LIST;
 }
 
+// --- new: track which character dropdown is open ---
+let activeCharDropdown = null;
+
+// helper: when we open a char dropdown, remember it + reset typeahead
+function setActiveCharDropdown(dd) {
+    activeCharDropdown = dd;
+    if (!dd) return;
+    dd.dataset.typeaheadKey = '';
+    dd.dataset.typeaheadIndex = '-1';
+    dd.dataset.typeaheadTs = '0';
+}
+
+// build the menu for player 1 or 2
 function buildCharMenu(player) {
     const menu = document.querySelector(player === 1 ? '#p1CharDropdown' : '#p2CharDropdown');
     if (!menu) return;
 
     const current = document.querySelector('[name="player' + player + '_character"]').value || '';
-    const list = getCharacterSource(); // this may be the fallback or the loaded list
+    const list = getCharacterSource();
 
-    menu.innerHTML = ''; // clear
+    menu.innerHTML = '';
 
-    // --- always add a "None" / reset option at the top ---
+    // always add "None" / reset at the top
     const noneItem = document.createElement('div');
     noneItem.className = 'char-dropdown-item';
-    noneItem.textContent = 'None';
+    noneItem.textContent = '--None--';
     if (current === '' || current == null) {
         noneItem.classList.add('selected');
     }
     noneItem.addEventListener('click', () => {
-        selectCharacter(player, '', 'None');
+        selectCharacter(player, '', '--None--');
     });
     menu.appendChild(noneItem);
 
-    // --- then add actual characters (if any) ---
+    // actual characters
     list.forEach(item => {
-        // if the fallback already IS a blank option, skip duplicating it
-        const id = item.id ?? item;
+        const id    = item.id    ?? item;
         const label = item.label ?? item;
-        if (id === '' || label === '— No character —') {
-            return; // we already added the reset item above
-        }
+
+        // if the list already had an empty / "no character" entry, skip it
+        if (id === '' || label === '— No character —') return;
 
         const btn = document.createElement('div');
         btn.className = 'char-dropdown-item';
@@ -482,6 +497,7 @@ function buildCharMenu(player) {
     });
 }
 
+// open/close a char menu for player
 function toggleCharMenu(player) {
     const menu = document.querySelector(player === 1 ? '#p1CharDropdown' : '#p2CharDropdown');
     if (!menu) return;
@@ -489,11 +505,22 @@ function toggleCharMenu(player) {
     const isHidden = menu.classList.contains('hidden');
 
     // close both first
-    document.querySelectorAll('.char-dropdown').forEach(m => m.classList.add('hidden'));
+    document.querySelectorAll('.char-dropdown').forEach(m => {
+        m.classList.add('hidden');
+        if (activeCharDropdown === m) {
+            activeCharDropdown = null;
+        }
+    });
 
     if (isHidden) {
         buildCharMenu(player);
         menu.classList.remove('hidden');
+
+        // --- new: always scroll to top on open ---
+        menu.scrollTop = 0;
+
+        // remember it's open (for key navigation)
+        setActiveCharDropdown(menu);
     }
 }
 
@@ -504,11 +531,15 @@ function selectCharacter(player, charId, label) {
     }
     updateCharacterButtonColor(player);
 
-    // close menu
     const menu = document.querySelector(player === 1 ? '#p1CharDropdown' : '#p2CharDropdown');
-    if (menu) menu.classList.add('hidden');
+    if (menu) {
+        menu.classList.add('hidden');
+        if (activeCharDropdown === menu) {
+            activeCharDropdown = null;
+        }
+    }
 
-    // send to backend
+    // push to backend
     emitUpdate && emitUpdate();
 }
 
@@ -530,34 +561,95 @@ document.addEventListener('click', (e) => {
     const isBtn  = e.target.closest('.char-select-btn');
     if (!isMenu && !isBtn) {
         document.querySelectorAll('.char-dropdown').forEach(m => m.classList.add('hidden'));
+        activeCharDropdown = null;
     }
 });
 
-// ===== Dynamic character list loader (single source) =====
-let __templateMeta = {};
+// --- NEW: type-to-jump for character menus (similar to image dropdowns) ---
+function charAlphaJump(dd, ch) {
+    if (!dd || dd.classList.contains('hidden')) return;
 
+    // all entries in the char menu
+    const items = dd.querySelectorAll('.char-dropdown-item');
+    if (!items.length) return;
+
+    // we usually want to skip the "None" item when jumping by letter,
+    // but allowing it is harmless — we'll still match by its text.
+    const now     = Date.now();
+    const lastKey = dd.dataset.typeaheadKey || '';
+    const lastIdx = parseInt(dd.dataset.typeaheadIndex || '-1', 10);
+    const lastTs  = parseInt(dd.dataset.typeaheadTs || '0', 10);
+    const sameKeyAndRecent = (lastKey === ch) && (now - lastTs < 800);
+
+    const matches = [];
+    items.forEach((el, i) => {
+        const txt = (el.textContent || '').trim().toLowerCase();
+        if (txt.startsWith(ch)) matches.push(i);
+    });
+    if (!matches.length) return;
+
+    let targetIdx;
+    if (sameKeyAndRecent) {
+        const pos = Math.max(0, matches.indexOf(lastIdx));
+        targetIdx = matches[(pos + 1) % matches.length];
+    } else {
+        targetIdx = matches[0];
+    }
+
+    const targetItem = items[targetIdx];
+    if (!targetItem) return;
+
+    // ensure visible
+    targetItem.scrollIntoView({ block: 'nearest' });
+
+    // store for cycling
+    dd.dataset.typeaheadKey   = ch;
+    dd.dataset.typeaheadIndex = String(targetIdx);
+    dd.dataset.typeaheadTs    = String(now);
+}
+
+// global key handler, but ONLY when a char dropdown is open
+document.addEventListener('keydown', (e) => {
+    if (!activeCharDropdown || activeCharDropdown.classList.contains('hidden')) return;
+
+    // ignore when typing in inputs/textareas or with modifiers
+    const t = e.target;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+    const key = e.key;
+    if (key && key.length === 1) {
+        const ch = key.toLowerCase();
+        if (ch >= 'a' && ch <= 'z') {
+            e.preventDefault();
+            charAlphaJump(activeCharDropdown, ch);
+        }
+    }
+});
+
+// ===== Dynamic character list loader (reads template meta from backend) =====
 async function loadCharacterListForActiveGame(preferredTemplateName) {
-    // 1. ask server for templates + active + game meta
+    // 1. ask server
     const res = await fetch('/templates/list', { cache: 'no-store' });
     const { templates = [], active = '', meta = {} } = await res.json();
-    __templateMeta = meta || {};
+    window.__templateMeta = meta || {};
 
     const sel = document.getElementById('templateSelect');
 
-    // 2. decide which template we should actually use
+    // 2. decide which template we are actually using
     let templateName =
-        (preferredTemplateName && preferredTemplateName.trim()) ||
-        (active && active.trim()) ||
-        (sel && sel.value && sel.value.trim()) ||
-        (templates[0] || '');
+        (preferredTemplateName && preferredTemplateName.trim())
+        || (active && active.trim())
+        || (sel && sel.value && sel.value.trim())
+        || (templates[0] || '');
 
-    // 3. keep dropdown in sync, but only if it's different
+    // 3. keep UI select in sync
     if (sel && templateName && sel.value !== templateName) {
         sel.value = templateName;
     }
 
-    // 4. read game for this template
-    const game = meta[templateName] && meta[templateName].game ? meta[templateName].game : null;
+    // 4. find game for that template
+    const game = (meta[templateName] && meta[templateName].game) ? meta[templateName].game : null;
 
     if (!game) {
         console.warn('No game metadata for template:', templateName);
@@ -567,11 +659,10 @@ async function loadCharacterListForActiveGame(preferredTemplateName) {
         return;
     }
 
-    // 5. fetch characters for that game
+    // 5. load JSON
+    const url = '/static/characters/characters_' + game + '.json';
     try {
-        const charRes = await fetch('/static/characters/characters_' + game + '.json?' + Date.now(), {
-            cache: 'no-store'
-        });
+        const charRes = await fetch(url + '?' + Date.now(), { cache: 'no-store' });
         const json = await charRes.json();
         if (json && Array.isArray(json.characters)) {
             window.__characterList = json.characters.map(c => ({ id: c, label: c }));
@@ -583,12 +674,12 @@ async function loadCharacterListForActiveGame(preferredTemplateName) {
         window.__characterList = [];
     }
 
-    // 6. rebuild menus
+    // 6. rebuild menus for both players
     buildCharMenu(1);
     buildCharMenu(2);
 }
 
-// initial load
+// init
 document.addEventListener('DOMContentLoaded', () => {
     loadCharacterListForActiveGame();
 });
@@ -2268,6 +2359,8 @@ function swapValues(id1, id2) {
 function swapPlayers() {
     swapValues("player1_name", "player2_name");
     swapValues("player1_clan", "player2_clan");
+	swapValues("player1_id", "player2_id");
+	swapValues("player1_character", "player2_character");
     swapValues("player1_wl", "player2_wl");
     swapValues("player1Img", "player2Img");
     restoreImageButtonStateFor(1);
@@ -2347,19 +2440,7 @@ function resetSingleScore(inputId) {
     field.value = 0;
     emitUpdate();
 }
-/*
-document.getElementById('resetPlayersBtn').addEventListener('click', async () => {
-await fetch('/reset/players', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
-});
 
-document.getElementById('resetTeamsBtn').addEventListener('click', async () => {
-await fetch('/reset/teams', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
-});
-
-document.getElementById('resetAllBtn').addEventListener('click', async () => {
-await fetch('/reset/all', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
-});
-*/
 function confirmDialog({
     title = 'Confirm',
     message = 'Are you sure?',
@@ -2524,6 +2605,15 @@ function resetPValues() {
 
         // W/L buttons visual state
         document.querySelectorAll(".WLside button").forEach((btn) => btn.classList.remove("active"));
+
+		// Characters
+		uiOnly_Set(document.querySelector('[name="player1_character"]'), '');
+        uiOnly_Set(document.querySelector('[name="player2_character"]'), '');
+		// repaint the character buttons
+        updateCharacterButtonColor(1);
+        updateCharacterButtonColor(2);
+        // close any open char menus
+        document.querySelectorAll('.char-dropdown').forEach(m => m.classList.add('hidden'));
 
         // Scores
         uiOnly_Set(document.getElementById('player1_score'), 0);
