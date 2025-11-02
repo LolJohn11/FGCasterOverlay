@@ -9,6 +9,12 @@
   <link rel="stylesheet" href="{{ asset_url(template_name, 'template.css') }}">
 </head>
 <body>
+
+<!-- Defines which game's character list to use. -->
+<!-- Write in "value" field the end of the URL of the game's page on https://www.fightersgeneration.com/ -->
+<!-- For example, for Tekken 8, the page is https://www.fightersgeneration.com/games/tekken8.html, so you must write "tekken8" in the value field.-->
+<input type="hidden" id="overlayGame" value="" />
+
 <div class="debug-bg-container">
    <!-- Add images like this: -->
    <!-- <img src="{{ asset_url(template_name, 'img/Image.png') }}" alt=""> -->
@@ -140,6 +146,7 @@ function connectSocket() {
             clan: '',
             wl: '',
             score: 0,
+			character: '',
             img: ''
          };
          const p2 = d.player2 || {
@@ -147,6 +154,7 @@ function connectSocket() {
             clan: '',
             wl: '',
             score: 0,
+			character: '',
             img: ''
          };
 
@@ -160,7 +168,10 @@ function connectSocket() {
             .trim();
          const name2 = (p2.name || '')
             .trim();
-
+		
+		 const p1Char = (p1.character || '').trim();
+		 const p2Char = (p2.character || '').trim();
+		
          const p1Img = document.getElementById('player1Img');
          const p2Img = document.getElementById('player2Img');
 

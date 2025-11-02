@@ -57,7 +57,7 @@ body {
    color: #f1f1f1;   /* Light text */
    display: flex;
    align-items: flex-end;
-   --offcanvas-base-width: 338px;
+   --offcanvas-base-width: 500px;
    --bs-offcanvas-width: calc(var(--offcanvas-base-width) * var(--ui-scale));
 }
 
@@ -87,6 +87,16 @@ body {
 #templateSelectLabel {
    color: #999;
    font-size: 14px;
+}
+
+.form-check {
+   font-size: 14px;
+   align-self: center;
+}
+
+.form-check-input:checked {
+	border-color: #f1f1f1;
+	background-color: #444;
 }
 
 .tooltip {
@@ -229,11 +239,11 @@ input::placeholder,
    border-right-color: #777 !important;
 }
 
-.btn-group .btn:first-child {
+.btn-group .btn:first-child:not(.team-popover):not(.char-select-btn) {
    border-right-color: #777 !important;
 }
 
-.btn-group .btn:last-child {
+.btn-group .btn:last-child:not(.team-popover):not(.char-select-btn) {
    border-left-color: #777 !important;
 }
 
@@ -301,6 +311,54 @@ input::placeholder,
    /* font-size: 0.8rem; */
 }
 
+.char-select-btn {
+    height: 31px;
+    width: 30px;
+    padding: 0 2px;
+    border-color: #444;
+}
+
+.char-select-btn:hover {
+    background-color: #444;
+    border-color: #444;
+    color: #fff;
+}
+
+.char-dropdown {
+    position: absolute;
+    top: 32px;
+    right: 0;
+    background: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: .25rem;
+    z-index: 999;
+    min-width: 140px;
+    max-height: 140px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+	scrollbar-color: #2a2a2a #444444;
+}
+
+.char-dropdown.hidden {
+    display: none;
+}
+
+.char-dropdown-item {
+    padding: 4px 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    font-size: 13px;
+}
+
+.char-dropdown-item:hover {
+    background: #444;
+}
+
+.char-dropdown-item.selected {
+    background: #3a5a36;
+}
+
 /* Remove default number input spinners */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
@@ -313,7 +371,7 @@ input[type="number"] {
 }
 
 input.form-control {
-   max-width: 98px;
+   /* max-width: 98px; */
    max-height: 31px;
    padding: .375rem .5rem .375rem .5rem;
    font-size: 14px;
@@ -328,7 +386,7 @@ input::placeholder {
 #customMatchTypeInput {
    width: 93px;
    height: 40px;
-   margin-top: 4px;
+   margin-top: 5px;
 }
 
 .mainstage-button-wrapper,
@@ -466,20 +524,21 @@ input::placeholder {
 .inputPlayer {
    border-radius: 0px .25rem .25rem 0px !important;
    border-left: none !important;
-   width: 101px;
+   width: 103px;
 }
 
 .inputTeam {
    border-radius: 0px !important;
    border-right: none !important;
-   width: 38px;
+   width: 52px;
 }
 
 .team-popover {
    height: 31px;
+   width: 30px;
    padding: 0 2px;
-   border-radius: 0px;
    border-color: #444;
+   border-radius: .25rem;
 }
 
 .team-popover:hover {
@@ -504,7 +563,6 @@ input::placeholder {
   padding: 0 2px;
   border-radius: 0;
   border-color: #444;
-  border-left: none;
 }
 .id-toggle:hover {
    background-color: #444;
@@ -675,9 +733,20 @@ input::placeholder {
    border-radius: 0px .25rem .25rem 0px;
 }
 
+#player1_w_btn,
+#player1_l_btn,
+#player2_w_btn,
+#player2_l_btn {
+	height: 30px;
+	width: 22px;
+	padding: 4px 0px;
+}
+
 #player1_score,
 #player2_score {
    border-radius: 0px;
+   width: 33px;
+   height: 30px;
 }
 
 .score-btn {

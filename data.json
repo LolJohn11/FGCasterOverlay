@@ -6,6 +6,7 @@
     "clan": "",
     "wl": "",
     "score": 0,
+    "character": "",
     "img": ""
   },
   "player2": {
@@ -14,6 +15,7 @@
     "clan": "",
     "wl": "",
     "score": 0,
+    "character": "",
     "img": ""
   },
   "team1": {

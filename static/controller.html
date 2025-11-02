@@ -46,27 +46,45 @@
                         <input type="file" id="customImageInput" data-player="1" accept="image/*" style="display: none;">
                         <input type="hidden" name="player1Img" id="player1Img" data-player="1" value="" />
                         <input name="player1_clan" placeholder="Tag" class="inputTeam form-control sr-1" value="" />
-                        <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="P1 Team Info">
-                            <button type="button" id="team1toggle" class="btn btn-sm btn-outline-secondary team-popover" data-bs-placement="right" data-popover-content="team1Popover"><i class="fa-solid fa-user-group fa-xs"></i></button>
-                        </span>
 						<button type="button" id="player1IdToggle" class="btn btn-sm btn-outline-secondary id-toggle" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Player 1 ID" onclick="togglePlayerId(1)"><i class="fa-solid fa-hashtag fa-xs"></i></button>
                         <input name="player1_name" placeholder="P1 Name" class="inputPlayer form-control sr-2" value="" />
 						<input name="player1_id" placeholder="P1 ID" class="form-control sr-2 inputPlayer" style="display:none;" value="" />
                     </div>
                     <div class="form-inline sb-2 row" style="width: 203px;">
                         <div class="btn-group btn-group-sm WLside mr-2" style="margin-right: 4px !important;" role="group">
-                            <button id="player1_w_btn" type="button" class="btn btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Winner's Side" style="height: 30px; width: 30px;" onclick="toggleWL('player1', '[W]', this)">W</button>
-                            <button id="player1_l_btn" type="button" class="btn btn-outline-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Loser's Side" style="height: 30px; width: 30px;" onclick="toggleWL('player1', '[L]', this)">L</button>
+                            <button id="player1_w_btn" type="button" class="btn btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Winner's Side" onclick="toggleWL('player1', '[W]', this)">W</button>
+                            <button id="player1_l_btn" type="button" class="btn btn-outline-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Loser's Side" onclick="toggleWL('player1', '[L]', this)">L</button>
                         </div>
                         <input type="hidden" name="player1_wl" id="player1_wl" value="" />
                         <div class="score-group sb-2">
                             <button type="button" class="btn btn-outline-success score-btn" onclick="adjustScore('player1_score', 1)"><i class="fa-solid fa-plus fa-2xs"></i></button>
-							<input type="number" name="player1_score" id="player1_score" class="form-control" style="width: 39px; height: 30px;" value="" />
+							<input type="number" name="player1_score" id="player1_score" class="form-control" value="" />
                             <!--
 							<button type="button" class="btn btn-outline-secondary score-btn" style="height: 30px; padding-bottom: 0px;" data-bs-toggle="tooltip" data-bs-placement="top" title="Reset Score" onclick="resetSingleScore('player1_score')"><i class="fa-solid fa-rotate-left fa-xs"></i></button>
 							-->
                             <button type="button" class="btn btn-outline-danger score-btn" onclick="adjustScore('player1_score', -1)"><i class="fa-solid fa-minus fa-2xs"></i></button>
                         </div>
+						<div class="btn-group btn-group-sm" style="margin-left: 4px !important; position: relative;">
+						<span data-bs-toggle="tooltip" data-bs-placement="bottom" title="P1 Team Info">
+                            <button type="button" id="team1toggle" class="btn btn-sm btn-outline-secondary team-popover" data-bs-placement="right" data-popover-content="team1Popover"><i class="fa-solid fa-user-group fa-xs"></i></button>
+                        </span>
+						<!-- NEW: P1 Character picker button -->
+						<span data-bs-toggle="tooltip" data-bs-placement="bottom" title="P1 Character">
+							<button type="button"
+									id="p1CharBtn"
+									class="btn btn-sm btn-outline-secondary char-select-btn"
+									data-player="1"
+									onclick="toggleCharMenu(1)">
+								<i class="fa-solid fa-person fa-xs"></i>
+							</button>
+						</span>
+
+						<!-- NEW: P1 Character dropdown (we'll fill it in step 2) -->
+						<div id="p1CharDropdown" class="char-dropdown hidden" data-player="1"></div>
+
+						<!-- NEW: P1 Character value to send to data.json -->
+						<input type="hidden" name="player1_character" id="player1_character" value="" />
+						</div>
                     </div>
                 </div>
                 <div class="form-section d-flex align-items-start" style="margin-bottom: 0px;">
@@ -99,27 +117,45 @@
                         <input type="file" id="customImageInput2" data-player="2" accept="image/*" style="display: none;">
                         <input type="hidden" name="player2Img" id="player2Img" data-player="2" value="" />
                         <input name="player2_clan" placeholder="Tag" class="form-control sr-1 inputTeam" value="" />
-						<span data-bs-toggle="tooltip" data-bs-placement="bottom" title="P2 Team Info">
-                            <button type="button" id="team2toggle" class="btn btn-sm btn-outline-secondary team-popover" data-bs-placement="right" data-popover-content="team2Popover"><i class="fa-solid fa-user-group fa-xs"></i></button>
-                        </span>
 						<button type="button" id="player2IdToggle" class="btn btn-sm btn-outline-secondary id-toggle" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Player 2 ID" onclick="togglePlayerId(2)"><i class="fa-solid fa-hashtag fa-xs"></i></button>
                         <input name="player2_name" placeholder="P2 Name" class="form-control sr-2 inputPlayer" value="" />
 						<input name="player2_id" placeholder="P2 ID" class="form-control sr-2 inputPlayer" style="display:none;" value="" />
                     </div>
                     <div class="form-inline sb-2 row" style="width: 203px;">
                         <div class="btn-group btn-group-sm WLside mr-2" style="margin-right: 4px !important;" role="group">
-                            <button id="player2_w_btn" type="button" class="btn btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Winner's Side" style="height: 30px; width: 30px;" onclick="toggleWL('player2', '[W]', this)">W</button>
-                            <button id="player2_l_btn" type="button" class="btn btn-outline-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Loser's Side" style="height: 30px; width: 30px;" onclick="toggleWL('player2', '[L]', this)">L</button>
+                            <button id="player2_w_btn" type="button" class="btn btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Winner's Side" onclick="toggleWL('player2', '[W]', this)">W</button>
+                            <button id="player2_l_btn" type="button" class="btn btn-outline-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Loser's Side" onclick="toggleWL('player2', '[L]', this)">L</button>
                         </div>
                         <input type="hidden" name="player2_wl" id="player2_wl" value="" />
                         <div class="score-group sb-2">
                             <button type="button" class="btn btn-outline-success score-btn" onclick="adjustScore('player2_score', 1)"><i class="fa-solid fa-plus fa-2xs"></i></button>
-							<input type="number" name="player2_score" id="player2_score" class="form-control" style="width: 39px; height: 30px;" value="" />
+							<input type="number" name="player2_score" id="player2_score" class="form-control" value="" />
                             <!--
 							<button type="button" class="btn btn-outline-secondary score-btn" style="height: 30px; padding-bottom: 0px;display: none;" data-bs-toggle="tooltip" data-bs-placement="top" title="Reset Score" onclick="resetSingleScore('player2_score')"><i class="fa-solid fa-rotate-left fa-xs"></i></button>
 							-->
                             <button type="button" class="btn btn-outline-danger score-btn" onclick="adjustScore('player2_score', -1)"><i class="fa-solid fa-minus fa-2xs"></i></button>
                         </div>
+						<div class="btn-group btn-group-sm" style="margin-left: 4px !important; position: relative;">
+						<span data-bs-toggle="tooltip" data-bs-placement="bottom" title="P2 Team Info">
+                            <button type="button" id="team2toggle" class="btn btn-sm btn-outline-secondary team-popover" data-bs-placement="right" data-popover-content="team2Popover"><i class="fa-solid fa-user-group fa-xs"></i></button>
+                        </span>
+						<!-- NEW: P2 Character picker button -->
+						<span data-bs-toggle="tooltip" data-bs-placement="bottom" title="P2 Character">
+							<button type="button"
+									id="p2CharBtn"
+									class="btn btn-sm btn-outline-secondary char-select-btn"
+									data-player="2"
+									onclick="toggleCharMenu(2)">
+								<i class="fa-solid fa-person fa-xs"></i>
+							</button>
+						</span>
+
+						<!-- NEW: P2 Character dropdown -->
+						<div id="p2CharDropdown" class="char-dropdown hidden" data-player="2"></div>
+
+						<!-- NEW: P2 Character value to send to data.json -->
+						<input type="hidden" name="player2_character" id="player2_character" value="" />
+						</div>
                     </div>
                 </div>
                 <div class="form-section align-items-start" style="margin-bottom: 0px; margin-right: 4px; max-width: 100px;">
@@ -224,7 +260,7 @@
                     </div>
                     <input type="file" id="customImgTeam1" data-team="1" accept="image/*" style="display: none;">
                     <input type="hidden" name="team1Img" id="team1Img" data-team="1" value="" />
-                    <input type="text" name="team1_name" placeholder="Team 1 Name" class="form-control sr-2 teamName" value="" />
+                    <input type="text" name="team1_name" placeholder="Team Name" class="form-control sr-2 teamName" value="" />
                 </div>
                 <div class="teamRow sb-2 row" style="margin-top: 4px; gap: 4px;">
                     <input type="number" name="team1_score" id="team1_score" class="form-control teamScore" value="" inputmode="numeric" pattern="[0-9]*" />
@@ -242,7 +278,7 @@
                     </div>
                     <input type="file" id="customImgTeam2" data-team="2" accept="image/*" style="display: none;">
                     <input type="hidden" name="team2Img" id="team2Img" data-team="2" value="" />
-                    <input type="text" name="team2_name" placeholder="Team 2 Name" class="form-control sr-2 teamName" value="" />
+                    <input type="text" name="team2_name" placeholder="Team Name" class="form-control sr-2 teamName" value="" />
                 </div>
                 <div class="teamRow sb-2 row" style="margin-top: 4px; gap: 4px;">
                     <input type="number" name="team2_score" id="team2_score" class="form-control teamScore" value="" inputmode="numeric" pattern="[0-9]*" />
@@ -277,6 +313,10 @@
                 </select>
                 <label id="templateSelectLabel" for="templateSelect">Overlay Template</label>
             </div>
+			<div class="form-check" style="margin-left: 12px;">
+				<input class="form-check-input" type="checkbox" value="" id="charOverride">
+				<label class="form-check-label" for="charOverride">Force update character list</label>
+			</div>
             <button type="button" class="btn-close btn-close-white" style="margin-left: 10px;margin-right: 16px;" data-bs-dismiss="offcanvas"></button>
         </div>
     </div>
@@ -386,6 +426,179 @@
     });
 
 })();
+
+// ===== Player character picker =====
+
+// We will fill this in step 2 from a dynamic source.
+// For now, just offer an empty menu + "Clear".
+const FALLBACK_CHARACTER_LIST = [
+    { id: '', label: '— No character —' }
+];
+
+function getCharacterSource() {
+    return (window.__characterList && Array.isArray(window.__characterList) && window.__characterList.length)
+        ? window.__characterList
+        : FALLBACK_CHARACTER_LIST;
+}
+
+function buildCharMenu(player) {
+    const menu = document.querySelector(player === 1 ? '#p1CharDropdown' : '#p2CharDropdown');
+    if (!menu) return;
+
+    const current = document.querySelector('[name="player' + player + '_character"]').value || '';
+    const list = getCharacterSource(); // this may be the fallback or the loaded list
+
+    menu.innerHTML = ''; // clear
+
+    // --- always add a "None" / reset option at the top ---
+    const noneItem = document.createElement('div');
+    noneItem.className = 'char-dropdown-item';
+    noneItem.textContent = 'None';
+    if (current === '' || current == null) {
+        noneItem.classList.add('selected');
+    }
+    noneItem.addEventListener('click', () => {
+        selectCharacter(player, '', 'None');
+    });
+    menu.appendChild(noneItem);
+
+    // --- then add actual characters (if any) ---
+    list.forEach(item => {
+        // if the fallback already IS a blank option, skip duplicating it
+        const id = item.id ?? item;
+        const label = item.label ?? item;
+        if (id === '' || label === '— No character —') {
+            return; // we already added the reset item above
+        }
+
+        const btn = document.createElement('div');
+        btn.className = 'char-dropdown-item';
+        btn.textContent = label || id || 'Unknown';
+        if ((id || '') === current) {
+            btn.classList.add('selected');
+        }
+        btn.addEventListener('click', () => selectCharacter(player, id || '', label || id || ''));
+        menu.appendChild(btn);
+    });
+}
+
+function toggleCharMenu(player) {
+    const menu = document.querySelector(player === 1 ? '#p1CharDropdown' : '#p2CharDropdown');
+    if (!menu) return;
+
+    const isHidden = menu.classList.contains('hidden');
+
+    // close both first
+    document.querySelectorAll('.char-dropdown').forEach(m => m.classList.add('hidden'));
+
+    if (isHidden) {
+        buildCharMenu(player);
+        menu.classList.remove('hidden');
+    }
+}
+
+function selectCharacter(player, charId, label) {
+    const input = document.querySelector('[name="player' + player + '_character"]');
+    if (input) {
+        input.value = charId;
+    }
+    updateCharacterButtonColor(player);
+
+    // close menu
+    const menu = document.querySelector(player === 1 ? '#p1CharDropdown' : '#p2CharDropdown');
+    if (menu) menu.classList.add('hidden');
+
+    // send to backend
+    emitUpdate && emitUpdate();
+}
+
+function updateCharacterButtonColor(player) {
+    const input = document.querySelector('[name="player' + player + '_character"]');
+    const btn   = document.querySelector(player === 1 ? '#p1CharBtn' : '#p2CharBtn');
+    if (!input || !btn) return;
+
+    if (input.value && input.value.trim() !== '') {
+        btn.style.color = '#0ead00';
+    } else {
+        btn.style.color = '#f1f1f1';
+    }
+}
+
+// click-outside to close char menus
+document.addEventListener('click', (e) => {
+    const isMenu = e.target.closest('.char-dropdown');
+    const isBtn  = e.target.closest('.char-select-btn');
+    if (!isMenu && !isBtn) {
+        document.querySelectorAll('.char-dropdown').forEach(m => m.classList.add('hidden'));
+    }
+});
+
+// ===== Dynamic character list loader =====
+let __templateMeta = {};
+
+async function loadCharacterListForActiveGame(preferredTemplateName) {
+    // 1. ask server
+    const res = await fetch('/templates/list', { cache: 'no-store' });
+    const { templates = [], active = '', meta = {} } = await res.json();
+    __templateMeta = meta || {};
+
+    const sel = document.getElementById('templateSelect');
+
+    // 2. decide which template we are actually using
+    let templateName =
+        preferredTemplateName && preferredTemplateName.trim()
+        || (active && active.trim())
+        || (sel && sel.value && sel.value.trim())
+        || (templates[0] || '');
+
+    // 3. keep UI in sync with server
+    if (sel && templateName && sel.value !== templateName) {
+        sel.value = templateName;
+    }
+
+    // 4. get game for that template
+    const game = (meta[templateName] && meta[templateName].game) ? meta[templateName].game : null;
+
+    if (!game) {
+        console.warn('No game metadata for template:', templateName);
+        window.__characterList = [];
+        buildCharMenu(1);
+        buildCharMenu(2);
+        return;
+    }
+
+    // 5. load character file
+    const url = '/static/characters/characters_' + game + '.json';
+    try {
+        const charRes = await fetch(url + '?' + Date.now(), { cache: 'no-store' });
+        const json = await charRes.json();
+        if (json && Array.isArray(json.characters)) {
+            window.__characterList = json.characters.map(c => ({ id: c, label: c }));
+        } else {
+            window.__characterList = [];
+        }
+    } catch (err) {
+        console.warn('Failed to load character list for', game, err);
+        window.__characterList = [];
+    }
+
+    // 6. rebuild
+    buildCharMenu(1);
+    buildCharMenu(2);
+}
+
+// initial load
+document.addEventListener('DOMContentLoaded', () => {
+    loadCharacterListForActiveGame();
+
+    // also re-load when template changes from the UI
+    const sel = document.getElementById('templateSelect');
+    if (sel) {
+        sel.addEventListener('change', () => {
+            loadCharacterListForActiveGame();
+        });
+    }
+});
 
 // ===== Player ID toggle helpers =====
 function togglePlayerId(n) {
@@ -1339,7 +1552,13 @@ document.addEventListener("DOMContentLoaded", function() {
     initTeamImageSelectors();
     bindTeamPopoverControls();
 
-    populateTemplateSelect().then(bindTemplateSelect);
+    populateTemplateSelect().then(() => {
+        bindTemplateSelect();
+        // also build the char list for the template that ended up selected
+        const sel = document.getElementById('templateSelect');
+        const current = sel ? sel.value : null;
+        loadCharacterListForActiveGame(current);
+    });
 });
 
 //// Populate template selection dropdown
@@ -1374,22 +1593,22 @@ async function populateTemplateSelect() {
 function bindTemplateSelect() {
     const sel = document.getElementById('templateSelect');
     if (!sel) return;
+
     sel.addEventListener('change', async () => {
         const choice = sel.value;
         try {
-            // switch overlays now
+            // 1) tell backend to switch overlay
             await fetch('/set-template', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    template: choice
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ template: choice })
             });
 
-            // also persist into data.json so it stays selected on reloads
-            emitUpdate(); // getFormData() will include it
+            // 2) now that the backend actually switched → load the right character list
+            await loadCharacterListForActiveGame(choice);
+
+            // 3) and finally persist the whole form (so data.json also knows the template)
+            emitUpdate();
         } catch (e) {
             console.error('Failed to set template', e);
         }
@@ -1588,6 +1807,7 @@ function getFormData() {
             clan: json.player1_clan,
             wl: json.player1_wl,
             score: json.player1_score,
+			character: json.player1_character,
             img: json.player1Img || ''
         },
         player2: {
@@ -1596,6 +1816,7 @@ function getFormData() {
             clan: json.player2_clan,
             wl: json.player2_wl,
             score: json.player2_score,
+			character: json.player2_character,
             img: json.player2Img || ''
         },
 
@@ -1657,6 +1878,7 @@ async function loadDataAndHydrate() {
         document.querySelector('[name="player1_clan"]').value = data.player1?.clan ?? '';
         document.querySelector('[name="player1_wl"]').value = data.player1?.wl ?? '';
         document.querySelector('[name="player1_score"]').value = data.player1?.score ?? 0;
+		document.querySelector('[name="player1_character"]').value = data.player1?.character ?? '';
         document.querySelector('[name="player1Img"]').value = data.player1?.img ?? '';
 
         document.querySelector('[name="player2_name"]').value = data.player2?.name ?? '';
@@ -1664,6 +1886,7 @@ async function loadDataAndHydrate() {
         document.querySelector('[name="player2_clan"]').value = data.player2?.clan ?? '';
         document.querySelector('[name="player2_wl"]').value = data.player2?.wl ?? '';
         document.querySelector('[name="player2_score"]').value = data.player2?.score ?? 0;
+		document.querySelector('[name="player2_character"]').value = data.player2?.character ?? '';
         document.querySelector('[name="player2Img"]').value = data.player2?.img ?? '';
 
         document.querySelector('[name="MatchTypeData"]').value = data.match_type ?? '';
@@ -1697,9 +1920,12 @@ async function loadDataAndHydrate() {
         updateTagIconColors(1);
         updateTagIconColors(2);
         updateTeamToggleColors();
+		updateCharacterButtonColor(1);
+		updateCharacterButtonColor(2);
         syncExtraToggleStates();
 		updatePlayerIdToggleColor(1);
 		updatePlayerIdToggleColor(2);
+		loadCharacterListForActiveGame(window.__savedData?.active_template);
 
         // UI scale
         const scale = parseFloat(data.ui_scale || 1) || 1;

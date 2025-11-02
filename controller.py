@@ -48,6 +48,7 @@ ASYNC_MODE = 'threading' if IS_FROZEN else None  # None = auto (dev), threading 
 TEMPLATES_ROOT = resource_path("templates")
 STATIC_ROOT    = resource_path("static")
 DATA_FILE      = resource_path("data.json")
+GAME_TAG_RE = re.compile(r'id=["\']overlayGame["\']\s+value=["\']([^"\']+)["\']', re.IGNORECASE)
 
 rich_traceback(show_locals=False, width=220)
 console = Console(highlight=False)
@@ -298,6 +299,21 @@ def ensure_active_template(default_name="default"):
         log.info(f":frame_photo: No active_template found — set to [bold]{default_name}[/bold]")
     return data["active_template"]
 
+def _extract_game_from_template(template_name: str) -> str | None:
+    """Read templates/<template_name>/template.html and extract the overlayGame hidden input."""
+    tpl_path = os.path.join(TEMPLATES_ROOT, template_name, "template.html")
+    try:
+        with open(tpl_path, "r", encoding="utf-8") as f:
+            # we don't need the whole file, game tag will be near the top
+            head = f.read(4096)
+        m = GAME_TAG_RE.search(head)
+        if m:
+            val = m.group(1).strip()
+            return val or None
+    except OSError:
+        pass
+    return None
+
 # ---- data helpers ----
 def save_data(data):
     """Atomically write data.json so readers never see a partial file."""
@@ -450,9 +466,19 @@ def list_templates():
 # --- new template route ---
 @app.route("/templates/list")
 def templates_list():
+    templates = list_templates()
+    active = get_active_template()
+    meta = {}
+
+    for name in templates:
+        game = _extract_game_from_template(name)
+        if game:
+            meta[name] = {"game": game}
+
     return jsonify({
-        "templates": list_templates(),
-        "active": get_active_template()
+        "templates": templates,
+        "active": active,
+        "meta": meta,
     })
 
 # ---- switch template from the controller UI ----
