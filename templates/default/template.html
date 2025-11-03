@@ -143,6 +143,7 @@ function connectSocket() {
          const d = data || {};
          const p1 = d.player1 || {
             name: '',
+			id: '',
             clan: '',
             wl: '',
             score: 0,
@@ -151,6 +152,7 @@ function connectSocket() {
          };
          const p2 = d.player2 || {
             name: '',
+			id: '',
             clan: '',
             wl: '',
             score: 0,
@@ -171,6 +173,9 @@ function connectSocket() {
 		
 		 const p1Char = (p1.character || '').trim();
 		 const p2Char = (p2.character || '').trim();
+		
+		 const p1ID = (p1.id || '').trim();
+		 const p2ID = (p2.id || '').trim();
 		
          const p1Img = document.getElementById('player1Img');
          const p2Img = document.getElementById('player2Img');

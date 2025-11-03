@@ -198,9 +198,9 @@ def _diff_payload(prev: dict, curr: dict) -> str:
 
     # Players
     lines.append(_diff_section("Player 1", prev.get("player1", {}), curr.get("player1", {}),
-                               [("name", "Name"), ("id", "ID"), ("clan", "Clan Tag"), ("wl", "W/L"), ("score", "Score"), ("img", "Img")]))
+                               [("name", "Name"), ("id", "ID"), ("clan", "Clan Tag"), ("wl", "W/L"), ("score", "Score"), ("character", "Character"), ("img", "Img")]))
     lines.append(_diff_section("Player 2", prev.get("player2", {}), curr.get("player2", {}),
-                               [("name", "Name"), ("id", "ID"), ("clan", "Clan Tag"), ("wl", "W/L"), ("score", "Score"), ("img", "Img")]))
+                               [("name", "Name"), ("id", "ID"), ("clan", "Clan Tag"), ("wl", "W/L"), ("score", "Score"), ("character", "Character"), ("img", "Img")]))
 
     # Teams
     lines.append(_diff_section("Team 1", prev.get("team1", {}), curr.get("team1", {}),
