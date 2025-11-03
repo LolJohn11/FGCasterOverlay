@@ -57,8 +57,20 @@ body {
    color: #f1f1f1;   /* Light text */
    display: flex;
    align-items: flex-end;
-   --offcanvas-base-width: 500px;
+   --offcanvas-base-width: 530px;
    --bs-offcanvas-width: calc(var(--offcanvas-base-width) * var(--ui-scale));
+}
+
+.offcanvas-body.ui-scaled {
+  /* After transform, visual width becomes (this width) * scale
+     We want that to equal the container width (var(--bs-offcanvas-width)) */
+  width: calc(var(--bs-offcanvas-width) / var(--ui-scale));
+
+  /* keep padding out of the width math to avoid tiny overshoots */
+  box-sizing: content-box;
+
+  /* ensure transform origin is top-left so size math stays consistent */
+  transform-origin: top right;
 }
 
 .offcanvas-body {
