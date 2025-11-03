@@ -499,29 +499,128 @@ function buildCharMenu(player) {
 
 // open/close a char menu for player
 function toggleCharMenu(player) {
+    const btn  = document.querySelector(player === 1 ? '#p1CharBtn'      : '#p2CharBtn');
     const menu = document.querySelector(player === 1 ? '#p1CharDropdown' : '#p2CharDropdown');
-    if (!menu) return;
+    if (!btn || !menu) return;
 
-    const isHidden = menu.classList.contains('hidden');
+    const wasHidden = menu.classList.contains('hidden');
 
-    // close both first
+    // close any open menu first
     document.querySelectorAll('.char-dropdown').forEach(m => {
-        m.classList.add('hidden');
-        if (activeCharDropdown === m) {
-            activeCharDropdown = null;
+        if (!m.classList.contains('hidden')) {
+            m.classList.add('hidden');
+            if (m._portal && m._portal.isPortaled) unportalDropdown(m);
         }
     });
 
-    if (isHidden) {
+    if (wasHidden) {
         buildCharMenu(player);
-        menu.classList.remove('hidden');
 
-        // --- new: always scroll to top on open ---
+        // ---- lock the current (natural) width BEFORE portaling ----
+        // temporarily show & measure in-place
+        const prevStyles = {
+            position: menu.style.position,
+            visibility: menu.style.visibility,
+            display: menu.style.display,
+            width: menu.style.width
+        };
+        menu.classList.remove('hidden');
+        menu.style.visibility = 'hidden';
+        menu.style.display = 'block';
+        menu.style.position = 'absolute';
+
+        const measured = Math.ceil(menu.getBoundingClientRect().width);
+        // keep width stable when moved to <body>
+        menu.style.width = measured > 0 ? measured + 'px' : '';
+
+        // restore visibility (still open)
+        menu.style.position = prevStyles.position;
+        menu.style.visibility = '';
+        menu.style.display = prevStyles.display;
+
+        // always start at top
         menu.scrollTop = 0;
 
-        // remember it's open (for key navigation)
+        // portal & position
+        portalDropdown(menu, btn);
+
         setActiveCharDropdown(menu);
+
+    } else {
+        menu.classList.add('hidden');
+        if (menu._portal && menu._portal.isPortaled) unportalDropdown(menu);
     }
+}
+
+function portalDropdown(menu, anchorBtn) {
+    if (!menu._portal) menu._portal = {};
+    menu._portal.parent = menu.parentNode;
+    menu._portal.next   = menu.nextSibling;
+    menu._portal.isPortaled = true;
+
+    document.body.appendChild(menu);
+    menu.style.position = 'fixed';
+    menu.style.transform = 'none';
+
+    // compute placement and apply (also used on resize)
+    const place = () => {
+		const r = anchorBtn.getBoundingClientRect();
+		const mRect = menu.getBoundingClientRect();
+		const margin = 6;
+
+		// Position to the RIGHT of the button
+		let top  = r.top;                 // align vertically with button top
+		let left = r.right + margin;      // start just to the right
+
+		// Flip left if we’d overflow off the right edge of the viewport
+		if (left + mRect.width > window.innerWidth - margin) {
+		  left = Math.max(margin, r.left - margin - mRect.width);
+		}
+
+		// Clamp vertically if menu runs off the bottom
+		if (top + mRect.height > window.innerHeight - margin) {
+		  top = Math.max(margin, window.innerHeight - margin - mRect.height);
+		}
+		if (top < margin) top = margin;
+
+		menu.style.left = Math.round(left) + 'px';
+		//menu.style.top  = Math.round(top) + 'px';
+		menu.style.top  = 0 + 'px';
+    };
+
+    menu._portal.place = place;
+    place();
+
+    // only close on resize (NOT on scroll), to avoid closing when scrolling the list
+    const onResize = () => { place(); };
+    window.addEventListener('resize', onResize, true);
+    menu._portal.removeFns = [['resize', onResize, true]];
+}
+
+function unportalDropdown(menu) {
+    if (!menu._portal) return;
+
+    // remove global listeners
+    if (menu._portal.removeFns) {
+        menu._portal.removeFns.forEach(([evt, fn, opt]) => window.removeEventListener(evt, fn, opt));
+    }
+
+    // restore in DOM
+    const { parent, next } = menu._portal;
+    if (parent) {
+        if (next) parent.insertBefore(menu, next);
+        else parent.appendChild(menu);
+    }
+
+    // cleanup styles & handlers
+    menu.style.position = '';
+    menu.style.left = '';
+    menu.style.top = '';
+    menu.style.zIndex = '';
+    // keep width return to CSS on next open
+    menu.style.width = '';
+
+    menu._portal.isPortaled = false;
 }
 
 function selectCharacter(player, charId, label) {

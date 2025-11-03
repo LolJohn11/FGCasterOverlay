@@ -345,7 +345,7 @@ input::placeholder,
     border-radius: .25rem;
     z-index: 999;
     min-width: 140px;
-    max-height: 140px;
+    max-height: 85px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
