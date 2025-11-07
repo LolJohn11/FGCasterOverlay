@@ -57,7 +57,7 @@ body {
    color: #f1f1f1;   /* Light text */
    display: flex;
    align-items: flex-end;
-   --offcanvas-base-width: 530px;
+   --offcanvas-base-width: 450px;
    --bs-offcanvas-width: calc(var(--offcanvas-base-width) * var(--ui-scale));
 }
 
@@ -346,6 +346,7 @@ input::placeholder,
     z-index: 999;
     min-width: 140px;
     max-height: 85px;
+    min-height: 85px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;

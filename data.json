@@ -1,5 +1,6 @@
 {
   "ui_scale": 1,
+  "char_override": false,
   "player1": {
     "name": "",
     "id": "",

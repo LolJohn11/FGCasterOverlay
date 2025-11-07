@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify, url_for, abort, send_from_directory, send_file, g
 from flask_socketio import SocketIO, emit
-import json, os, sys, time, logging, re, click, threading
+from pathlib import Path
+import json, os, sys, time, logging, re, click, threading, subprocess
 
 # ---------- Rich logging setup ----------
 from rich.logging import RichHandler
@@ -23,6 +24,10 @@ class QuietRequestHandler(WSGIRequestHandler):
         super().log_error(*args, **kwargs)
 
 DATA_LOCK = threading.Lock()
+SCRAPER_LOCK = threading.Lock()
+
+CHAR_SCRAPER_STATE = {"running": False, "slug": "", "started_at": 0.0}
+CHARLIST_LOCK = threading.Lock()
 
 def _search_bases():
     """Prefer the EXE folder for external assets; fall back to _MEIPASS; dev uses script folder."""
@@ -109,6 +114,181 @@ DATA_URL_RE = re.compile(
     r'^data:(?P<mime>[-\w.+/]+)(?:;name=(?P<name>[^;]+))?(?:;charset=[^;]+)?(?:;base64)?,',
     re.IGNORECASE
 )
+
+# Read the <input id="overlayGame" value="..."> from template.html
+GAME_TAG_RE = re.compile(r'id=["\']overlayGame["\']\s+value=["\']([^"\']+)["\']', re.IGNORECASE)
+
+def _extract_game_from_template(template_name: str) -> str | None:
+    tpl_path = os.path.join(TEMPLATES_ROOT, template_name, "template.html")
+    try:
+        with open(tpl_path, "r", encoding="utf-8") as f:
+            head = f.read(4096)
+        m = GAME_TAG_RE.search(head)
+        if m:
+            return (m.group(1) or "").strip()
+    except Exception:
+        pass
+    return None
+
+def _charlist_exists(slug: str) -> bool:
+    if not slug:
+        return False
+    chars_path = Path(app.static_folder) / "characters" / f"characters_{slug}.json"
+    return chars_path.exists()
+    
+def _charlist_path_for(slug: str) -> str:
+    # UI loads from /static/characters/characters_{slug}.json
+    return os.path.join(STATIC_ROOT, "characters", f"characters_{slug}.json")
+
+def _charlist_exists(slug: str) -> bool:
+    return os.path.isfile(_charlist_path_for(slug))
+    
+def _run_char_scraper_for_slug(slug: str):
+    """
+    Run /static/scripts/scraper_gamechars.py to produce /static/characters/characters_{slug}.json.
+    The scraper reads a small gamename.json with {"game": "<slug>"}.
+    """
+    if not slug:
+        log.warning("No game slug provided; skipping scraper.")
+        return
+
+    static_dir    = Path(app.static_folder)             # e.g. .../static
+    scripts_dir   = static_dir / "scripts"
+    chars_dir     = static_dir / "characters"
+    script_path   = scripts_dir / "scraper_gamechars.py"
+    out_path      = chars_dir / f"characters_{slug}.json"
+    gamename_json = static_dir / "gamename.json"
+
+    if not script_path.exists():
+        log.error(f"Script not found: {script_path}")
+        return
+
+    chars_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        gamename_json.write_text(
+            json.dumps({"game": slug}, ensure_ascii=False, indent=2),
+            encoding="utf-8"
+        )
+    except Exception as ex:
+        log.error(f"Failed writing gamename.json: {ex}")
+        return
+
+    # avoid concurrent runs
+    if not SCRAPER_LOCK.acquire(blocking=False):
+        #log.warning("Scraper already running; skipping duplicate.")
+        try:
+            gamename_json.unlink(missing_ok=True)
+        except Exception:
+            pass
+        return
+
+    # mark running & notify clients
+    CHAR_SCRAPER_STATE.update({"running": True, "slug": slug, "started_at": time.time()})
+    try:
+        socketio.emit("charlist_status", {"running": True, "slug": slug})
+    except Exception:
+        pass
+
+    try:
+        log.info(f"Downloading characters for '{slug}'")
+        # -u for unbuffered stdout so logs appear live here
+        cmd = [sys.executable, "-u", str(script_path), "--gamename-json", str(gamename_json)]
+        proc = subprocess.Popen(
+            cmd,
+            cwd=str(static_dir),              # scraper writes to ./characters/
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+        )
+        
+        # formatting console logs from sub-script
+        assert proc.stdout is not None
+        for raw in proc.stdout:
+            line = raw.rstrip("\n").strip()
+            if not line:
+                continue
+
+            # Detect a simple tag prefix from the subscript and set the level
+            lower = line.lower().lstrip()
+            level = "INFO"
+            msg = line
+
+            for prefix, tag in (
+                ("[error]", "ERROR"),
+                ("[err]",   "ERROR"),
+                ("[warning]", "WARN"),
+                ("[warn]",   "WARN"),
+                ("[info]",   "INFO"),
+            ):
+                if lower.startswith(prefix):
+                    level = tag
+                    msg = line[len(prefix):].lstrip()  # strip the tag from the message
+                    break
+
+            if level == "ERROR":
+                log.error(msg)
+            elif level == "WARN":
+                log.warning(msg)
+            else:
+                log.info(msg)
+
+        rc = proc.wait()
+        if rc != 0:
+            log.error(f"Scraper exited with code {rc}")
+        else:
+            if out_path.exists():
+                try:
+                    payload = json.loads(out_path.read_text(encoding="utf-8"))
+                    n = len(payload.get("characters", []))
+                except Exception:
+                    n = "?"
+            else:
+                log.warning(f"Scraper finished but {out_path.name} was not created.")
+    except Exception as ex:
+        log.error(f"Error while running scraper: {ex}")
+    finally:
+        # mark done
+        CHAR_SCRAPER_STATE.update({"running": False})
+        #log.info(f"[bold cyan]Scraper finished for '{slug}'[/bold cyan] - notifying clients...")
+        
+        # Give a moment for any file operations to complete
+        #log.info("Sleeping 0.2s...")
+        time.sleep(0.2)
+        #log.info("Sleep complete")
+        
+        payload = {"running": False, "slug": slug}
+        #log.info(f"Payload prepared: {payload}")
+        
+        try:
+            #log.info("About to emit charlist_status...")
+            
+            # Try WITHOUT app context first
+            socketio.emit("charlist_status", payload, namespace='/')
+            
+            #log.info("Socket emission complete")
+        except Exception as e:
+            #log.error(f"Failed to emit socket event: {e!r}")
+            import traceback
+            #log.error(f"Traceback: {traceback.format_exc()}")
+        
+       # log.info("Cleaning up gamename.json...")
+        try:
+            gamename_json.unlink(missing_ok=True)
+            #log.info("Cleanup complete")
+        except Exception as e:
+            log.error(f"Cleanup failed: {e!r}")
+
+        SCRAPER_LOCK.release()
+
+@app.route("/characters/status")
+def characters_status():
+    # Lightweight status so UI can poll once on load
+    return jsonify({
+        "running": bool(CHAR_SCRAPER_STATE.get("running")),
+        "slug": CHAR_SCRAPER_STATE.get("slug") or "",
+        "started_at": CHAR_SCRAPER_STATE.get("started_at") or 0.0,
+    })
 
 # --- preserve config keys when saving UI updates ---
 PRESERVE_KEYS = ('port', 'active_template')
@@ -314,6 +494,19 @@ def _extract_game_from_template(template_name: str) -> str | None:
         pass
     return None
 
+def maybe_run_scraper_on_startup():
+    try:
+        data = load_data() or {}
+        active = get_active_template()
+        slug = _extract_game_from_template(active) or ""
+        if not slug:
+            return
+        should_force = bool(data.get("char_override"))
+        if should_force or not _charlist_exists(slug):
+            threading.Thread(target=_run_char_scraper_for_slug, args=(slug,), daemon=True).start()
+    except Exception as ex:
+        log.warning(f"[dim]Startup scraper skipped[/dim] — {ex!r}")
+
 # ---- data helpers ----
 def save_data(data):
     """Atomically write data.json so readers never see a partial file."""
@@ -399,7 +592,6 @@ def serve_data_json():
     return send_file(DATA_FILE, mimetype='application/json', conditional=True)
 
 # ---- sanitize and check template ----
-
 def is_valid_template(name: str) -> bool:
     if not name: return False
     folder = os.path.join(TEMPLATES_ROOT, name)
@@ -484,15 +676,23 @@ def templates_list():
 # ---- switch template from the controller UI ----
 @app.route('/set-template', methods=['POST'])
 def set_template():
-    payload = request.get_json(force=True)
-    name = payload.get("template")
+    payload = request.get_json(silent=True) or {}
+    name = (payload.get("template") or "").strip()
     set_active_template(name)
 
     # also store in data.json so the controller reloads with it selected
     data = load_data() or {}
     data["active_template"] = name
+    if "char_override" in payload:
+        data["char_override"] = bool(payload["char_override"])
     save_data(data)
-
+    
+    # derive game slug and run scraper in background
+    slug = _extract_game_from_template(name) or ""
+    should_force = bool(data.get("char_override"))
+    if slug and (should_force or not _charlist_exists(slug)):
+        threading.Thread(target=_run_char_scraper_for_slug, args=(slug,), daemon=True).start()
+    
     # notify overlays to reload
     socketio.emit('template_changed', {"template": name})
     log.info(f"[bold cyan]Switched active template[/bold cyan] → [bold]{name}[/bold]")
@@ -505,8 +705,24 @@ def reset_players():
     current = load_data() or {}
     # keep non-player fields as-is
     cleared = dict(current)
-    cleared["player1"] = {}
-    cleared["player2"] = {}
+    cleared["player1"] = {
+        "name": "",
+        "id": "",
+        "clan": "",
+        "wl": "",
+        "score": 0,
+        "character": "",
+        "img": ""
+    }
+    cleared["player2"] = {
+        "name": "",
+        "id": "",
+        "clan": "",
+        "wl": "",
+        "score": 0,
+        "character": "",
+        "img": ""
+    }
 
     # Persist while preserving server-owned keys no matter what
     save_data_preserving(cleared)
@@ -521,8 +737,16 @@ def reset_teams():
     current = load_data() or {}
     # keep non-player fields as-is
     cleared = dict(current)
-    cleared["team1"] = {}
-    cleared["team2"] = {}
+    cleared["team1"] = {
+        "name": "",
+        "score": 0,
+        "img": ""
+    }
+    cleared["team2"] = {
+        "name": "",
+        "score": 0,
+        "img": ""
+    }
 
     # Persist while preserving server-owned keys no matter what
     save_data_preserving(cleared)
@@ -539,19 +763,51 @@ def reset_all():
 
     # Build a fresh, cleared scoreboard payload
     cleared = {
-        "player1": {},
-        "player2": {},
-        "team1":   {},
-        "team2":   {},
-        "stage":   "",
+        "player1": {
+            "name": "",
+            "id": "",
+            "clan": "",
+            "wl": "",
+            "score": 0,
+            "character": "",
+            "img": ""
+        },
+        "player2": {
+            "name": "",
+            "id": "",
+            "clan": "",
+            "wl": "",
+            "score": 0,
+            "character": "",
+            "img": ""
+        },
+        "team1": {
+            "name": "",
+            "score": 0,
+            "img": ""
+        },
+        "team2": {
+            "name": "",
+            "score": 0,
+            "img": ""
+        },
+        "stage": "",
         "match_type": "",
         "toptext": "",
-        "caster1": {},
-        "caster2": {},
+        "caster1": {
+            "name": "",
+            "twitch": "",
+            "twitter": ""
+        },
+        "caster2": {
+            "name": "",
+            "twitch": "",
+            "twitter": ""
+        }
     }
 
     # Carry over any non-scoreboard, UI-level settings you want to persist
-    for k in ("ui_scale",):  # add more keys here if you want to keep them across "Reset All"
+    for k in ("ui_scale", "char_override"):  # add more keys here if you want to keep them across "Reset All"
         if k in current:
             cleared[k] = current[k]
 
@@ -607,7 +863,7 @@ if __name__ == '__main__':
     USE_RELOADER = False if IS_FROZEN else True
 
     run_kwargs = dict(debug=not IS_FROZEN, use_reloader=USE_RELOADER)
-
+    
     # Pick the right knobs per async mode (to avoid raw access logs)
     mode = getattr(socketio, "async_mode", None)
     if mode == 'eventlet':
@@ -645,6 +901,9 @@ if __name__ == '__main__':
         log.info(f"[bold green]Server loaded successfully![/bold green] "
              f"Listening on [bold]http://127.0.0.1:{port}[/bold] "
              f"(to change port, edit data.json and restart)")
-        #log.info("Waiting for overlay to connect...")
-
+        try:
+            threading.Timer(0.10, maybe_run_scraper_on_startup).start()
+        except Exception as e:
+            log.error(f"Startup scraper trigger failed — {e!r}")
+    
     socketio.run(app, port=port, **run_kwargs)

@@ -26,10 +26,86 @@
     </script>
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-..." crossorigin="anonymous"></script>
     <script>
-        const socket = io();
-        socket.on('connect', () => socket.emit('identify', {
-            role: 'controller'
-        }));
+		let scraperPollInterval = null;
+
+		function startScraperCompletionPoll(expectedSlug) {
+		  //console.log('[POLL] Starting completion poll for slug:', expectedSlug);
+		  
+		  // Clear any existing poll
+		  if (scraperPollInterval) {
+			clearInterval(scraperPollInterval);
+		  }
+		  
+		  scraperPollInterval = setInterval(async () => {
+			try {
+			  const res = await fetch('/characters/status?' + Date.now(), { cache: 'no-store' });
+			  const status = await res.json();
+			  
+			  //console.log('[POLL] Status check:', status);
+			  
+			  // Check if scraper has finished
+			  if (!status.running) {
+				//console.log('[POLL] ✓ Scraper finished! Stopping poll and reloading list...');
+				clearInterval(scraperPollInterval);
+				scraperPollInterval = null;
+				
+				// Wait a moment for file to be fully written
+				await new Promise(r => setTimeout(r, 500));
+				
+				// Force reload the character list
+				await loadCharacterListForActiveGame(undefined, { force: true });
+			  }
+			} catch (e) {
+			  //console.error('[POLL] Error checking status:', e);
+			}
+		  }, 1000); // Poll every 1 second
+		}
+		
+		console.log('[SOCKET] Initializing socket connection...');
+		const socket = io();
+
+		socket.on('connect', () => {
+		  console.log('[SOCKET] ✓ Connected! Socket ID:', socket.id);
+		  socket.emit('identify', { role: 'controller' });
+		});
+
+		socket.on('disconnect', (reason) => {
+		  console.warn('[SOCKET] ✗ Disconnected. Reason:', reason);
+		});
+
+		socket.on('connect_error', (err) => {
+		  console.error('[SOCKET] Connection error:', err);
+		});
+
+		socket.on('charlist_status', async (msg) => {
+		  //console.log('[SOCKET] ✓ charlist_status received:', JSON.stringify(msg, null, 2));
+		  
+		  if (!msg || typeof msg.running === 'undefined') {
+			//console.warn('[SOCKET] Invalid message, ignoring');
+			return;
+		  }
+
+		  if (msg.running) {
+			//console.log('[SOCKET] Scraper started, showing placeholder and starting poll');
+			showUpdatingCharacterListPlaceholder();
+			
+			// Start polling for completion
+			startScraperCompletionPoll(msg.slug);
+			return;
+		  }
+
+		  // This might never fire due to threading issues, but keep it as backup
+		  //console.log('[SOCKET] ✓ Scraper finished via socket');
+		  await new Promise(r => setTimeout(r, 500));
+		  await loadCharacterListForActiveGame(undefined, { force: true });
+		});
+
+		// Debug: log ALL socket events
+		socket.onAny((eventName, ...args) => {
+		  console.log(`[SOCKET-ANY] Event: "${eventName}"`, args);
+		});
+
+		//console.log('[SOCKET] Event listeners registered');
     </script>
 </head>
 
@@ -68,7 +144,6 @@
 						<span data-bs-toggle="tooltip" data-bs-placement="bottom" title="P1 Team Info">
                             <button type="button" id="team1toggle" class="btn btn-sm btn-outline-secondary team-popover" data-bs-placement="right" data-popover-content="team1Popover"><i class="fa-solid fa-user-group fa-xs"></i></button>
                         </span>
-						<!-- NEW: P1 Character picker button -->
 						<span data-bs-toggle="tooltip" data-bs-placement="bottom" title="P1 Character">
 							<button type="button"
 									id="p1CharBtn"
@@ -78,11 +153,7 @@
 								<i class="fa-solid fa-person fa-xs"></i>
 							</button>
 						</span>
-
-						<!-- NEW: P1 Character dropdown (we'll fill it in step 2) -->
 						<div id="p1CharDropdown" class="char-dropdown hidden" data-player="1"></div>
-
-						<!-- NEW: P1 Character value to send to data.json -->
 						<input type="hidden" name="player1_character" id="player1_character" value="" />
 						</div>
                     </div>
@@ -139,7 +210,6 @@
 						<span data-bs-toggle="tooltip" data-bs-placement="bottom" title="P2 Team Info">
                             <button type="button" id="team2toggle" class="btn btn-sm btn-outline-secondary team-popover" data-bs-placement="right" data-popover-content="team2Popover"><i class="fa-solid fa-user-group fa-xs"></i></button>
                         </span>
-						<!-- NEW: P2 Character picker button -->
 						<span data-bs-toggle="tooltip" data-bs-placement="bottom" title="P2 Character">
 							<button type="button"
 									id="p2CharBtn"
@@ -149,11 +219,7 @@
 								<i class="fa-solid fa-person fa-xs"></i>
 							</button>
 						</span>
-
-						<!-- NEW: P2 Character dropdown -->
 						<div id="p2CharDropdown" class="char-dropdown hidden" data-player="2"></div>
-
-						<!-- NEW: P2 Character value to send to data.json -->
 						<input type="hidden" name="player2_character" id="player2_character" value="" />
 						</div>
                     </div>
@@ -289,7 +355,7 @@
             </div>
         </form>
     </div>
-    <div class="offcanvas offcanvas-end" id="offcanvas" data-bs-backdrop="static">
+    <div class="offcanvas offcanvas-end" id="offcanvas">
         <div class="offcanvas-body ui-scaled">
             <div class="form-floating" style="margin-left: 10px;">
                 <select id="uiZoomSelect" class="form-select form-select-sm" aria-label="UI Scale">
@@ -314,8 +380,8 @@
                 <label id="templateSelectLabel" for="templateSelect">Overlay Template</label>
             </div>
 			<div class="form-check" style="margin-left: 12px;">
-				<input class="form-check-input" type="checkbox" value="" id="charOverride">
-				<label class="form-check-label" for="charOverride">Force update character list</label>
+				<input class="form-check-input" type="checkbox" id="charOverride">
+				<label class="form-check-label" for="charOverride">Force update<br>character list</label>
 			</div>
             <button type="button" class="btn-close btn-close-white" style="margin-left: 10px;margin-right: 16px;" data-bs-dismiss="offcanvas"></button>
         </div>
@@ -444,7 +510,7 @@ function getCharacterSource() {
         : FALLBACK_CHARACTER_LIST;
 }
 
-// --- new: track which character dropdown is open ---
+// --- track which character dropdown is open ---
 let activeCharDropdown = null;
 
 // helper: when we open a char dropdown, remember it + reset typeahead
@@ -463,6 +529,18 @@ function buildCharMenu(player) {
 
     const current = document.querySelector('[name="player' + player + '_character"]').value || '';
     const list = getCharacterSource();
+	
+	// If the list is the special "updating" placeholder, render only that row.
+	// Use the same class as any normal item so it inherits identical styling.
+	if (list.length === 1 && (list[0].id === '__updating__' || list[0].label === '— Updating list… —')) {
+	  menu.innerHTML = '';
+	  const upd = document.createElement('div');
+	  upd.className = 'char-dropdown-item';   // same class as other items
+	  upd.textContent = '— Updating list… —';
+	  upd.style.pointerEvents = 'none';       // disabled
+	  menu.appendChild(upd);
+	  return;
+	}
 
     menu.innerHTML = '';
 
@@ -654,6 +732,50 @@ function updateCharacterButtonColor(player) {
     }
 }
 
+async function fetchCharacterListWithRetry(game, tries = 8, delayMs = 300) {
+  //console.log('[FETCH_RETRY] Starting fetch for game:', game, 'tries:', tries);
+  const urlBase = '/static/characters/characters_' + game + '.json';
+  
+  for (let i = 0; i < tries; i++) {
+    try {
+      const cacheBuster = Date.now() + '_' + Math.random();
+      const url = urlBase + '?' + cacheBuster;
+      //console.log(`[FETCH_RETRY] Attempt ${i + 1}/${tries}:`, url);
+      
+      const res = await fetch(url, { 
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
+        }
+      });
+      
+      //console.log(`[FETCH_RETRY] Response status:`, res.status, res.ok);
+      
+      if (res.ok) {
+        const json = await res.json();
+        //console.log(`[FETCH_RETRY] JSON parsed:`, json);
+        
+        if (json && Array.isArray(json.characters) && json.characters.length) {
+          //console.log(`[FETCH_RETRY] ✓ Success! ${json.characters.length} characters`);
+          return json.characters.map(c => ({ id: c, label: c }));
+        } else {
+          //console.warn(`[FETCH_RETRY] JSON invalid or empty characters array`);
+        }
+      }
+    } catch (e) {
+      console.error(`[FETCH_RETRY] Attempt ${i + 1} failed:`, e);
+    }
+    
+    const delay = delayMs * Math.pow(1.5, i);
+    //console.log(`[FETCH_RETRY] Waiting ${delay}ms before retry...`);
+    await new Promise(r => setTimeout(r, delay));
+  }
+  
+  //console.error('[FETCH_RETRY] All attempts failed');
+  return null;
+}
+
 // click-outside to close char menus
 document.addEventListener('click', (e) => {
     const isMenu = e.target.closest('.char-dropdown');
@@ -664,7 +786,7 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// --- NEW: type-to-jump for character menus (similar to image dropdowns) ---
+// --- type-to-jump for character menus (similar to image dropdowns) ---
 function charAlphaJump(dd, ch) {
     if (!dd || dd.classList.contains('hidden')) return;
 
@@ -726,62 +848,90 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// ===== Dynamic character list loader (reads template meta from backend) =====
-async function loadCharacterListForActiveGame(preferredTemplateName) {
-    // 1. ask server
-    const res = await fetch('/templates/list', { cache: 'no-store' });
-    const { templates = [], active = '', meta = {} } = await res.json();
-    window.__templateMeta = meta || {};
+// --- loading character list for the active template ---
+async function loadCharacterListForActiveGame(preferredTemplateName, { force = false } = {}) {
+  //console.log('[LOAD_CHARS] Starting, force:', force, 'preferredTemplate:', preferredTemplateName);
+  
+  // 1) Get template meta (active + game)
+  const res = await fetch('/templates/list', { cache: 'no-store' });
+  const { templates = [], active = '', meta = {} } = await res.json();
+  window.__templateMeta = meta || {};
 
-    const sel = document.getElementById('templateSelect');
+  //console.log('[LOAD_CHARS] Templates list received:', { templates, active, meta });
 
-    // 2. decide which template we are actually using
-    let templateName =
-        (preferredTemplateName && preferredTemplateName.trim())
-        || (active && active.trim())
-        || (sel && sel.value && sel.value.trim())
-        || (templates[0] || '');
+  const sel = document.getElementById('templateSelect');
+  let templateName =
+    (preferredTemplateName && preferredTemplateName.trim()) ||
+    (active && active.trim()) ||
+    (sel && sel.value && sel.value.trim()) ||
+    (templates[0] || '');
 
-    // 3. keep UI select in sync
-    if (sel && templateName && sel.value !== templateName) {
-        sel.value = templateName;
-    }
+  if (sel && templateName && sel.value !== templateName) sel.value = templateName;
 
-    // 4. find game for that template
-    const game = (meta[templateName] && meta[templateName].game) ? meta[templateName].game : null;
+  const game = meta[templateName]?.game || null;
+  //console.log('[LOAD_CHARS] Template:', templateName, 'Game:', game);
+  
+  if (!game) {
+    //console.log('[LOAD_CHARS] No game found, clearing list');
+    window.__characterList = [];
+    buildCharMenu(1); buildCharMenu(2);
+    return;
+  }
 
-    if (!game) {
-        console.warn('No game metadata for template:', templateName);
-        window.__characterList = [];
-        buildCharMenu(1);
-        buildCharMenu(2);
-        return;
-    }
-
-    // 5. load JSON
-    const url = '/static/characters/characters_' + game + '.json';
+  // 2) If not forced, and scraper is running → show placeholder and exit
+  if (!force) {
+    //console.log('[LOAD_CHARS] Not forced, checking scraper status...');
     try {
-        const charRes = await fetch(url + '?' + Date.now(), { cache: 'no-store' });
-        const json = await charRes.json();
-        if (json && Array.isArray(json.characters)) {
-            window.__characterList = json.characters.map(c => ({ id: c, label: c }));
-        } else {
-            window.__characterList = [];
-        }
-    } catch (err) {
-        console.warn('Failed to load character list for', game, err);
-        window.__characterList = [];
+      const st = await fetch('/characters/status?' + Date.now(), { cache: 'no-store' }).then(r => r.json());
+      //console.log('[LOAD_CHARS] Scraper status:', st);
+      if (st && st.running) {
+        //console.log('[LOAD_CHARS] Scraper running, showing placeholder and exiting');
+        showUpdatingCharacterListPlaceholder();
+        return;
+      }
+    } catch (e) {
+      //console.warn('[LOAD_CHARS] Status check failed:', e);
     }
+  } else {
+    //console.log('[LOAD_CHARS] Force=true, skipping status check');
+  }
 
-    // 6. rebuild menus for both players
-    buildCharMenu(1);
-    buildCharMenu(2);
+  // 3) Fetch (with retry)
+  //console.log('[LOAD_CHARS] Fetching character list for game:', game);
+  const list = await fetchCharacterListWithRetry(game);
+  
+  if (list && list.length) {
+    //console.log('[LOAD_CHARS] ✓ Success! Loaded', list.length, 'characters');
+    window.__characterList = list;
+  } else {
+    //console.warn('[LOAD_CHARS] ⚠ No characters loaded, falling back to empty');
+    window.__characterList = [];
+  }
+
+  // 4) Rebuild both menus
+  //console.log('[LOAD_CHARS] Rebuilding menus...');
+  buildCharMenu(1);
+  buildCharMenu(2);
+  //console.log('[LOAD_CHARS] Complete!');
 }
 
-// init
+// --- Initial load (no extra template change listeners here; your existing UI handles that) ---
 document.addEventListener('DOMContentLoaded', () => {
-    loadCharacterListForActiveGame();
+	loadCharacterListForActiveGame();
+
+	// If you keep the charOverride checkbox: emitting an update will
+	// let the backend decide to run the scraper; UI just reflects it.
+	const cb = document.getElementById('charOverride');
+	if (cb) cb.addEventListener('change', () => { if (typeof emitUpdate === 'function') emitUpdate(); });
 });
+
+// --- Helper to show a proper, disabled placeholder like your special options ---
+function showUpdatingCharacterListPlaceholder() {
+  // same look/feel as your special rows (em-dashes), not selectable
+  window.__characterList = [{ id: '__updating__', label: '— Updating list… —' }];
+  buildCharMenu(1);
+  buildCharMenu(2);
+}
 
 // ===== Player ID toggle helpers =====
 function togglePlayerId(n) {
@@ -1738,6 +1888,19 @@ document.addEventListener("DOMContentLoaded", function() {
     populateTemplateSelect()
     .then(bindTemplateSelect)
     .then(() => loadCharacterListForActiveGame());
+	
+	(async function checkCharScraperOnBoot() {
+	  try {
+		const res = await fetch('/characters/status?' + Date.now(), { cache: 'no-store' });
+		if (res.ok) {
+		  const st = await res.json();
+		  if (st && st.running) {
+			showUpdatingCharacterListPlaceholder();
+			// we’ll get the socket event when it finishes → list will auto-reload then
+		  }
+		}
+	  } catch (e) { /* ignore */ }
+	})();
 });
 
 //// Populate template selection dropdown
@@ -1774,21 +1937,42 @@ function bindTemplateSelect() {
     if (!sel) return;
     sel.addEventListener('change', async () => {
         const choice = sel.value;
+        const override = !!document.getElementById('charOverride')?.checked;
         try {
             await fetch('/set-template', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ template: choice })
+                body: JSON.stringify({ template: choice, char_override: override })
             });
-            // now refresh char list for the chosen template
+            
+            // Check if scraper is running and start polling if so
+            const meta = window.__templateMeta || {};
+            const game = meta[choice]?.game;
+            if (game) {
+                const status = await fetch('/characters/status?' + Date.now(), { cache: 'no-store' }).then(r => r.json());
+                if (status && status.running) {
+                    console.log('[TEMPLATE] Scraper already running, starting poll');
+                    startScraperCompletionPoll(game);
+                }
+            }
+            
+            // refresh char list for the chosen template
             await loadCharacterListForActiveGame(choice);
-            // and re-emit full data
+            // re-emit full data
             emitUpdate();
         } catch (e) {
             console.error('Failed to set template', e);
         }
     });
 }
+
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const data = await fetch('/static/data.json?' + Date.now()).then(r => r.json());
+    const cb = document.getElementById('charOverride');
+    if (cb) cb.checked = !!data.char_override;
+  } catch (e) {}
+});
 
 let matchType = "";
 let matchWins = 3;
@@ -1974,7 +2158,8 @@ function getFormData() {
 
     return {
         ui_scale: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ui-scale')) || 1,
-        active_template: (document.getElementById('templateSelect')?.value || 'default'),
+        char_override: !!document.getElementById('charOverride')?.checked,
+		active_template: (document.getElementById('templateSelect')?.value || 'default'),
 
         player1: {
             name: json.player1_name,
@@ -2101,7 +2286,11 @@ async function loadDataAndHydrate() {
 		updatePlayerIdToggleColor(1);
 		updatePlayerIdToggleColor(2);
 		loadCharacterListForActiveGame(window.__savedData?.active_template);
-
+		
+		// Character list override tiggle
+		const elOverride = document.getElementById('charOverride');
+		if (elOverride) elOverride.checked = !!(data.char_override);
+		
         // UI scale
         const scale = parseFloat(data.ui_scale || 1) || 1;
         //setUiScale?.(scale);
