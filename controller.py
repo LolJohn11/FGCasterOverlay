@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, jsonify, url_for, abort, send_from_directory, send_file, g
 from flask_socketio import SocketIO, emit
 from pathlib import Path
-import json, os, sys, time, logging, re, click, threading, subprocess
+import json, os, sys, time, logging, re, click, threading, subprocess, runpy
 
 # ---------- Rich logging setup ----------
 from rich.logging import RichHandler
@@ -191,49 +191,125 @@ def _run_char_scraper_for_slug(slug: str):
 
     try:
         log.info(f"Downloading characters for '{slug}'")
-        # -u for unbuffered stdout so logs appear live here
-        cmd = [sys.executable, "-u", str(script_path), "--gamename-json", str(gamename_json)]
-        proc = subprocess.Popen(
-            cmd,
-            cwd=str(static_dir),              # scraper writes to ./characters/
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            bufsize=1,
-        )
         
-        # formatting console logs from sub-script
-        assert proc.stdout is not None
-        for raw in proc.stdout:
-            line = raw.rstrip("\n").strip()
-            if not line:
-                continue
+        # Handle frozen vs non-frozen execution
+        if IS_FROZEN:
+            # When frozen, execute the scraper module directly in the same process
+            # This avoids the infinite recursion issue
+            import runpy
+            import sys as sys_module
+            import io
+            from contextlib import redirect_stdout, redirect_stderr
+            
+            # Save original argv and cwd
+            original_argv = sys_module.argv[:]
+            original_cwd = os.getcwd()
+            
+            # Capture stdout/stderr
+            captured_output = io.StringIO()
+            
+            try:
+                # Set up argv as if we called it from command line
+                sys_module.argv = [
+                    str(script_path),
+                    "--gamename-json", str(gamename_json)
+                ]
+                
+                # Change to static dir for relative paths to work
+                os.chdir(str(static_dir))
+                
+                # Run the scraper script with captured output
+                log.info(f"Running scraper in-process (frozen mode)")
+                
+                with redirect_stdout(captured_output), redirect_stderr(captured_output):
+                    runpy.run_path(str(script_path), run_name="__main__")
+                
+                rc = 0  # Assume success if no exception
+                
+            except SystemExit as e:
+                rc = e.code if isinstance(e.code, int) else (1 if e.code else 0)
+            except Exception as e:
+                log.error(f"Scraper execution failed: {e}")
+                rc = 1
+            finally:
+                # Restore original state
+                sys_module.argv = original_argv
+                os.chdir(original_cwd)
+                
+                # Process captured output line by line with the same formatting logic
+                output = captured_output.getvalue()
+                for raw in output.split('\n'):
+                    line = raw.rstrip().strip()
+                    if not line:
+                        continue
 
-            # Detect a simple tag prefix from the subscript and set the level
-            lower = line.lower().lstrip()
-            level = "INFO"
-            msg = line
+                    lower = line.lower().lstrip()
+                    level = "INFO"
+                    msg = line
 
-            for prefix, tag in (
-                ("[error]", "ERROR"),
-                ("[err]",   "ERROR"),
-                ("[warning]", "WARN"),
-                ("[warn]",   "WARN"),
-                ("[info]",   "INFO"),
-            ):
-                if lower.startswith(prefix):
-                    level = tag
-                    msg = line[len(prefix):].lstrip()  # strip the tag from the message
-                    break
+                    for prefix, tag in (
+                        ("[error]", "ERROR"),
+                        ("[err]",   "ERROR"),
+                        ("[warning]", "WARN"),
+                        ("[warn]",   "WARN"),
+                        ("[info]",   "INFO"),
+                        ("[ok]",     "INFO"),
+                    ):
+                        if lower.startswith(prefix):
+                            level = tag
+                            msg = line[len(prefix):].lstrip()
+                            break
 
-            if level == "ERROR":
-                log.error(msg)
-            elif level == "WARN":
-                log.warning(msg)
-            else:
-                log.info(msg)
+                    if level == "ERROR":
+                        log.error(msg)
+                    elif level == "WARN":
+                        log.warning(msg)
+                    else:
+                        log.info(msg)
+        else:
+            # Non-frozen: use subprocess as before
+            cmd = [sys.executable, "-u", str(script_path), "--gamename-json", str(gamename_json)]
+            proc = subprocess.Popen(
+                cmd,
+                cwd=str(static_dir),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1,
+            )
+            
+            assert proc.stdout is not None
+            for raw in proc.stdout:
+                line = raw.rstrip("\n").strip()
+                if not line:
+                    continue
 
-        rc = proc.wait()
+                lower = line.lower().lstrip()
+                level = "INFO"
+                msg = line
+
+                for prefix, tag in (
+                    ("[error]", "ERROR"),
+                    ("[err]",   "ERROR"),
+                    ("[warning]", "WARN"),
+                    ("[warn]",   "WARN"),
+                    ("[info]",   "INFO"),
+                ):
+                    if lower.startswith(prefix):
+                        level = tag
+                        msg = line[len(prefix):].lstrip()
+                        break
+
+                if level == "ERROR":
+                    log.error(msg)
+                elif level == "WARN":
+                    log.warning(msg)
+                else:
+                    log.info(msg)
+
+            rc = proc.wait()
+        
+        # Common exit code handling
         if rc != 0:
             log.error(f"Scraper exited with code {rc}")
         else:
@@ -241,10 +317,12 @@ def _run_char_scraper_for_slug(slug: str):
                 try:
                     payload = json.loads(out_path.read_text(encoding="utf-8"))
                     n = len(payload.get("characters", []))
+                    #log.info(f"Successfully fetched {n} characters.")
                 except Exception:
                     n = "?"
             else:
                 log.warning(f"Scraper finished but {out_path.name} was not created.")
+                
     except Exception as ex:
         log.error(f"Error while running scraper: {ex}")
     finally:
@@ -252,32 +330,21 @@ def _run_char_scraper_for_slug(slug: str):
         CHAR_SCRAPER_STATE.update({"running": False})
         #log.info(f"[bold cyan]Scraper finished for '{slug}'[/bold cyan] - notifying clients...")
         
-        # Give a moment for any file operations to complete
-        #log.info("Sleeping 0.2s...")
         time.sleep(0.2)
-        #log.info("Sleep complete")
         
         payload = {"running": False, "slug": slug}
         #log.info(f"Payload prepared: {payload}")
         
         try:
-            #log.info("About to emit charlist_status...")
-            
-            # Try WITHOUT app context first
             socketio.emit("charlist_status", payload, namespace='/')
-            
             #log.info("Socket emission complete")
         except Exception as e:
-            #log.error(f"Failed to emit socket event: {e!r}")
-            import traceback
-            #log.error(f"Traceback: {traceback.format_exc()}")
+            log.error(f"Failed to emit socket event: {e!r}")
         
-       # log.info("Cleaning up gamename.json...")
         try:
             gamename_json.unlink(missing_ok=True)
-            #log.info("Cleanup complete")
-        except Exception as e:
-            log.error(f"Cleanup failed: {e!r}")
+        except Exception:
+            pass
 
         SCRAPER_LOCK.release()
 

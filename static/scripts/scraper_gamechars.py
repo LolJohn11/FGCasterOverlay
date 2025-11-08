@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 
 import requests
 from bs4 import BeautifulSoup
-from playwright.sync_api import sync_playwright, Page
+#from playwright.sync_api import sync_playwright, Page
 
 BASE_URL = "https://www.fightersgeneration.com/"
 
@@ -57,8 +57,14 @@ def extract_characters_from_game_page(html: str) -> List[str]:
 
     return sorted(set(names), key=lambda s: s.lower())
 
-
+"""
 def get_html_playwright(url: str) -> str:
+    try:
+        from playwright.sync_api import sync_playwright, Page
+    except ImportError:
+        error("Playwright not available. Cannot fallback to browser rendering.")
+        raise RuntimeError("Playwright not available in this build.")
+    
     # fallback only when requests fails
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -98,7 +104,7 @@ def get_html_playwright(url: str) -> str:
         html = page.content()
         browser.close()
     return html
-
+"""
 
 def load_game_slug(path: str = "gamename.json") -> str:
     data = json.loads(Path(path).read_text(encoding="utf-8"))
@@ -136,7 +142,8 @@ def main():
         try:
             html = fetch_html_fast(game_url)
         except Exception:
-            html = get_html_playwright(game_url)
+            #html = get_html_playwright(game_url)
+            error("Cannot fetch HTML with the fast method.")
 
     characters = extract_characters_from_game_page(html)
 
