@@ -219,7 +219,7 @@ def _run_char_scraper_for_slug(slug: str):
                 os.chdir(str(static_dir))
                 
                 # Run the scraper script with captured output
-                log.info(f"Running scraper in-process (frozen mode)")
+                #log.info(f"Running scraper in-process (frozen mode)")
                 
                 with redirect_stdout(captured_output), redirect_stderr(captured_output):
                     runpy.run_path(str(script_path), run_name="__main__")
