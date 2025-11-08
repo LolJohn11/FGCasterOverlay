@@ -20,7 +20,8 @@ FGCaster Overlay  | Other overlay apps
 ## Features
 ### Controller
 ![Controller Screenshot](static/img/controller.png)
-* Separate fields for player name, clan tag, score, and "winners/losers" side display.
+* Separate fields for player name, clan tag, score, in-game player ID, and "winners/losers" side display.
+* Player character selectors that automatically load the correct character lists for the selected overlay template.
 * Support for team names and scores (for example, for team battle events).
 * Set a country flag or upload a custom image for any of the players or teams.
 * Presets for setting event stage, match type (can be set to custom values).
