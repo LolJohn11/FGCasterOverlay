@@ -140,7 +140,7 @@
 							-->
                             <button type="button" class="btn btn-outline-danger score-btn" onclick="adjustScore('player1_score', -1)"><i class="fa-solid fa-minus fa-2xs"></i></button>
                         </div>
-						<div class="btn-group btn-group-sm" style="margin-left: 4px !important; position: relative;">
+						<div class="btn-group btn-group-sm extraPlayerBtns" style="margin-left: 4px !important; position: relative;">
 						<span data-bs-toggle="tooltip" data-bs-placement="bottom" title="P1 Team Info">
                             <button type="button" id="team1toggle" class="btn btn-sm btn-outline-secondary team-popover" data-bs-placement="right" data-popover-content="team1Popover"><i class="fa-solid fa-user-group fa-xs"></i></button>
                         </span>
@@ -163,11 +163,11 @@
                         <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Swap Players" style="width: 50px; height: 31px;" onclick="swapPlayers()">
                             <i class="fa-solid fa-arrow-right-arrow-left fa-sm"></i><i class="fa-solid fa-font fa-sm"></i>
                         </button>
-                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Swap Teams" style="width: 50px; height: 31px;" onclick="swapTeams()">
-                            <i class="fa-solid fa-arrow-right-arrow-left fa-sm"></i><i class="fa-solid fa-user-group fa-sm"></i>
-                        </button>
                         <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Swap Player Scores" style="width: 50px; height: 31px;" onclick="swapScores()">
                             <i class="fa-solid fa-arrow-right-arrow-left fa-sm"></i><i class="fa-solid fa-crown fa-sm"></i>
+                        </button>
+						<button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Swap Teams" style="width: 50px; height: 31px;" onclick="swapTeams()">
+                            <i class="fa-solid fa-arrow-right-arrow-left fa-sm"></i><i class="fa-solid fa-user-group fa-sm"></i>
                         </button>
                         <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Swap All" style="width: 50px; height: 31px;" onclick="swapAll()">
                             <i class="fa-solid fa-arrow-right-arrow-left fa-sm"></i><i class="fa-solid fa-infinity fa-sm"></i>
@@ -206,7 +206,7 @@
 							-->
                             <button type="button" class="btn btn-outline-danger score-btn" onclick="adjustScore('player2_score', -1)"><i class="fa-solid fa-minus fa-2xs"></i></button>
                         </div>
-						<div class="btn-group btn-group-sm" style="margin-left: 4px !important; position: relative;">
+						<div class="btn-group btn-group-sm extraPlayerBtns" style="margin-left: 4px !important; position: relative;">
 						<span data-bs-toggle="tooltip" data-bs-placement="bottom" title="P2 Team Info">
                             <button type="button" id="team2toggle" class="btn btn-sm btn-outline-secondary team-popover" data-bs-placement="right" data-popover-content="team2Popover"><i class="fa-solid fa-user-group fa-xs"></i></button>
                         </span>

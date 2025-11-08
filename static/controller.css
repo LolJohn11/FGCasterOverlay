@@ -320,12 +320,13 @@ input::placeholder,
 .score-btn {
    padding: 2px 6px;
    min-height: 30px;
+   width: 22px;
    /* font-size: 0.8rem; */
 }
 
 .char-select-btn {
     height: 31px;
-    width: 30px;
+    width: 30.5px;
     padding: 0 2px;
     border-color: #444;
 }
@@ -548,7 +549,7 @@ input::placeholder {
 
 .team-popover {
    height: 31px;
-   width: 30px;
+   width: 29.5px;
    padding: 0 2px;
    border-color: #444;
    border-radius: .25rem;
@@ -751,7 +752,7 @@ input::placeholder {
 #player2_w_btn,
 #player2_l_btn {
 	height: 30px;
-	width: 22px;
+	width: 30px;
 	padding: 4px 0px;
 }
 
@@ -767,12 +768,18 @@ input::placeholder {
    padding: 2px 2px 0px 2px;
 }
 
-.score-group .score-btn:first-child {
+.score-group .score-btn:first-child,
+#team1toggle, #team2toggle {
    border-radius: .25rem 0px 0px .25rem;
 }
 
-.score-group .score-btn:last-child {
+.score-group .score-btn:last-child,
+#p1CharBtn, #p2CharBtn {
    border-radius: 0px .25rem .25rem 0px;
+}
+
+#team1toggle, #team2toggle {
+   border-right: none;
 }
 
 #topText,
