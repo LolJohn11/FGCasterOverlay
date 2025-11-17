@@ -124,6 +124,7 @@ body {
 	font-size: 18px;
 	padding-left: 0px;
 	padding-right: 0px;
+    padding-bottom: 4px;
 }
 
 .imgBlock {
@@ -210,7 +211,7 @@ body {
 .teamImg {
 	width: 71px;
 	height: 53px;
-	object-fit: cover;
+	object-fit: contain;
 	display: none; 
 }
 

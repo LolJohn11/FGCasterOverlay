@@ -225,7 +225,7 @@ body {
 .teamImg {
 	width: 71px;
 	height: 53px;
-	object-fit: cover;
+	object-fit: contain;
 	display: none; 
 }
 

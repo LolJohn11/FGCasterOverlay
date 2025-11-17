@@ -1,21 +1,14 @@
 @font-face {
-	font-family: 'Noto Sans Bold';
-	src: url('fonts/NotoSans-Bold.ttf');
-	font-weight: normal;
-	font-style: bold;
-}
-
-@font-face {
-	font-family: 'Noto Sans Condensed';
-	src: url('fonts/NotoSans-Condensed.ttf');
+	font-family: 'Akko Pro';
+	src: url('fonts/AKKOPRO-CONDENSED.otf');
 	font-weight: normal;
 	font-style: normal;
 }
 
 body {
 	margin: 0;
-	/* font-family: 'Titillium Web', sans-serif; <--- Backup font*/
-	font-family: 'Noto Sans Condensed', sans-serif;
+	/* font-family: 'Titillium Web', sans-serif; <--- Default font*/
+	font-family: 'Akko Pro', sans-serif;
 	color: white;
 	background: transparent;
 }
@@ -31,13 +24,17 @@ body {
 	overflow: hidden;
 }
 
-.debug-bg, .bg-img {
+.debug-bg {
 	position: absolute;
 	top: 0;
 	left: 0;
 	width: 100%;
 	height: 100%;
 	object-fit: cover; /* keep aspect ratio while filling space */
+	z-index: 0;
+}
+
+.bg-img {
 	z-index: 0;
 }
 
@@ -54,38 +51,42 @@ body {
 
 .nameBlock {
 	background-color: transparent;
-	width: 286px;
+	width: 364px;
 	height: 49px;
 	padding: 0px 5px 0px 5px;
 	align-content: center;
-	text-shadow: 2px 0 black, -2px 0 black, 0 2px black, 0 -2px black, 1px 1px black, -1px -1px black, 1px -1px black, -1px 1px black;
+	text-shadow: 0 0 10px black, 2px 0 black, -2px 0 black, 0 2px black, 0 -2px black, 1px 1px black, -1px -1px black, 1px -1px black, -1px 1px black;
 }
 
 .name {
-	font-size: 24px;
+	font-size: 32px;
 	white-space: nowrap;
 	text-align: center;
 }
 
 #nameBlockP1 {
-	margin: 6px 12px 0px 0px;
+	margin: 15px 18px 0px 0px;
 }
 
 #nameBlockP2 {
-	margin: 6px 0px 0px 12px;
+	margin: 15px 0px 0px 18px;
 }
 
 .scoreBlock {
 	background-color: transparent;
-	margin-top: 6px;
+	margin-top: 14px;
+	padding: 2px 0px;
 	width: 38px;
 	height: 47px;
+	align-content: center;
+	text-align: center;
+	align-items: center;
 	text-shadow: 0 0 4px black , 2px 0 black, -2px 0 black, 0 2px black, 0 -2px black, 1px 1px black, -1px -1px black, 1px -1px black, -1px 1px black;
 }
 
 .score {
-	font-family: 'Noto Sans Bold', sans-serif;
 	font-size: 36px;
+	font-weight: bold;
 	text-align: center;
 }
 
@@ -102,7 +103,7 @@ body {
 	display: flex;
 	width: 532px;
 	gap: 10px;
-	align-items: flex-start;
+	align-items: center;
 	justify-content: center;
 }
 
@@ -116,17 +117,18 @@ body {
 }
 
 #topText {
-	width: 210px;
-	height: 40px;
-	font-size: 18px;
+	max-width: 250px;
+	height: 30px;
+	font-size: 22px;
 }
 
 #stageText, #matchTypeText {
 	width: 170px;
 	height: 20px;
-	font-size: 14px;
+	font-size: 18px;
 	padding-left: 0px;
 	padding-right: 0px;
+    padding-bottom: 4px;
 }
 
 .imgBlock {
@@ -136,7 +138,7 @@ body {
 	align-items: center;
 	display: flex;
 	justify-content: center;
-	margin-top: 7px;
+	margin-top: 15px;
 }
 
 .playerImg {
@@ -167,7 +169,7 @@ body {
 }
 
 #teamsDivider {
-	width: 120px;
+	width: 100px;
 }
 
 .team {
@@ -202,7 +204,6 @@ body {
 
 #team1Score,
 #team2Score {
-	font-family: 'Noto Sans Bold', sans-serif;
 	height: 36px;
 	width: 34px;
 	display: inline-flex;
@@ -215,26 +216,13 @@ body {
 	width: 71px;
 	height: 53px;
 	object-fit: contain;
-	display: none; 
-}
-
-#team1Img {
-	mask-image: url('img/img_mask_t1.png');
-	mask-size: 71px 49px;
-	mask-position: 0px 3px; /* mask alignment is hard, good luck :( */
-}
-
-#team2Img {
-	mask-image: url('img/img_mask_t2.png');
-	mask-size: 71px 49px;
-	mask-position: 0px 3px;
 }
 
 .commentators {
 	background-color: transparent;
 	align-items: center;
 	gap: 6px;
-	font-size: 14px;
+	font-size: 18px;
 	display: flex;
 	justify-content: center;
 	height: 20px;
@@ -267,7 +255,7 @@ body {
 
 .casterText {
 	display: inline-flex;
-	height: 22px;
+	height: 18px;
 	width: 130px;
 	align-items: center;
 	justify-content: center;
