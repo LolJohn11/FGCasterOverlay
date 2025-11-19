@@ -270,7 +270,7 @@
                     <input type="text" id="customStageInput" class="form-control" placeholder="Custom text" onblur="updateStageField()" onkeydown="if(event.key === 'Enter'){ this.blur(); }" />
                 </div>
                 <input type="hidden" name="StageData" id="StageData" value="" />
-                <div class="form-section align-items-start roundSelectorWrapper" style="margin-bottom: 0px; min-width: 33px;">
+                <div class="form-section align-items-start roundSelectorWrapper" style="margin-bottom: 0px;min-width: 33px;">
                     <div class="form-group d-flex" style="margin-bottom: 0px;">
                         <div class="round-control" id="roundControlWrapper" style="display: none; justify-content: center;">
                             <button id="roundUp" class="btn btn-outline-secondary btn-sm" onclick="changeRoundNum(1)"><i class="fa-solid fa-caret-up fa-xs"></i></button>
@@ -2272,6 +2272,12 @@ async function loadDataAndHydrate() {
         restoreWLButtons();
         restoreMatchTypeButtons();
         restoreStageButtons();
+		
+		if (!data.stage || data.stage.trim() === '') {
+            stageMain = "";
+            stageSub = "";
+        }
+		
         restoreImageButtonStateFor?.(1);
         restoreImageButtonStateFor?.(2);
         restoreTeamImageButtonState?.(1);
@@ -2565,6 +2571,7 @@ function restoreStageButtons() {
     const roundNum = document.getElementById("stageRoundNum");
     const roundSelector = document.getElementById("roundControlWrapper");
     const customInput = document.getElementById("customStageInput");
+    const stageSubGroup = document.querySelector(".stage-sub");
 
     // Reset all UI states
     mainButtons.forEach(btn => btn.classList.remove('active'));
@@ -2572,62 +2579,91 @@ function restoreStageButtons() {
     customInput.style.display = "none";
     customInput.value = "";
     roundSelector.style.display = "none";
+    stageSubGroup.style.display = "";
+    document.querySelector('.roundSelectorWrapper').style.minWidth = "33px";
 
     stageMain = "";
     stageSub = "";
 
     if (!fullStage) return;
 
-    // Detect and parse custom stage
-    if (!fullStage.includes("Winners") && !fullStage.includes("Losers") &&
-        !fullStage.includes("Pools") && !fullStage.includes("Round-Robin") &&
-        !fullStage.includes("Grand Finals")) {
+    // Check for main stage keywords
+    const hasWinners = fullStage.includes("Winners");
+    const hasLosers = fullStage.includes("Losers");
+    const hasPools = fullStage.includes("Pools");
+    const hasRoundRobin = fullStage.includes("Round-Robin");
+    const hasGrandFinals = fullStage.includes("Grand Finals");
+    
+    // Check for sub-stage keywords
+    const hasQuarterfinal = fullStage.includes("Quarterfinal");
+    const hasSemifinal = fullStage.includes("Semifinal");
+    const hasFinal = fullStage.includes("Final") && !hasGrandFinals; // Don't match "Grand Finals"
+    const hasRound = fullStage.includes("Round") && !hasRoundRobin; // Don't match "Round-Robin"
+    const hasBracketReset = fullStage.includes("Reset");
+
+    const hasMainStage = hasWinners || hasLosers || hasPools || hasRoundRobin || hasGrandFinals;
+    const hasSubStage = hasQuarterfinal || hasSemifinal || hasFinal || hasRound || hasBracketReset;
+
+    // If it's truly custom (no preset keywords at all)
+    if (!hasMainStage && !hasSubStage) {
         stageMain = fullStage;
         document.querySelector('.cusTogBtn').classList.add('active');
         customInput.style.display = "inline-block";
         customInput.value = fullStage;
-        const stageSubGroup = document.querySelector(".stage-sub");
         stageSubGroup.style.display = "none";
+        document.querySelector('.roundSelectorWrapper').style.minWidth = "";
         return;
     }
 
-    // Extract stageMain and stageSub
-    const parts = fullStage.split(' ');
-    if (parts.length > 0) {
-        const firstPart = parts[0];
-        if (firstPart === "Pools" || firstPart === "Winners" || firstPart === "Losers" ||
-            firstPart === "Round-Robin" || firstPart === "Grand") {
-            stageMain = (firstPart === "Grand") ? "Grand Finals" : firstPart;
-        }
+    // Parse main stage
+    if (hasGrandFinals) {
+        stageMain = "Grand Finals";
+    } else if (hasPools) {
+        stageMain = "Pools";
+    } else if (hasWinners) {
+        stageMain = "Winners";
+    } else if (hasLosers) {
+        stageMain = "Losers";
+    } else if (hasRoundRobin) {
+        stageMain = "Round-Robin";
     }
 
-    if (parts.includes("Quarterfinal")) {
+    // Parse sub-stage
+    if (hasQuarterfinal) {
         stageSub = "Quarterfinal";
-    } else if (parts.includes("Semifinal")) {
+    } else if (hasSemifinal) {
         stageSub = "Semifinal";
-    } else if (parts.includes("Final") && !parts.includes("Grand")) {
+    } else if (hasFinal) {
         stageSub = "Final";
-    } else if (parts.includes("Round")) {
+    } else if (hasRound) {
         stageSub = "Round";
         const roundMatch = fullStage.match(/Round (\d+)/);
         if (roundMatch) {
             document.getElementById("stageRoundNum").value = parseInt(roundMatch[1]);
             roundSelector.style.display = "flex";
         }
+    } else if (hasBracketReset) {
+        stageSub = "Reset";
     }
 
-    // Visually toggle correct buttons
+    // Visually toggle correct main stage buttons
     mainButtons.forEach(btn => {
         if (btn.textContent === getButtonLabel(stageMain)) {
             btn.classList.add('active');
         }
     });
 
+    // Visually toggle correct sub-stage buttons
     subButtons.forEach(btn => {
         if (btn.textContent === getButtonLabel(stageSub)) {
             btn.classList.add('active');
         }
     });
+	
+	// Ensure Custom button is NOT active if we have any preset values
+    if (hasMainStage || hasSubStage) {
+        document.querySelector('.cusTogBtn')?.classList.remove('active');
+    }
 }
 
 function adjustScore(inputId, change) {
@@ -2874,6 +2910,38 @@ function uiOnly_ResetTeamImageButton(team) {
     selectedImageByTeam[team] = null;
 }
 
+function resetStageValues() {
+    // Reset JavaScript state variables
+    stageMain = "";
+    stageSub = "";
+    
+    // Clear stage buttons visual state
+    document.querySelectorAll('.stage-main button, .stage-sub button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Hide round control
+    const roundWrap = document.getElementById('roundControlWrapper');
+    if (roundWrap) roundWrap.style.display = 'none';
+    
+    // Reset round number
+    uiOnly_Set(document.getElementById('stageRoundNum'), 1);
+    
+    // Clear custom stage input and hide it
+    const customInput = document.getElementById('customStageInput');
+    if (customInput) {
+        customInput.value = '';
+        customInput.style.display = 'none';
+    }
+    
+    // Show stage-sub buttons
+    const stageSubGroup = document.querySelector('.stage-sub');
+    if (stageSubGroup) stageSubGroup.style.display = '';
+    
+    // Reset hidden field
+    uiOnly_Set(document.getElementById('StageData'), '');
+}
+
 function resetPValues() {
     // Mute emits while we touch the DOM
     const prevHydrating = isHydrating;
@@ -2987,8 +3055,9 @@ function resetAll() {
         updateTagIconColors(1);
         updateTagIconColors(2);
 
-        // 5) Stage & Match Type (UI only)
-        // Clear stage buttons (main/sub), round control, custom text
+        // 5) Stage & Match Type
+        resetStageValues();
+		// Clear stage buttons (main/sub), round control, custom text
         document.querySelectorAll('.stage-main .btn, .stage-sub .btn').forEach(b => b.classList.remove('active'));
         uiOnly_Set(document.getElementById('StageData'), '');
         uiOnly_Set(document.getElementById('customStageInput'), '');
@@ -2997,8 +3066,8 @@ function resetAll() {
         uiOnly_Set(document.getElementById('stageRoundNum'), 1);
 
         // Match type preset/custom
-        resetMatchType(); // this is UI-only (doesn't POST) in your file
-        updateMatchTypeUI(); // keep the view consistent
+        resetMatchType();
+        updateMatchTypeUI();
         uiOnly_Set(document.getElementById('customMatchTypeInput'), '');
 
     } finally {
