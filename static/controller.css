@@ -146,12 +146,12 @@ body {
    /* Dark background */
    color: #f1f1f1;
    /* Light text */
-   border: 1px solid #6c757d;
+   border: 1px solid #777;
    border-radius: .25rem;
 }
 
 .popover-arrow {
-   --bs-popover-bg: #6c757d !important;
+   --bs-popover-bg: #777 !important;
 }
 
 .popover,
@@ -282,7 +282,7 @@ input::placeholder,
 .btn-group-vertical .btn {
 	width: 31px;
     max-height: 23px;
-    border-color: #6c757d !important;
+    border-color: #777 !important;
 	padding: 0px;
 }
 
@@ -328,12 +328,12 @@ input::placeholder,
     height: 31px;
     width: 30.5px;
     padding: 0 2px;
-    border-color: #444;
+    border-color: #777;
 }
 
 .char-select-btn:hover {
     background-color: #444;
-    border-color: #444;
+    border-color: #777;
     color: #fff;
 }
 
@@ -414,7 +414,7 @@ input::placeholder {
 .mainstage-button-wrapper .btn-row,
 .extra-button-wrapper .btn-row {
    display: flex;
-   border: 1px solid #6c757d;
+   border: 1px solid #777;
    border-radius: 0.25rem;
    overflow: hidden;
    width: max-content;
@@ -423,19 +423,19 @@ input::placeholder {
 .mainstage-button-wrapper .btn-row .btn {
    width: 33px;
    border-radius: 0;
-   border: 0px solid #6c757d;
+   border: 0px solid #777;
 }
 
 .extra-button-wrapper .btn-row .btn {
    width: 32px;
    border-radius: 0;
-   border: 0px solid #6c757d;
+   border: 0px solid #777;
 }
 
 .mainstage-button-wrapper .btn-row .btn:nth-child(2),
 .extra-button-wrapper .btn-row .btn:nth-child(2) {
-   border-left: 1px solid #6c757d !important;
-   border-right: 1px solid #6c757d !important;
+   border-left: 1px solid #777 !important;
+   border-right: 1px solid #777 !important;
 }
 
 .mainstage-button-wrapper .btn-row .btn:last-child,
@@ -469,7 +469,7 @@ input::placeholder {
 
 .substage-button-wrapper .btn-row {
    display: flex;
-   border: 1px solid #6c757d;
+   border: 1px solid #777;
    border-radius: 0.25rem;
    overflow: hidden;
    width: max-content;
@@ -478,12 +478,12 @@ input::placeholder {
 .substage-button-wrapper .btn-row .btn {
    width: 33px;
    border-radius: 0;
-   border: 0px solid #6c757d;
+   border: 0px solid #777;
 }
 
 .substage-button-wrapper .btn-row .btn:nth-child(2) {
-   border-left: 1px solid #6c757d !important;
-   border-right: 1px solid #6c757d !important;
+   border-left: 1px solid #777 !important;
+   border-right: 1px solid #777 !important;
 }
 
 .substage-button-wrapper .btn-row .btn:last-child {
@@ -501,7 +501,7 @@ input::placeholder {
    flex-direction: column;
    align-items: stretch;
    width: 33px;
-   border: 1px solid #6c757d;
+   border: 1px solid #777;
    border-radius: 0.25rem;
    padding: 0;
 }
@@ -551,13 +551,13 @@ input::placeholder {
    height: 31px;
    width: 29.5px;
    padding: 0 2px;
-   border-color: #444;
+   border-color: #777;
    border-radius: .25rem;
 }
 
 .team-popover:hover {
    background-color: #444;
-   border-color: #444;
+   border-color: #777;
    color: #fff;
 }
 
