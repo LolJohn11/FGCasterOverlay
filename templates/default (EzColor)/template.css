@@ -1,3 +1,103 @@
+/* ==== SVG ELEMENTS COLOR SETTINGS ==== */
+
+/* == Player Plaques == */
+
+/* Gradient for background/fill - Player 1 */
+#linear-gradient-p1-noimg,
+#linear-gradient-p1-full {
+	--gradient-stop-1: #d4174f; /* d4174f */
+	--gradient-stop-2: #bf1747; /* bf1747 */
+	--gradient-stop-3: #881734; /* 881734 */
+	--gradient-stop-4: #7a172f; /* 7a172f */
+}
+/* Gradient for background/fill - Player 2 */
+#linear-gradient-p2-noimg,
+#linear-gradient-p2-full {
+	--gradient-stop-1: #d4174f; /* d4174f */
+	--gradient-stop-2: #bf1747; /* bf1747 */
+	--gradient-stop-3: #881734; /* 881734 */
+	--gradient-stop-4: #7a172f; /* 7a172f */
+}
+
+/* Stroke color - Player 1 */
+#P1_bg_stroke_noimg polygon,
+#P1_diag_noimg line,
+#P1_vert_noimg line,
+#P1_bg_stroke polygon,
+#P1_diag line,
+#P1_vert line {
+	stroke: #ff648d; /* ff648d */
+}
+/* Stroke color - Player 2 */
+#P2_bg_stroke_noimg polygon,
+#P2_diag_noimg line,
+#P2_vert_noimg line,
+#P2_bg_stroke polygon,
+#P2_diag line,
+#P2_vert line {
+	stroke: #ff648d; /* ff648d */
+}
+
+/* Faint outer glow effect on stroke */
+#coloredGlow {
+	--glow-color: #F70041; /* F70041 */
+	--glow-opacity: 1;
+}
+
+/* Drop shadow */
+.playerPlaque {
+	filter: drop-shadow(black 0px 0px 0.2rem);
+}
+
+/* == Team Plaques == */
+
+/* Background color - Team 1 */
+#T1_noimg_bg,
+#T1_full_bg {
+	fill: #000000; /* 000000 */
+	opacity: 0.9; /* 0.9 */
+}
+/* Background color - Team 2 */
+#T2_noimg_bg,
+#T2_full_bg {
+	fill: #000000; /* 000000 */
+	opacity: 0.9; /* 0.9 */
+}
+
+/* Line color - Team 1 */
+#T1_noimg_line line,
+#T1_full_line line {
+	stroke: #ffffff; /* ffffff */
+}
+/* Line color - Team 2 */
+#T2_noimg_line line,
+#T2_full_line line {
+	stroke: #ffffff; /* ffffff */
+}
+
+/* == Top Row == */
+
+#topRowBG {
+	filter: drop-shadow(black 0px 0px 0.2rem); /* drop shadow */
+}
+#topRowSVG {
+	fill: #000000; /* color */
+	opacity: 0.7; /* opacity */
+}
+
+/* == Casters Row == */
+
+#castersBG {
+	filter: drop-shadow(black 0px 0px 0.2rem); /* drop shadow */
+}
+#castersSVG {
+	fill: #000000; /* color */
+	opacity: 0.7; /* opacity */
+}
+
+
+/* ==== END OF SVG ELEMENTS COLOR SETTINGS ==== */
+
 @font-face {
 	font-family: 'Akko Pro';
 	src: url('fonts/AKKOPRO-CONDENSED.otf');
