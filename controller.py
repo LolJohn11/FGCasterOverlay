@@ -543,7 +543,7 @@ def ensure_active_template(default_name="default"):
     if "active_template" not in data:
         data["active_template"] = default_name
         save_data(data)
-        log.info(f":frame_photo: No active_template found — set to [bold]{default_name}[/bold]")
+        log.info("No active_template found — set to [bold]{default_name}[/bold]")
     return data["active_template"]
 
 def _extract_game_from_template(template_name: str) -> str | None:

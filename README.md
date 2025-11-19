@@ -38,6 +38,7 @@ FGCaster Overlay  | Other overlay apps
 	* Guilty Gear -Strive-
 * Built-in templates include basic animations, which you can adjust or build upon if needed.
 * Easy to edit or create your own templates using HTML, CSS, and JS.
+	* Includes "EzColor" template for fast customization if you just want to tweak the colors.
 ### Have an idea for a new feature?
 Submit your thoughts in the "Issues" tab!
 
