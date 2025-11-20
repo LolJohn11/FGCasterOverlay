@@ -42,6 +42,16 @@
 				<feMergeNode in="SourceGraphic"/>
 			  </feMerge>
 			</filter>
+			<filter id="elShadow" x="-50%" y="-50%" width="200%" height="200%">
+                <feColorMatrix type="matrix" values="1 0 0 0 0 
+                                                     0 1 0 0 0 
+                                                     0 0 1 0 0 
+                                                     0 0 0 100 0"
+                                                     result="boostedInput"/>
+                                                   
+                <feGaussianBlur stdDeviation="5"/>
+                <feComposite operator="out" in2="boostedInput"/>
+            </filter>
 			<linearGradient id="linear-gradient-p1-noimg" x1="6.58" y1="32.49" x2="451.08" y2="32.49" gradientUnits="userSpaceOnUse">
 				<stop offset="0.13" stop-color="var(--gradient-stop-1, #d4174f)" />
 				<stop offset="0.34" stop-color="var(--gradient-stop-2, #bf1747)" />
@@ -71,10 +81,9 @@
 
 	<!-- Top row -->
 	<div style="display: flex; position: absolute; width: 100%; justify-content: center;">
-		<svg id="topRowBG" xmlns="http://www.w3.org/2000/svg" width="573.4" height="36.87" viewBox="0 0 573.4 36.87" data-anim="down" class="bg-img" alt="Top Text Row" style="margin-top: 1px;">
-			<g id="topRowSVG" >
-				<path d="M1246.48-.74H673.08L690,33.35a5,5,0,0,0,4.48,2.78h530.66a5,5,0,0,0,4.49-2.78Z" transform="translate(-673.08 0.74)" />
-			</g>
+		<svg id="topRowBG" xmlns="http://www.w3.org/2000/svg" width="700" height="66.87" viewBox="0 0 573.4 66.87" data-anim="down" class="bg-img" alt="Top Text Row" style="margin-top: 1px; display: block;">
+			<path id="topRowShadow" filter="url(#elShadow)" d="M1246.48-.74H673.08L690,33.35a5,5,0,0,0,4.48,2.78h530.66a5,5,0,0,0,4.49-2.78Z" transform="translate(-673.08 0.74)" stroke="none" fill-opacity="0.1" />
+			<path id="topRowBody" d="M1246.48-.74H673.08L690,33.35a5,5,0,0,0,4.48,2.78h530.66a5,5,0,0,0,4.49-2.78Z" transform="translate(-673.08 0.74)" />
 		</svg>
 	</div>
 
@@ -238,10 +247,9 @@
 
 	<!-- Caster row -->
 	<div style="display: flex; position: absolute; bottom:0; width: 100%; justify-content: center;">
-		<svg id="castersBG" xmlns="http://www.w3.org/2000/svg" width="340.24" height="27.83" viewBox="0 0 340.24 27.83" data-anim="up" class="bg-img" alt="Casters Row">
-			<g id="castersSVG" >
-				<path d="M789.88,1080h340.24l-12.4-25a5,5,0,0,0-4.49-2.79H806.77a5,5,0,0,0-4.49,2.79Z" transform="translate(-789.88 -1052.17)" />
-			</g>
+		<svg id="castersBG" xmlns="http://www.w3.org/2000/svg" width="700" height="67.83" viewBox="0 -40 340.24 67.83" data-anim="up" class="bg-img" alt="Casters Row">
+			<path id="castersShadow" filter="url(#elShadow)" d="M789.88,1080h340.24l-12.4-25a5,5,0,0,0-4.49-2.79H806.77a5,5,0,0,0-4.49,2.79Z" transform="translate(-789.88 -1052.17)" stroke="none" fill-opacity="0.1" />
+			<path id="castersBody" d="M789.88,1080h340.24l-12.4-25a5,5,0,0,0-4.49-2.79H806.77a5,5,0,0,0-4.49,2.79Z" transform="translate(-789.88 -1052.17)" />
 		</svg>
 	</div>
 

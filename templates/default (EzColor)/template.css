@@ -77,26 +77,33 @@
 
 /* == Top Row == */
 
-#topRowBG {
-	filter: drop-shadow(black 0px 0px 0.2rem); /* drop shadow */
+/* Drop shadow */
+#topRowShadow {
+	fill: #000000; /* 000000 */
+	opacity: 0.8; /* 0.8 */
 }
-#topRowSVG {
-	fill: #000000; /* color */
-	opacity: 0.7; /* opacity */
+/* Element body */
+#topRowBody {
+	fill: #000000; /* 000000 */
+	opacity: 0.9; /* 0.9 */
 }
 
 /* == Casters Row == */
 
-#castersBG {
-	filter: drop-shadow(black 0px 0px 0.2rem); /* drop shadow */
+/* Drop shadow */
+#castersShadow {
+	fill: #000000; /* 000000 */
+	opacity: 0.8; /* 0.8 */
 }
-#castersSVG {
-	fill: #000000; /* color */
-	opacity: 0.7; /* opacity */
+/* Element body */
+#castersBody {
+	fill: #000000; /* 000000 */
+	opacity: 0.9; /* 0.9 */
 }
-
 
 /* ==== END OF SVG ELEMENTS COLOR SETTINGS ==== */
+
+
 
 @font-face {
 	font-family: 'Akko Pro';
@@ -165,11 +172,11 @@ body {
 }
 
 #nameBlockP1 {
-	margin: 14px 19px 0px 0px;
+	margin: 14px 14px 0px 0px;
 }
 
 #nameBlockP2 {
-	margin: 14px 0px 0px 19px;
+	margin: 14px 0px 0px 14px;
 }
 
 .scoreBlock {
@@ -195,7 +202,7 @@ body {
 	flex-direction: column;
 	align-items: center;
 	gap: 4px;
-	margin: 2px 33.5px;
+	margin: 2px 35px;
 }
 
 .infoRow {
