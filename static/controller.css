@@ -352,25 +352,86 @@ input::placeholder,
     display: flex;
     flex-direction: column;
 	scrollbar-color: #2a2a2a #444444;
+	scrollbar-width: thin;
 }
 
-.char-dropdown.hidden {
+.profile-dropdown {
+    position: absolute;
+    background: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: .25rem;
+    min-width: 140px;
+	max-height: 85px;
+    min-height: 85px;
+    overflow-y: auto;
+    z-index: 999;
+	flex-direction: column;
+	scrollbar-color: #2a2a2a #444444;
+	scrollbar-width: thin;
+}
+
+.profile-dropdown-item i {
+    width: 16px;
+    text-align: center;
+}
+
+.char-dropdown.hidden,
+.profile-dropdown.hidden {
     display: none;
 }
 
 .char-dropdown-item {
     padding: 4px 8px;
     cursor: pointer;
+	transition: background-color 0.15s;
     white-space: nowrap;
     font-size: 13px;
 }
 
-.char-dropdown-item:hover {
+.profile-dropdown-item {
+    padding: 4px 8px;
+    cursor: pointer;
+    transition: background-color 0.15s;
+	white-space: nowrap;
+	font-size: 13px;
+    user-select: none;
+}
+
+.char-dropdown-item:hover,
+.profile-dropdown-item:hover {
     background: #444;
 }
 
-.char-dropdown-item.selected {
+.char-dropdown-item.selected,
+.profile-dropdown-item.selected {
     background: #3a5a36;
+}
+
+.char-dropdown-divider {
+    min-height: 1px;
+	max-height: 1px;
+    background-color: #444;
+    margin: 0px;
+}
+
+.btn:disabled, .btn.disabled {
+  border-color: #444;
+  color: #444;
+  opacity: unset;
+}
+
+.profile-btn {
+  height: 31px;
+  width: 15px;
+  padding: 2px 0 0 0;
+  border-radius: 0px .25rem .25rem 0px;
+  border-color: #444;
+}
+
+.profile-btn:hover {
+   background-color: #444;
+   border-color: #444 !important;
+   color: #fff;
 }
 
 /* Remove default number input spinners */
@@ -536,9 +597,10 @@ input::placeholder {
 }
 
 .inputPlayer {
-   border-radius: 0px .25rem .25rem 0px !important;
+   border-radius: 0px !important;
    border-left: none !important;
-   width: 103px;
+   border-right: none !important;
+   width: 88px;
 }
 
 .inputTeam {
@@ -618,9 +680,9 @@ input::placeholder {
    position: absolute;
    display: flex;
    flex-direction: column;
-   top: 0;
+   top: -10;
    left: 100%;
-   font-size: 14px;
+   font-size: 13px;
    background-color: #2a2a2a;
    border: 1px solid #444444;
    border-radius: .2rem 0px 0px .2rem;
@@ -629,7 +691,8 @@ input::placeholder {
    white-space: nowrap;
    padding: 2px 0;
    z-index: 999;
-   max-height: 66px;
+   max-height: 85px;
+   min-height: 85px;
    max-width: 200px;
    scrollbar-color: #2a2a2a #444444;
    scrollbar-width: thin;
@@ -645,7 +708,7 @@ input::placeholder {
 
 .dropdown-divider {
    border-top: 1px solid #444;
-   margin: 4px;
+   margin: 0px;
 }
 
 .flag-option,
@@ -765,7 +828,7 @@ input::placeholder {
 
 .score-btn {
    height: 30px; 
-   padding: 2px 2px 0px 2px;
+   padding: 2px;
 }
 
 .score-group .score-btn:first-child,

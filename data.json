@@ -1,6 +1,4 @@
 {
-  "ui_scale": 1,
-  "char_override": false,
   "player1": {
     "name": "",
     "id": "",
@@ -8,7 +6,8 @@
     "wl": "",
     "score": 0,
     "character": "",
-    "img": ""
+    "img": "",
+    "profile": ""
   },
   "player2": {
     "name": "",
@@ -17,7 +16,8 @@
     "wl": "",
     "score": 0,
     "character": "",
-    "img": ""
+    "img": "",
+    "profile": ""
   },
   "team1": {
     "name": "",
@@ -31,6 +31,7 @@
   },
   "stage": "",
   "match_type": "",
+  "toptext": "",
   "caster1": {
     "name": "",
     "twitch": "",
@@ -41,7 +42,8 @@
     "twitch": "",
     "twitter": ""
   },
-  "toptext": "",
+  "ui_scale": 1,
+  "char_override": false,
   "port": 8008,
   "active_template": "default"
 }

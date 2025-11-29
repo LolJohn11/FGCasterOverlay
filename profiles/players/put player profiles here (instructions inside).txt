@@ -1,0 +1,23 @@
+Put the player profile files in this folder next to this text file.
+Sub-folders are supported, so create those for better file organization if needed.
+
+The player profile file must be in the ".json" format, with the following structure (values provided are an example):
+
+{ 
+"name": "Name",
+"clan": "ABC",
+"id": "1234567890",
+"img": "us",
+"characters": ["Chun-Li", "Ryu"]
+}
+
+If you want to specify a custom image, leave the "img" field value blank (with empty quotes like this "") and put the desired custom image next to the profile file and name it the same as the profile file (or it won't work). Example: Player.json and Player.png
+
+The "characters" field must be filled out with the characters the same way they are writen on the game's page on fightersgeneration.com - meaning you have to write, for example, "Ken Masters" instead of "Ken" for this to work.
+This field also supports characters from different games which can be present in the same list. Just put characters from different games in the "characters" array.
+Also, if you want to explicitly specify a multi-game character list (if, for example, you are afraid that a character name might get picked up by the wrong game if they have similar-named characters), than that field must be structured like this:
+     
+"characters": {
+	"tekken8": ["Jin Kazama", "Reina"],
+	"sf6": ["Ryu", "Guile"]
+	}

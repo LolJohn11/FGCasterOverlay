@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, jsonify, url_for, abort, send_from_directory, send_file, g
 from flask_socketio import SocketIO, emit
 from pathlib import Path
-import json, os, sys, time, logging, re, click, threading, subprocess, runpy
+import json, os, sys, time, logging, re, click, threading, subprocess, runpy, base64
 
 # ---------- Rich logging setup ----------
 from rich.logging import RichHandler
@@ -356,6 +356,148 @@ def characters_status():
         "slug": CHAR_SCRAPER_STATE.get("slug") or "",
         "started_at": CHAR_SCRAPER_STATE.get("started_at") or 0.0,
     })
+
+@app.route('/profiles/players/list')
+def list_player_profiles():
+    """List player profiles and folders at a given path."""
+    # Get the subfolder path from query parameter (e.g., ?path=My%20Clan)
+    subfolder = request.args.get('path', '').strip()
+    
+    # Build the full path
+    if subfolder:
+        profiles_dir = Path(resource_path("profiles", "players")) / subfolder
+    else:
+        profiles_dir = Path(resource_path("profiles", "players"))
+    
+    # Ensure base directory exists
+    base_dir = Path(resource_path("profiles", "players"))
+    base_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Check if requested path exists and is within profiles/players
+    if not profiles_dir.exists() or not profiles_dir.is_dir():
+        return jsonify({"error": "Path not found"}), 404
+    
+    # Security check: ensure we're still within profiles/players
+    try:
+        profiles_dir.resolve().relative_to(base_dir.resolve())
+    except ValueError:
+        return jsonify({"error": "Invalid path"}), 403
+    
+    items = []
+    
+    try:
+        # List folders first, then files
+        entries = sorted(profiles_dir.iterdir(), key=lambda p: (not p.is_dir(), p.name.lower()))
+        
+        for entry in entries:
+            if entry.is_dir():
+                # It's a folder
+                items.append({
+                    "type": "folder",
+                    "name": entry.name,
+                    "path": str(Path(subfolder) / entry.name) if subfolder else entry.name
+                })
+            elif entry.suffix == ".json":
+                # It's a profile file
+                try:
+                    data = json.loads(entry.read_text(encoding="utf-8"))
+                    # Build the full relative path from profiles/players root
+                    if subfolder:
+                        full_path = str(Path(subfolder) / entry.stem)
+                    else:
+                        full_path = entry.stem
+                    
+                    items.append({
+                        "type": "profile",
+                        "id": entry.stem,
+                        "name": data.get("name", entry.stem),
+                        "file": entry.name,
+                        "path": full_path
+                    })
+                except Exception as e:
+                    log.warning(f"Failed to read profile {entry.name}: {e}")
+                    continue
+                    
+    except Exception as e:
+        log.error(f"Failed to scan profiles directory: {e}")
+        return jsonify({"error": "Failed to scan directory"}), 500
+    
+    return jsonify({
+        "items": items,
+        "current_path": subfolder,
+        "parent_path": str(Path(subfolder).parent) if subfolder and subfolder != '.' else None
+    })
+    
+@app.route('/profiles/players/<path:profile_id>')
+def get_player_profile(profile_id):
+    """Get a specific player profile by ID (can include subfolder path)."""
+    profiles_dir = Path(resource_path("profiles", "players"))
+    
+    # profile_id might be just "filename" or "subfolder/filename"
+    # Try with .json extension
+    if not profile_id.endswith('.json'):
+        profile_id_json = f"{profile_id}.json"
+    else:
+        profile_id_json = profile_id
+        profile_id = profile_id[:-5]  # Remove .json for image search
+    
+    profile_path = profiles_dir / profile_id_json
+    
+    if not profile_path.exists():
+        return jsonify({"error": "Profile not found"}), 404
+    
+    # Security check: ensure we're still within profiles/players
+    try:
+        profile_path.resolve().relative_to(profiles_dir.resolve())
+    except ValueError:
+        return jsonify({"error": "Invalid path"}), 403
+    
+    try:
+        data = json.loads(profile_path.read_text(encoding="utf-8"))
+        
+        # Check for custom image if img field is blank
+        if not data.get("img") or data.get("img").strip() == "":
+            # Look for image files with the same name
+            image_extensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg']
+            profile_stem = profile_path.stem  # filename without extension
+            profile_dir = profile_path.parent
+            
+            for ext in image_extensions:
+                image_path = profile_dir / f"{profile_stem}{ext}"
+                if image_path.exists():
+                    # Read image and convert to base64 data URL
+                    try:
+                        import base64
+                        image_data = image_path.read_bytes()
+                        
+                        # Determine MIME type
+                        mime_types = {
+                            '.png': 'image/png',
+                            '.jpg': 'image/jpeg',
+                            '.jpeg': 'image/jpeg',
+                            '.gif': 'image/gif',
+                            '.webp': 'image/webp',
+                            '.svg': 'image/svg+xml'
+                        }
+                        mime_type = mime_types.get(ext.lower(), 'image/png')
+                        
+                        # Create data URL
+                        base64_data = base64.b64encode(image_data).decode('utf-8')
+                        data_url = f"data:{mime_type};base64,{base64_data}"
+                        
+                        # Add custom_img field to response
+                        data['custom_img'] = data_url
+                        #log.info(f"Found custom image for profile {profile_id}: {image_path.name}")
+                        break
+                        
+                    except Exception as e:
+                        log.warning(f"Failed to read custom image {image_path.name}: {e}")
+                        continue
+        
+        return jsonify(data)
+    except Exception as e:
+        log.error(f"Failed to read profile {profile_id}: {e}")
+        return jsonify({"error": "Failed to read profile"}), 500
 
 # --- preserve config keys when saving UI updates ---
 PRESERVE_KEYS = ('port', 'active_template')
@@ -779,7 +921,8 @@ def reset_players():
         "wl": "",
         "score": 0,
         "character": "",
-        "img": ""
+        "img": "",
+        "profile": ""
     }
     cleared["player2"] = {
         "name": "",
@@ -788,7 +931,8 @@ def reset_players():
         "wl": "",
         "score": 0,
         "character": "",
-        "img": ""
+        "img": "",
+        "profile": ""
     }
 
     # Persist while preserving server-owned keys no matter what
@@ -837,7 +981,8 @@ def reset_all():
             "wl": "",
             "score": 0,
             "character": "",
-            "img": ""
+            "img": "",
+            "profile": ""
         },
         "player2": {
             "name": "",
@@ -846,7 +991,8 @@ def reset_all():
             "wl": "",
             "score": 0,
             "character": "",
-            "img": ""
+            "img": "",
+            "profile": ""
         },
         "team1": {
             "name": "",

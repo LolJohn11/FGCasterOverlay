@@ -125,6 +125,12 @@
 						<button type="button" id="player1IdToggle" class="btn btn-sm btn-outline-secondary id-toggle" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Player 1 ID" onclick="togglePlayerId(1)"><i class="fa-solid fa-hashtag fa-xs"></i></button>
                         <input name="player1_name" placeholder="P1 Name" class="inputPlayer form-control sr-2" value="" />
 						<input name="player1_id" placeholder="P1 ID" class="form-control sr-2 inputPlayer" style="display:none;" value="" />
+						<span data-bs-toggle="tooltip" data-bs-placement="bottom" title="P1 Profiles">
+							<button id="P1ProfileBtn" class="btn btn-sm btn-outline-secondary profile-btn" data-player="1" onclick="toggleProfileMenu(1)">
+								<i class="fa-solid fa-caret-down fa-2xs"></i>
+							</button>
+						</span>
+						<div id="p1ProfileDropdown" class="profile-dropdown hidden" data-player="1"></div>
                     </div>
                     <div class="form-inline sb-2 row" style="width: 203px;">
                         <div class="btn-group btn-group-sm WLside mr-2" style="margin-right: 4px !important;" role="group">
@@ -191,6 +197,12 @@
 						<button type="button" id="player2IdToggle" class="btn btn-sm btn-outline-secondary id-toggle" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Player 2 ID" onclick="togglePlayerId(2)"><i class="fa-solid fa-hashtag fa-xs"></i></button>
                         <input name="player2_name" placeholder="P2 Name" class="form-control sr-2 inputPlayer" value="" />
 						<input name="player2_id" placeholder="P2 ID" class="form-control sr-2 inputPlayer" style="display:none;" value="" />
+						<span data-bs-toggle="tooltip" data-bs-placement="bottom" title="P2 Profiles">
+							<button id="P2ProfileBtn" class="btn btn-sm btn-outline-secondary profile-btn" data-player="2" onclick="toggleProfileMenu(2)">
+								<i class="fa-solid fa-caret-down fa-2xs"></i>
+							</button>
+						</span>
+						<div id="p2ProfileDropdown" class="profile-dropdown hidden" data-player="2"></div>
                     </div>
                     <div class="form-inline sb-2 row" style="width: 203px;">
                         <div class="btn-group btn-group-sm WLside mr-2" style="margin-right: 4px !important;" role="group">
@@ -493,6 +505,622 @@
 
 })();
 
+// ===== Player Profile Picker =====
+
+let activeProfileDropdown = null;
+window.__profileList = [];
+window.__currentProfilePath = '';
+window.__selectedProfiles = { 1: '', 2: '' };
+
+// Load player profiles from backend for a specific path
+async function loadPlayerProfiles(path = '') {
+    try {
+        const url = '/profiles/players/list' + (path ? '?path=' + encodeURIComponent(path) : '');
+        const res = await fetch(url, { cache: 'no-store' });
+        
+        if (!res.ok) {
+            console.warn('[PROFILE] Failed to load profiles');
+            window.__profileList = [{ type: 'message', name: '— No profiles found —' }];
+            window.__currentProfilePath = '';
+            updateProfileButtonStates(false); // Disable buttons
+            return;
+        }
+        
+        const data = await res.json();
+        const items = data.items || [];
+        window.__currentProfilePath = data.current_path || '';
+        
+        // Build the list with parent navigation if not at root
+        window.__profileList = [];
+        
+		
+        // Add "--None--" option at root level only to clear profile
+        if (!window.__currentProfilePath) {
+            window.__profileList.push({ type: 'clear', id: '', name: '--None--' });
+        }
+		
+        // Add back/up navigation if we're in a subfolder
+        if (data.parent_path !== null) {
+            window.__profileList.push({ 
+                type: 'back', 
+                name: '← Back',
+                path: data.parent_path === '.' ? '' : data.parent_path
+            });
+        }
+        
+        // Add folders and profiles
+        window.__profileList.push(...items);
+        
+        // Check if there are any actual profiles (not just folders or messages)
+        const hasProfiles = items.some(item => item.type === 'profile' || item.type === 'folder');
+        updateProfileButtonStates(hasProfiles);
+        
+        console.log('[PROFILE] Loaded', items.length, 'items at path:', path || '(root)');
+    } catch (e) {
+        console.error('[PROFILE] Error loading profiles:', e);
+        window.__profileList = [{ type: 'message', name: '— Error loading profiles —' }];
+        window.__currentProfilePath = '';
+        updateProfileButtonStates(false); // Disable buttons
+    }
+}
+
+// Enable or disable profile buttons based on whether profiles exist
+function updateProfileButtonStates(hasProfiles) {
+    const p1Btn = document.getElementById('P1ProfileBtn');
+    const p2Btn = document.getElementById('P2ProfileBtn');
+    
+    if (hasProfiles) {
+        p1Btn?.classList.remove('disabled');
+        p2Btn?.classList.remove('disabled');
+        p1Btn?.removeAttribute('disabled');
+        p2Btn?.removeAttribute('disabled');
+    } else {
+        p1Btn?.classList.add('disabled');
+        p2Btn?.classList.add('disabled');
+        p1Btn?.setAttribute('disabled', 'disabled');
+        p2Btn?.setAttribute('disabled', 'disabled');
+    }
+}
+
+function buildProfileMenu(player) {
+    const menu = document.querySelector(player === 1 ? '#p1ProfileDropdown' : '#p2ProfileDropdown');
+    if (!menu) {
+        console.error('Profile menu not found for player', player);
+        return;
+    }
+
+    const list = window.__profileList || [];
+    menu.innerHTML = '';
+
+    // If no items loaded yet, show loading message
+    if (list.length === 0) {
+        const loading = document.createElement('div');
+        loading.className = 'profile-dropdown-item';
+        loading.textContent = '— Loading profiles… —';
+        loading.style.pointerEvents = 'none';
+        loading.style.opacity = '0.6';
+        menu.appendChild(loading);
+        return;
+    }
+
+    // Add each item
+    list.forEach(item => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'profile-dropdown-item';
+        
+        if (item.type === 'clear') {
+            // Clear/reset option (--None--)
+            itemDiv.textContent = item.name;
+            itemDiv.style.fontStyle = 'italic';
+            itemDiv.style.borderBottom = '1px solid #444';
+            itemDiv.addEventListener('click', () => clearPlayerProfile(player));
+            
+        } else if (item.type === 'folder') {
+            // Folder item with icon
+            itemDiv.innerHTML = `<i class="fa-solid fa-folder" style="margin-right: 8px; color: #ffd700;"><\/i>${item.name}`;
+            itemDiv.addEventListener('click', () => navigateToFolder(player, item.path));
+            
+        } else if (item.type === 'back') {
+            // Back navigation
+            itemDiv.textContent = item.name;
+            itemDiv.style.fontStyle = 'italic';
+            itemDiv.style.borderBottom = '1px solid #444';
+            itemDiv.addEventListener('click', () => navigateToFolder(player, item.path));
+            
+        } else if (item.type === 'profile') {
+			// Profile item with icon
+			itemDiv.innerHTML = `<i class="fa-solid fa-user" style="margin-right: 8px; color: #4a9eff;"><\/i>${item.name}`;
+			// Store the full path in a data attribute
+			itemDiv.dataset.profilePath = item.path || item.id;
+			
+			// Highlight if this profile is currently selected
+			const selectedProfileId = window.__selectedProfiles?.[player] || '';
+			if (selectedProfileId && (item.path === selectedProfileId || item.id === selectedProfileId)) {
+				itemDiv.classList.add('selected');
+			}
+			
+			itemDiv.addEventListener('click', () => {
+				const fullPath = itemDiv.dataset.profilePath;
+				selectProfile(player, fullPath, item.name);
+			});
+            
+        } else if (item.type === 'none') {
+            // "No profile" option
+            itemDiv.textContent = item.name;
+            itemDiv.style.fontStyle = 'italic';
+            itemDiv.style.opacity = '0.7';
+            itemDiv.addEventListener('click', () => selectProfile(player, '', ''));
+            
+        } else {
+            // Message items (loading, error, etc.)
+            itemDiv.textContent = item.name;
+            itemDiv.style.pointerEvents = 'none';
+            itemDiv.style.opacity = '0.6';
+        }
+        
+        menu.appendChild(itemDiv);
+    });
+}
+
+async function navigateToFolder(player, path) {
+    console.log('[PROFILE] Navigating to folder:', path);
+    
+    // Load profiles for the new path
+    await loadPlayerProfiles(path);
+    
+    // Rebuild the menu
+    buildProfileMenu(player);
+}
+
+function toggleProfileMenu(player) {
+    
+    const btn  = document.getElementById(player === 1 ? 'P1ProfileBtn' : 'P2ProfileBtn');
+    
+    // Don't open if button is disabled
+    if (btn?.classList.contains('disabled') || btn?.hasAttribute('disabled')) {
+        console.log('[PROFILE] Button is disabled, not opening menu');
+        return;
+    }
+    
+    console.log('[PROFILE] Toggle menu for player', player);
+    
+    const menu = document.querySelector(player === 1 ? '#p1ProfileDropdown' : '#p2ProfileDropdown');
+    
+    if (!btn || !menu) {
+        console.error('[PROFILE] Button or menu not found:', { btn, menu });
+        return;
+    }
+
+    const wasHidden = menu.classList.contains('hidden');
+
+    // Close any open profile dropdown
+    document.querySelectorAll('.profile-dropdown').forEach(m => {
+        if (!m.classList.contains('hidden')) {
+            m.classList.add('hidden');
+            if (m._profilePortal && m._profilePortal.isPortaled) unportalProfileDropdown(m);
+        }
+    });
+
+    if (wasHidden) {
+        // Reset to root when opening
+        window.__currentProfilePath = '';
+        
+        buildProfileMenu(player);
+
+        // Lock width before portaling
+        const prevStyles = {
+            position: menu.style.position,
+            visibility: menu.style.visibility,
+            display: menu.style.display,
+            width: menu.style.width
+        };
+        menu.classList.remove('hidden');
+        menu.style.visibility = 'hidden';
+        menu.style.display = 'block';
+        menu.style.position = 'absolute';
+
+        const measured = Math.ceil(menu.getBoundingClientRect().width);
+        menu.style.width = measured > 0 ? measured + 'px' : '200px';
+
+        menu.style.position = prevStyles.position;
+        menu.style.visibility = '';
+        menu.style.display = prevStyles.display;
+
+        menu.scrollTop = 0;
+
+        portalProfileDropdown(menu, btn);
+
+        activeProfileDropdown = menu;
+        console.log('[PROFILE] Menu opened');
+    } else {
+        menu.classList.add('hidden');
+        if (menu._profilePortal && menu._profilePortal.isPortaled) unportalProfileDropdown(menu);
+        console.log('[PROFILE] Menu closed');
+    }
+}
+
+function portalProfileDropdown(menu, anchorBtn) {
+    if (!menu._profilePortal) menu._profilePortal = {};
+    menu._profilePortal.parent = menu.parentNode;
+    menu._profilePortal.next   = menu.nextSibling;
+    menu._profilePortal.isPortaled = true;
+
+    document.body.appendChild(menu);
+    menu.style.position = 'fixed';
+    menu.style.transform = 'none';
+    menu.style.zIndex = '9999';
+
+    const place = () => {
+        const r = anchorBtn.getBoundingClientRect();
+        const mRect = menu.getBoundingClientRect();
+        const margin = 6;
+
+        let top  = r.top;
+        let left = r.right + margin;
+
+        if (left + mRect.width > window.innerWidth - margin) {
+            left = Math.max(margin, r.left - margin - mRect.width);
+        }
+
+        if (top + mRect.height > window.innerHeight - margin) {
+            top = Math.max(margin, window.innerHeight - margin - mRect.height);
+        }
+        if (top < margin) top = margin;
+
+        menu.style.left = Math.round(left) - 2 + 'px';
+        //menu.style.top  = Math.round(top) + 'px';
+		menu.style.top  = 0 + 'px';
+    };
+
+    menu._profilePortal.place = place;
+    place();
+
+    const onResize = () => { place(); };
+    window.addEventListener('resize', onResize, true);
+    menu._profilePortal.removeFns = [['resize', onResize, true]];
+}
+
+function unportalProfileDropdown(menu) {
+    if (!menu._profilePortal) return;
+
+    if (menu._profilePortal.removeFns) {
+        menu._profilePortal.removeFns.forEach(([evt, fn, opt]) => window.removeEventListener(evt, fn, opt));
+    }
+
+    const { parent, next } = menu._profilePortal;
+    if (parent) {
+        if (next) parent.insertBefore(menu, next);
+        else parent.appendChild(menu);
+    }
+
+    menu.style.position = '';
+    menu.style.left = '';
+    menu.style.top = '';
+    menu.style.zIndex = '';
+    menu.style.width = '';
+
+    menu._profilePortal.isPortaled = false;
+}
+
+async function selectProfile(player, profileId, profileName) {
+    console.log(`[PROFILE] Player ${player} selected profile:`, profileId, profileName);
+    
+    // Close the menu first
+    const menu = document.querySelector(player === 1 ? '#p1ProfileDropdown' : '#p2ProfileDropdown');
+    if (menu) {
+        menu.classList.add('hidden');
+        if (menu._profilePortal && menu._profilePortal.isPortaled) unportalProfileDropdown(menu);
+        if (activeProfileDropdown === menu) {
+            activeProfileDropdown = null;
+        }
+    }
+    
+    // If "No profile" was selected, clear everything
+    if (!profileId) {
+        console.log('[PROFILE] No profile selected, clearing character prioritization');
+        window.__selectedProfiles[player] = '';
+        clearCharacterPrioritization(player);
+        buildCharMenu(player);
+        updateProfileButtonColor(player);
+        emitUpdate();
+        return;
+    }
+    
+    // Store the selected profile ID
+    window.__selectedProfiles[player] = profileId;
+    updateProfileButtonColor(player);
+    
+    // Fetch the full profile data
+    try {
+        const res = await fetch(`/profiles/players/${profileId}`, { cache: 'no-store' });
+        if (!res.ok) {
+            console.error('[PROFILE] Failed to fetch profile data');
+            return;
+        }
+        
+        const profileData = await res.json();
+        console.log('[PROFILE] Loaded profile data:', profileData);
+        
+        // Apply profile data to player fields
+        await applyProfileToPlayer(player, profileData);
+        
+    } catch (e) {
+        console.error('[PROFILE] Error loading profile:', e);
+    }
+}
+
+async function clearPlayerProfile(player) {
+    console.log(`[PROFILE] Clearing profile for player ${player}`);
+    
+    // Close the menu
+    const menu = document.querySelector(player === 1 ? '#p1ProfileDropdown' : '#p2ProfileDropdown');
+    if (menu) {
+        menu.classList.add('hidden');
+        if (menu._profilePortal && menu._profilePortal.isPortaled) unportalProfileDropdown(menu);
+        if (activeProfileDropdown === menu) {
+            activeProfileDropdown = null;
+        }
+    }
+    
+    // Check if a profile is currently selected
+    const hasProfile = window.__selectedProfiles?.[player] && window.__selectedProfiles[player] !== '';
+    
+    if (!hasProfile) {
+        console.log('[PROFILE] No profile selected, nothing to clear');
+        return; // Exit early if no profile is selected
+    }
+    
+    // Clear the selected profile
+    window.__selectedProfiles[player] = '';
+    
+    // Clear character prioritization
+    clearCharacterPrioritization(player);
+    buildCharMenu(player);
+	updateProfileButtonColor(player);
+    
+    // Reset player values to defaults
+    const prevHydrating = isHydrating;
+    isHydrating = true;
+    
+    try {
+        // Clear name
+        const nameInput = document.querySelector(`[name="player${player}_name"]`);
+        if (nameInput) {
+            nameInput.value = '';
+            nameInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        
+        // Clear ID
+        const idInput = document.querySelector(`[name="player${player}_id"]`);
+        if (idInput) {
+            idInput.value = '';
+            idInput.dispatchEvent(new Event('input', { bubbles: true }));
+            updatePlayerIdToggleColor(player);
+        }
+        
+        // Clear clan
+        const clanInput = document.querySelector(`[name="player${player}_clan"]`);
+        if (clanInput) {
+            clanInput.value = '';
+            clanInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        
+        // Clear image
+        const { btn, hidden } = playerEls(player);
+        if (btn) {
+            btn.innerHTML = '';
+            const icon = document.createElement('i');
+            icon.className = 'fa-regular fa-image';
+            icon.style.color = '#f1f1f1';
+            btn.appendChild(icon);
+        }
+        if (hidden) hidden.value = '';
+        selectedImageByPlayer[player] = null;
+        
+        console.log('[PROFILE] Cleared all profile data for player', player);
+        
+    } finally {
+        isHydrating = prevHydrating;
+        emitUpdate(); // Save the cleared state
+    }
+}
+
+async function applyProfileToPlayer(player, profileData) {
+    const prevHydrating = isHydrating;
+    isHydrating = true; // Prevent emitting during updates
+    
+    try {
+        // 1. Update name
+        if (profileData.name) {
+            const nameInput = document.querySelector(`[name="player${player}_name"]`);
+            if (nameInput) {
+                nameInput.value = profileData.name;
+                nameInput.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        }
+        
+        // 2. Update clan
+        if (profileData.clan !== undefined) {
+            const clanInput = document.querySelector(`[name="player${player}_clan"]`);
+            if (clanInput) {
+                clanInput.value = profileData.clan || '';
+                clanInput.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        }
+        
+        // 3. Update ID
+        if (profileData.id !== undefined) {
+            const idInput = document.querySelector(`[name="player${player}_id"]`);
+            if (idInput) {
+                idInput.value = profileData.id || '';
+                idInput.dispatchEvent(new Event('input', { bubbles: true }));
+                updatePlayerIdToggleColor(player);
+            }
+        }
+        
+        // 4. Update image
+        // Priority: custom_img (data URL) > img (country code)
+        if (profileData.custom_img) {
+            // Custom image provided as data URL
+            applyCustomImageToPlayer(player, profileData.custom_img);
+        } else if (profileData.img && profileData.img.trim() !== '') {
+            // Country code provided
+            const countryCode = profileData.img.trim().toLowerCase();
+            await applyFlagToPlayer(player, countryCode);
+        }
+        
+        // 5. Prioritize characters if provided
+        if (profileData.characters) {
+            const gameSlug = getCurrentGameSlug();
+            prioritizeProfileCharacters(player, profileData.characters, gameSlug);
+            // Rebuild the character menu to show prioritized list
+            buildCharMenu(player);
+        } else {
+            // Clear any existing prioritization
+            clearCharacterPrioritization(player);
+            buildCharMenu(player);
+        }
+        
+        console.log('[PROFILE] Applied profile to player', player);
+        
+    } finally {
+        isHydrating = prevHydrating;
+        // Now emit the update
+        emitUpdate();
+    }
+}
+
+async function applyFlagToPlayer(player, countryCode) {
+    try {
+        // Load country list to get the full country name
+        const countries = await fetchCountriesOnce();
+        const country = countries.find(c => c.code.toLowerCase() === countryCode);
+        
+        if (!country) {
+            console.warn('[PROFILE] Country code not found:', countryCode);
+            return;
+        }
+        
+        // Update the player's image using the existing flag selection logic
+        const { btn, hidden } = playerEls(player);
+        if (!btn || !hidden) return;
+        
+        // Set button to show flag (1x1 for display)
+        btn.innerHTML = `<img src="/static/flags/flags/1x1/${countryCode}.svg" alt="${country.name}" class="image-selected">`;
+        
+        // Set hidden input to 4x3 flag path (for overlay)
+        hidden.value = `/static/flags/flags/4x3/${countryCode}.svg`;
+        
+        // Update internal state
+        selectedImageByPlayer[player] = countryCode;
+        
+        console.log('[PROFILE] Applied flag:', country.name, 'to player', player);
+        
+    } catch (e) {
+        console.error('[PROFILE] Error applying flag:', e);
+    }
+}
+
+function applyCustomImageToPlayer(player, dataUrl) {
+    const { btn, hidden } = playerEls(player);
+    if (!btn || !hidden) return;
+    
+    // Set button to show custom image
+    btn.innerHTML = `<img src="${dataUrl}" class="image-selected">`;
+    
+    // Set hidden input to data URL (for overlay)
+    hidden.value = dataUrl;
+    
+    // Update internal state
+    selectedImageByPlayer[player] = "custom";
+    
+    console.log('[PROFILE] Applied custom image to player', player);
+}
+
+// Click-outside to close profile menus (independent handler)
+document.addEventListener('click', (e) => {
+    const isProfileMenu = e.target.closest('.profile-dropdown');
+    const isProfileBtn  = e.target.closest('.profile-btn');
+    if (!isProfileMenu && !isProfileBtn) {
+        document.querySelectorAll('.profile-dropdown').forEach(m => {
+            if (!m.classList.contains('hidden')) {
+                m.classList.add('hidden');
+                if (m._profilePortal && m._profilePortal.isPortaled) unportalProfileDropdown(m);
+            }
+        });
+        activeProfileDropdown = null;
+    }
+});
+
+// Type-to-jump for profile menus
+document.addEventListener('keydown', (e) => {
+    if (!activeProfileDropdown || activeProfileDropdown.classList.contains('hidden')) return;
+    
+    const t = e.target;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+    const key = e.key;
+    if (key && key.length === 1) {
+        const ch = key.toLowerCase();
+        if (ch >= 'a' && ch <= 'z') {
+            e.preventDefault();
+            profileAlphaJump(activeProfileDropdown, ch);
+        }
+    }
+});
+
+function profileAlphaJump(dd, ch) {
+    if (!dd || dd.classList.contains('hidden')) return;
+
+    const items = dd.querySelectorAll('.profile-dropdown-item');
+    if (!items.length) return;
+
+    const now     = Date.now();
+    const lastKey = dd.dataset.profileTypeaheadKey || '';
+    const lastIdx = parseInt(dd.dataset.profileTypeaheadIndex || '-1', 10);
+    const lastTs  = parseInt(dd.dataset.profileTypeaheadTs || '0', 10);
+    const sameKeyAndRecent = (lastKey === ch) && (now - lastTs < 800);
+
+    const matches = [];
+    items.forEach((el, i) => {
+        const txt = (el.textContent || '').trim().toLowerCase();
+        if (txt.startsWith(ch)) matches.push(i);
+    });
+    if (!matches.length) return;
+
+    let targetIdx;
+    if (sameKeyAndRecent) {
+        const pos = Math.max(0, matches.indexOf(lastIdx));
+        targetIdx = matches[(pos + 1) % matches.length];
+    } else {
+        targetIdx = matches[0];
+    }
+
+    const targetItem = items[targetIdx];
+    if (!targetItem) return;
+
+    targetItem.scrollIntoView({ block: 'nearest' });
+
+    dd.dataset.profileTypeaheadKey   = ch;
+    dd.dataset.profileTypeaheadIndex = String(targetIdx);
+    dd.dataset.profileTypeaheadTs    = String(now);
+}
+
+// Update profile button color based on whether a profile is selected
+function updateProfileButtonColor(player) {
+    const btn = document.getElementById(player === 1 ? 'P1ProfileBtn' : 'P2ProfileBtn');
+    if (!btn) return;
+    
+    const hasProfile = window.__selectedProfiles?.[player] && window.__selectedProfiles[player] !== '';
+    
+    if (hasProfile) {
+        btn.style.color = '#0ead00'; // Green when profile selected
+    } else {
+        btn.style.color = '#f1f1f1'; // Default gray when no profile
+    }
+}
+
 // ===== Player character picker =====
 
 // fallback when there is no per-game list
@@ -528,23 +1156,27 @@ function buildCharMenu(player) {
     if (!menu) return;
 
     const current = document.querySelector('[name="player' + player + '_character"]').value || '';
+    
+    // Check if we have a prioritized list for this player
+    const playerList = window.__playerCharacterLists?.[player];
+    const hasPriority = playerList && playerList.hasPriority;
+    
     const list = getCharacterSource();
 	
-	// If the list is the special "updating" placeholder, render only that row.
-	// Use the same class as any normal item so it inherits identical styling.
-	if (list.length === 1 && (list[0].id === '__updating__' || list[0].label === '— Updating list… —')) {
-	  menu.innerHTML = '';
-	  const upd = document.createElement('div');
-	  upd.className = 'char-dropdown-item';   // same class as other items
-	  upd.textContent = '— Updating list… —';
-	  upd.style.pointerEvents = 'none';       // disabled
-	  menu.appendChild(upd);
-	  return;
-	}
+    // If the list is the special "updating" placeholder, render only that row.
+    if (list.length === 1 && (list[0].id === '__updating__' || list[0].label === '— Updating list… —')) {
+      menu.innerHTML = '';
+      const upd = document.createElement('div');
+      upd.className = 'char-dropdown-item';
+      upd.textContent = '— Updating list… —';
+      upd.style.pointerEvents = 'none';
+      menu.appendChild(upd);
+      return;
+    }
 
     menu.innerHTML = '';
 
-    // always add "None" / reset at the top
+    // Always add "None" / reset at the top
     const noneItem = document.createElement('div');
     noneItem.className = 'char-dropdown-item';
     noneItem.textContent = '--None--';
@@ -556,23 +1188,150 @@ function buildCharMenu(player) {
     });
     menu.appendChild(noneItem);
 
-    // actual characters
-    list.forEach(item => {
-        const id    = item.id    ?? item;
-        const label = item.label ?? item;
+    if (hasPriority) {
+        // Add priority characters section (no header, just items)
+        playerList.priority.forEach(item => {
+            const id = item.id ?? item;
+            const label = item.label ?? item;
+            
+            const btn = document.createElement('div');
+            btn.className = 'char-dropdown-item';
+            btn.textContent = label || id || 'Unknown';
+            if ((id || '') === current) {
+                btn.classList.add('selected');
+            }
+            btn.addEventListener('click', () => selectCharacter(player, id || '', label || id || ''));
+            menu.appendChild(btn);
+        });
+        
+        // Add divider
+        const divider = document.createElement('div');
+        divider.className = 'char-dropdown-divider';
+        menu.appendChild(divider);
+        
+        // Add other characters (no header)
+        playerList.others.forEach(item => {
+            const id = item.id ?? item;
+            const label = item.label ?? item;
+            
+            const btn = document.createElement('div');
+            btn.className = 'char-dropdown-item';
+            btn.textContent = label || id || 'Unknown';
+            if ((id || '') === current) {
+                btn.classList.add('selected');
+            }
+            btn.addEventListener('click', () => selectCharacter(player, id || '', label || id || ''));
+            menu.appendChild(btn);
+        });
+        
+    } else {
+        // No prioritization - show all characters normally
+        list.forEach(item => {
+            const id = item.id ?? item;
+            const label = item.label ?? item;
 
-        // if the list already had an empty / "no character" entry, skip it
-        if (id === '' || label === '— No character —') return;
+            // Skip empty entries
+            if (id === '' || label === '— No character —') return;
 
-        const btn = document.createElement('div');
-        btn.className = 'char-dropdown-item';
-        btn.textContent = label || id || 'Unknown';
-        if ((id || '') === current) {
-            btn.classList.add('selected');
+            const btn = document.createElement('div');
+            btn.className = 'char-dropdown-item';
+            btn.textContent = label || id || 'Unknown';
+            if ((id || '') === current) {
+                btn.classList.add('selected');
+            }
+            btn.addEventListener('click', () => selectCharacter(player, id || '', label || id || ''));
+            menu.appendChild(btn);
+        });
+    }
+}
+
+// Reorder character list to prioritize profile characters
+function prioritizeProfileCharacters(player, profileCharacters, gameSlug) {
+    if (!profileCharacters) {
+        return;
+    }
+    
+    // Determine which character list to use
+    let charactersForGame = [];
+    
+    if (Array.isArray(profileCharacters)) {
+        // Old format: flat array, use for any game
+        charactersForGame = profileCharacters;
+    } else if (typeof profileCharacters === 'object') {
+        // New format: object with game keys
+        if (!gameSlug) {
+            console.warn('[PROFILE] No game slug provided for multi-game profile');
+            return;
         }
-        btn.addEventListener('click', () => selectCharacter(player, id || '', label || id || ''));
-        menu.appendChild(btn);
+        charactersForGame = profileCharacters[gameSlug] || [];
+    }
+    
+    if (charactersForGame.length === 0) {
+        console.log('[PROFILE] No characters found for current game:', gameSlug);
+        // Clear prioritization if no characters for this game
+        clearCharacterPrioritization(player);
+        return;
+    }
+    
+    const fullList = getCharacterSource();
+    
+    // Skip if we only have the fallback/placeholder list
+    if (fullList.length <= 1 || fullList[0].id === '__updating__') {
+        return;
+    }
+    
+    // Separate profile characters from the rest
+    const priorityChars = [];
+    const otherChars = [];
+    
+    fullList.forEach(char => {
+        const charId = char.id ?? char;
+        const charLabel = char.label ?? char;
+        
+        // Skip empty entries
+        if (charId === '' || charLabel === '— No character —') {
+            return;
+        }
+        
+        // Check if this character is in the profile's list (case-insensitive)
+        const isProfileChar = charactersForGame.some(pc => 
+            pc.toLowerCase() === charId.toLowerCase() || 
+            pc.toLowerCase() === charLabel.toLowerCase()
+        );
+        
+        if (isProfileChar) {
+            priorityChars.push(char);
+        } else {
+            otherChars.push(char);
+        }
     });
+    
+    // Store the reordered list for this player
+    if (!window.__playerCharacterLists) {
+        window.__playerCharacterLists = {};
+    }
+    
+    window.__playerCharacterLists[player] = {
+        priority: priorityChars,
+        others: otherChars,
+        hasPriority: priorityChars.length > 0
+    };
+    
+    console.log('[PROFILE] Prioritized', priorityChars.length, 'characters for player', player, 'game:', gameSlug);
+}
+
+// Get the current game slug from template metadata
+function getCurrentGameSlug() {
+    const meta = window.__templateMeta || {};
+    const templateName = document.getElementById('templateSelect')?.value || '';
+    return meta[templateName]?.game || null;
+}
+
+// Clear character prioritization for a player
+function clearCharacterPrioritization(player) {
+    if (window.__playerCharacterLists) {
+        delete window.__playerCharacterLists[player];
+    }
 }
 
 // open/close a char menu for player
@@ -661,7 +1420,7 @@ function portalDropdown(menu, anchorBtn) {
 		}
 		if (top < margin) top = margin;
 
-		menu.style.left = Math.round(left) + 'px';
+		menu.style.left = Math.round(left) - 2 + 'px';
 		//menu.style.top  = Math.round(top) + 'px';
 		menu.style.top  = 0 + 'px';
     };
@@ -913,12 +1672,70 @@ async function loadCharacterListForActiveGame(preferredTemplateName, { force = f
   buildCharMenu(1);
   buildCharMenu(2);
   //console.log('[LOAD_CHARS] Complete!');
+  
+  // Restore profile character prioritization after characters are loaded
+  await restoreProfilePrioritization();
+}
+
+// Restore profile character prioritization from saved data
+async function restoreProfilePrioritization() {
+    const data = window.__savedData;
+    if (!data) return;
+    
+    const gameSlug = getCurrentGameSlug();
+    
+    // Restore player 1 profile
+    // Only restore from saved data if we don't already have a profile selected in memory
+    const p1ProfileToUse = window.__selectedProfiles[1] || data.player1?.profile;
+    if (p1ProfileToUse) {
+        window.__selectedProfiles[1] = p1ProfileToUse;
+		updateProfileButtonColor(1);
+        try {
+            const res = await fetch(`/profiles/players/${p1ProfileToUse}`, { cache: 'no-store' });
+            if (res.ok) {
+                const profileData = await res.json();
+                if (profileData.characters) {
+                    prioritizeProfileCharacters(1, profileData.characters, gameSlug);
+                    buildCharMenu(1);
+                    console.log('[PROFILE] Restored character prioritization for player 1');
+                }
+            }
+        } catch (e) {
+            console.warn('[PROFILE] Could not restore player 1 profile:', e);
+        }
+    } else {
+        updateProfileButtonColor(1);
+    }
+    
+    // Restore player 2 profile
+    // Only restore from saved data if we don't already have a profile selected in memory
+    const p2ProfileToUse = window.__selectedProfiles[2] || data.player2?.profile;
+    if (p2ProfileToUse) {
+        window.__selectedProfiles[2] = p2ProfileToUse;
+		updateProfileButtonColor(2);
+        try {
+            const res = await fetch(`/profiles/players/${p2ProfileToUse}`, { cache: 'no-store' });
+            if (res.ok) {
+                const profileData = await res.json();
+                if (profileData.characters) {
+                    prioritizeProfileCharacters(2, profileData.characters, gameSlug);
+                    buildCharMenu(2);
+                    console.log('[PROFILE] Restored character prioritization for player 2');
+                }
+            }
+        } catch (e) {
+            console.warn('[PROFILE] Could not restore player 2 profile:', e);
+        }
+    } else {
+        updateProfileButtonColor(2); // Ensure color is correct even if no profile
+    }
 }
 
 // --- Initial load (no extra template change listeners here; your existing UI handles that) ---
 document.addEventListener('DOMContentLoaded', () => {
 	loadCharacterListForActiveGame();
-
+	loadPlayerProfiles();
+	
 	// If you keep the charOverride checkbox: emitting an update will
 	// let the backend decide to run the scraper; UI just reflects it.
 	const cb = document.getElementById('charOverride');
@@ -1958,6 +2775,8 @@ function bindTemplateSelect() {
             
             // refresh char list for the chosen template
             await loadCharacterListForActiveGame(choice);
+            // NOTE: restoreProfilePrioritization is called inside loadCharacterListForActiveGame
+            
             // re-emit full data
             emitUpdate();
         } catch (e) {
@@ -2159,25 +2978,27 @@ function getFormData() {
     return {
         ui_scale: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ui-scale')) || 1,
         char_override: !!document.getElementById('charOverride')?.checked,
-		active_template: (document.getElementById('templateSelect')?.value || 'default'),
+        active_template: (document.getElementById('templateSelect')?.value || 'default'),
 
         player1: {
             name: json.player1_name,
-			id: json.player1_id,
+            id: json.player1_id,
             clan: json.player1_clan,
             wl: json.player1_wl,
             score: json.player1_score,
-			character: json.player1_character,
-            img: json.player1Img || ''
+            character: json.player1_character,
+            img: json.player1Img || '',
+            profile: window.__selectedProfiles?.[1] || ''
         },
         player2: {
             name: json.player2_name,
-			id: json.player2_id,
+            id: json.player2_id,
             clan: json.player2_clan,
             wl: json.player2_wl,
             score: json.player2_score,
-			character: json.player2_character,
-            img: json.player2Img || ''
+            character: json.player2_character,
+            img: json.player2Img || '',
+            profile: window.__selectedProfiles?.[2] || ''
         },
 
         // Read team fields by selector so they’re captured even while popovers are open
@@ -2305,6 +3126,40 @@ async function loadDataAndHydrate() {
             const ls = parseFloat(localStorage.getItem('ui_scale') || '1') || 1;
             uiSelect.value = String(ls);
         }
+		
+		// Restore selected profiles
+        if (data.player1?.profile) {
+            window.__selectedProfiles[1] = data.player1.profile;
+            // Reload the profile to restore character prioritization
+            try {
+                const res = await fetch(`/profiles/players/${data.player1.profile}`, { cache: 'no-store' });
+                if (res.ok) {
+                    const profileData = await res.json();
+                    if (profileData.characters) {
+                        prioritizeProfileCharacters(1, profileData.characters);
+                    }
+                }
+            } catch (e) {
+                console.warn('[PROFILE] Could not restore player 1 profile:', e);
+            }
+        }
+        
+        if (data.player2?.profile) {
+            window.__selectedProfiles[2] = data.player2.profile;
+            // Reload the profile to restore character prioritization
+            try {
+                const res = await fetch(`/profiles/players/${data.player2.profile}`, { cache: 'no-store' });
+                if (res.ok) {
+                    const profileData = await res.json();
+                    if (profileData.characters) {
+                        prioritizeProfileCharacters(2, profileData.characters);
+                    }
+                }
+            } catch (e) {
+                console.warn('[PROFILE] Could not restore player 2 profile:', e);
+            }
+        }
+		
     } catch (e) {
         // no saved data yet – fine, keep defaults
     } finally {
@@ -2948,7 +3803,16 @@ function resetPValues() {
     isHydrating = true;
 
     try {
-        // Names / clans / W/L
+        
+		// Clear player profiles
+        window.__selectedProfiles[1] = '';
+        window.__selectedProfiles[2] = '';
+        clearCharacterPrioritization(1);
+        clearCharacterPrioritization(2);
+		updateProfileButtonColor(1);
+        updateProfileButtonColor(2);
+		
+		// Names / clans / W/L
         uiOnly_Set(document.querySelector('[name="player1_name"]'), '');
 		uiOnly_Set(document.querySelector('[name="player1_id"]'), '');
         uiOnly_Set(document.querySelector('[name="player1_clan"]'), '');

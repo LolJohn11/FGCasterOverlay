@@ -4,3 +4,8 @@ dist/
 FGCaster-Overlay.exe
 FGCaster-Overlay.spec
 build.bat
+
+profiles/players/*
+!profiles/players/*.txt
+profiles/teams/*
+!profiles/teams/*.txt
