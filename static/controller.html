@@ -165,7 +165,7 @@
                     </div>
                 </div>
                 <div class="form-section d-flex align-items-start" style="margin-bottom: 0px;">
-                    <div class="d-flex flex-wrap" style="width: 108px; gap: 4px;">
+                    <div class="d-flex flex-wrap" style="width: 108px; row-gap: 5px; column-gap: 4px;">
                         <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Swap Players" style="width: 50px; height: 31px;" onclick="swapPlayers()">
                             <i class="fa-solid fa-arrow-right-arrow-left fa-sm"></i><i class="fa-solid fa-font fa-sm"></i>
                         </button>
@@ -660,6 +660,9 @@ function buildProfileMenu(player) {
         
         menu.appendChild(itemDiv);
     });
+	
+	// Mark overflowing items for scrolling
+    markOverflowingDropdownItems(menu, '.profile-dropdown-item', 128);
 }
 
 async function navigateToFolder(player, path) {
@@ -720,7 +723,8 @@ function toggleProfileMenu(player) {
         menu.style.position = 'absolute';
 
         const measured = Math.ceil(menu.getBoundingClientRect().width);
-        menu.style.width = measured > 0 ? measured + 'px' : '200px';
+        //menu.style.width = measured > 0 ? measured + 'px' : '200px';
+		menu.style.width = 140 + "px";
 
         menu.style.position = prevStyles.position;
         menu.style.visibility = '';
@@ -1243,6 +1247,10 @@ function buildCharMenu(player) {
             menu.appendChild(btn);
         });
     }
+	
+	// Mark overflowing items for scrolling
+    markOverflowingDropdownItems(menu, '.char-dropdown-item', 128);
+	
 }
 
 // Reorder character list to prioritize profile characters
@@ -2339,6 +2347,85 @@ function markOverflowingLabels() {
             }
         });
     }, 100);
+}
+
+// Generic function to mark overflowing text in dropdown items
+function markOverflowingDropdownItems(dropdown, itemSelector, containerMaxWidth = 155) {
+    if (!dropdown) return;
+    
+    setTimeout(() => {
+        const items = dropdown.querySelectorAll(itemSelector);
+        
+        items.forEach(item => {
+            // Skip items that shouldn't scroll
+            if (item.classList.contains('char-dropdown-header') || 
+                item.classList.contains('char-dropdown-divider') ||
+                item.classList.contains('profile-dropdown-divider')) {
+                return;
+            }
+            
+            // Skip if already processed
+            if (item.querySelector('.dropdown-text-wrapper')) {
+                return;
+            }
+            
+            // Find icon and text
+            let iconElement = null;
+            let textContent = '';
+            
+            const icon = item.querySelector('i, img');
+            if (icon) {
+                iconElement = icon.cloneNode(true); // Clone to preserve
+                // Get text content (everything except the icon)
+                textContent = Array.from(item.childNodes)
+                    .filter(node => node !== icon && node.nodeType === Node.TEXT_NODE)
+                    .map(node => node.textContent)
+                    .join('')
+                    .trim();
+            } else {
+                textContent = item.textContent.trim();
+            }
+            
+            if (!textContent) return;
+            
+            // Measure the text width
+            const tempSpan = document.createElement('span');
+            tempSpan.style.visibility = 'hidden';
+            tempSpan.style.position = 'absolute';
+            tempSpan.style.whiteSpace = 'nowrap';
+            tempSpan.textContent = textContent;
+            document.body.appendChild(tempSpan);
+            
+            const textWidth = tempSpan.getBoundingClientRect().width;
+            document.body.removeChild(tempSpan);
+            
+            // Create the text wrapper (like country-name-wrapper in image dropdown)
+            const textWrapper = document.createElement('span');
+            textWrapper.className = 'dropdown-text-wrapper';
+            
+            // Check if text overflows
+            if (textWidth > containerMaxWidth) {
+                const overflowAmount = textWidth - containerMaxWidth + 5;
+                
+                const scrollableSpan = document.createElement('span');
+                scrollableSpan.className = 'scrollable-text';
+                scrollableSpan.style.setProperty('--scroll-distance', `-${overflowAmount}px`);
+                scrollableSpan.textContent = textContent;
+                
+                textWrapper.appendChild(scrollableSpan);
+            } else {
+                // No overflow, just plain text
+                textWrapper.textContent = textContent;
+            }
+            
+            // Rebuild the item
+            item.innerHTML = '';
+            if (iconElement) {
+                item.appendChild(iconElement);
+            }
+            item.appendChild(textWrapper);
+        });
+    }, 5);
 }
 
 /////////Team Image dropdowns

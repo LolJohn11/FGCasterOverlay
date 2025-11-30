@@ -276,7 +276,7 @@ input::placeholder,
 
 .btn-group-vertical {
 	justify-content: flex-start;
-	height: 66px;
+	height: 67px;
 }
 
 .btn-group-vertical .btn {
@@ -315,13 +315,6 @@ input::placeholder,
 .score-group input {
    width: 40px;
    text-align: center;
-}
-
-.score-btn {
-   padding: 2px 6px;
-   min-height: 30px;
-   width: 22px;
-   /* font-size: 0.8rem; */
 }
 
 .char-select-btn {
@@ -364,6 +357,7 @@ input::placeholder,
 	max-height: 85px;
     min-height: 85px;
     overflow-y: auto;
+	overflow-x: clip;
     z-index: 999;
 	flex-direction: column;
 	scrollbar-color: #2a2a2a #444444;
@@ -771,6 +765,29 @@ input::placeholder {
    animation: scroll-text 6s linear infinite;
 }
 
+.dropdown-text-wrapper {
+    display: inline-block;
+    overflow: hidden;
+    max-width: 128px;
+    vertical-align: text-top;
+}
+
+.profile-dropdown-item i,
+.profile-dropdown-item img,
+.char-dropdown-item i,
+.char-dropdown-item img {
+    vertical-align: middle;
+    margin-right: 8px;
+}
+
+.char-dropdown-item .dropdown-text-wrapper {
+    max-width: 128px;
+}
+
+.profile-dropdown-item .dropdown-text-wrapper {
+    max-width: 128px;
+}
+
 @keyframes scroll-text {
 
    0%,
@@ -814,7 +831,7 @@ input::placeholder {
 #player1_l_btn,
 #player2_w_btn,
 #player2_l_btn {
-	height: 30px;
+	height: 31px;
 	width: 30px;
 	padding: 4px 0px;
 }
@@ -823,11 +840,13 @@ input::placeholder {
 #player2_score {
    border-radius: 0px;
    width: 33px;
-   height: 30px;
+   height: 31px;
 }
 
 .score-btn {
-   height: 30px; 
+   height: 31px; 
+   min-height: 31px;
+   width: 22px;
    padding: 2px;
 }
 

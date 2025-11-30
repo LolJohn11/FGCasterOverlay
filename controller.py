@@ -1073,6 +1073,14 @@ def on_disconnect():
         log.info("Client disconnected")
 
 if __name__ == '__main__':
+    
+    if IS_FROZEN:
+        import ctypes
+        try:
+            ctypes.windll.kernel32.SetConsoleTitleW("FGCaster Overlay - Controller")
+        except Exception:
+            pass  # Silently fail if not on Windows or if it doesn't work
+    
     USE_RELOADER = False if IS_FROZEN else True
 
     run_kwargs = dict(debug=not IS_FROZEN, use_reloader=USE_RELOADER)
