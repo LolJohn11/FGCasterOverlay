@@ -604,18 +604,35 @@ function buildProfileMenu(player) {
     }
 
     // Add each item
-    list.forEach(item => {
+    list.forEach((item, index) => {
+        // Handle the clear option specially - create split button row
+        if (item.type === 'clear') {
+            // Create container for split buttons
+            const splitRow = document.createElement('div');
+            splitRow.className = 'profile-split-row';
+            
+            // Left button: --None--
+            const noneBtn = document.createElement('div');
+            noneBtn.className = 'profile-dropdown-item split-button';
+            noneBtn.innerHTML = '<i class="fa-solid fa-xmark fa-sm" style="margin-right: 4px;"></i>Empty';
+            noneBtn.addEventListener('click', () => clearPlayerProfile(player));
+            
+            // Right button: Save
+            const saveBtn = document.createElement('div');
+            saveBtn.className = 'profile-dropdown-item split-button save-btn';
+            saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk fa-sm" style="margin-right: 4px;"></i>Save';
+            saveBtn.addEventListener('click', () => openSaveProfileDialog(player));
+            
+            splitRow.appendChild(noneBtn);
+            splitRow.appendChild(saveBtn);
+            menu.appendChild(splitRow);
+            return; // Skip normal processing for this item
+        }
+        
         const itemDiv = document.createElement('div');
         itemDiv.className = 'profile-dropdown-item';
         
-        if (item.type === 'clear') {
-            // Clear/reset option (--None--)
-            itemDiv.textContent = item.name;
-            itemDiv.style.fontStyle = 'italic';
-            itemDiv.style.borderBottom = '1px solid #444';
-            itemDiv.addEventListener('click', () => clearPlayerProfile(player));
-            
-        } else if (item.type === 'folder') {
+        if (item.type === 'folder') {
             // Folder item with icon
             itemDiv.innerHTML = `<i class="fa-solid fa-folder" style="margin-right: 8px; color: #ffd700;"><\/i>${item.name}`;
             itemDiv.addEventListener('click', () => navigateToFolder(player, item.path));
@@ -926,6 +943,158 @@ async function clearPlayerProfile(player) {
     } finally {
         isHydrating = prevHydrating;
         emitUpdate(); // Save the cleared state
+    }
+}
+
+async function openSaveProfileDialog(player) {
+    console.log('[PROFILE] Opening save dialog for player', player);
+    
+    // Close the dropdown
+    const menu = document.querySelector(player === 1 ? '#p1ProfileDropdown' : '#p2ProfileDropdown');
+    if (menu) {
+        menu.classList.add('hidden');
+        if (menu._profilePortal && menu._profilePortal.isPortaled) unportalProfileDropdown(menu);
+        if (activeProfileDropdown === menu) {
+            activeProfileDropdown = null;
+        }
+    }
+    
+    // Gather current player data
+    const name = document.querySelector(`[name="player${player}_name"]`)?.value?.trim() || '';
+    const clan = document.querySelector(`[name="player${player}_clan"]`)?.value?.trim() || '';
+    const id = document.querySelector(`[name="player${player}_id"]`)?.value?.trim() || '';
+    const character = document.querySelector(`[name="player${player}_character"]`)?.value?.trim() || '';
+    
+    // Get player image info
+    const imgHidden = document.getElementById(player === 1 ? 'player1Img' : 'player2Img');
+    const imgValue = imgHidden?.value?.trim() || '';
+    
+    // Determine image type and data
+    let imgType = '';
+    let imgData = '';
+    let customImgData = '';
+    
+    if (imgValue) {
+        if (imgValue.includes('/flags/flags/')) {
+            // It's a flag - extract country code
+            const match = imgValue.match(/\/flags\/flags\/\d+x\d+\/([a-z]{2})\.svg/i);
+            if (match) {
+                imgType = 'flag';
+                imgData = match[1].toLowerCase(); // Country code like 'ua', 'us'
+                console.log('[PROFILE] Detected flag image:', imgData);
+            }
+        } else if (imgValue.startsWith('data:image/')) {
+            // It's a custom image (data URL)
+            imgType = 'custom';
+            customImgData = imgValue;
+            console.log('[PROFILE] Detected custom image (data URL)');
+        }
+    }
+    
+    // Get current game slug
+    const gameSlug = getCurrentGameSlug();
+    
+    // Validate that we have at least a name
+    if (!name) {
+        alert('Please enter a player name before saving a profile.');
+        return;
+    }
+    
+    // Create a default filename from the player name
+    const defaultFileName = name.replace(/[^a-zA-Z0-9_\-]/g, '_') + '.json';
+    
+    // Prompt user for filename
+    const fileName = prompt(
+        `Save profile for "${name}":\n\nEnter filename (without .json):`,
+        defaultFileName.replace('.json', '')
+    );
+    
+    if (!fileName) {
+        console.log('[PROFILE] Save cancelled');
+        return;
+    }
+    
+    try {
+        // First, check if file exists
+        const checkRes = await fetch('/profiles/players/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                file_path: fileName,
+                check_exists_only: true
+            })
+        });
+        
+        if (!checkRes.ok) {
+            const error = await checkRes.json();
+            throw new Error(error.error || 'Failed to check file');
+        }
+        
+        const checkResult = await checkRes.json();
+        
+        // If file exists, ask for confirmation
+        if (checkResult.exists) {
+            const confirmed = confirm(
+                `A profile named "${checkResult.file_path}" already exists.\n\nDo you want to overwrite it?`
+            );
+            
+            if (!confirmed) {
+                console.log('[PROFILE] Overwrite cancelled');
+                return;
+            }
+        }
+        
+        // Build the profile data
+        const profileData = {
+            name: name,
+            clan: clan,
+            id: id,
+            file_path: fileName
+        };
+        
+        // Add character if selected
+        if (character) {
+            profileData.character = character;
+            if (gameSlug) {
+                profileData.game_slug = gameSlug;
+            }
+        }
+        
+        // Add image data
+        if (imgType) {
+            profileData.img_type = imgType;
+            if (imgType === 'flag') {
+                profileData.img = imgData; // Country code
+            } else if (imgType === 'custom') {
+                profileData.custom_img_data = customImgData; // Base64 data URL
+            }
+        }
+        
+        // Now save the file
+        const saveRes = await fetch('/profiles/players/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(profileData)
+        });
+        
+        if (!saveRes.ok) {
+            const error = await saveRes.json();
+            throw new Error(error.error || 'Failed to save profile');
+        }
+        
+        const result = await saveRes.json();
+        console.log('[PROFILE] Profile saved successfully:', result.file_path);
+        
+        // Show success message
+        const action = result.overwritten ? 'overwritten' : 'saved';
+        alert(`Profile ${action} successfully as:\n${result.file_path}`);
+        
+        // Reload the profile list to show the new/updated profile
+        await loadPlayerProfiles(window.__currentProfilePath);
+        
+    } catch (e) {
+        console.error('[PROFILE] Error saving profile:', e);
+        alert(`Failed to save profile:\n${e.message}`);
     }
 }
 

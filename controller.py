@@ -499,6 +499,134 @@ def get_player_profile(profile_id):
         log.error(f"Failed to read profile {profile_id}: {e}")
         return jsonify({"error": "Failed to read profile"}), 500
 
+@app.route('/profiles/players/save', methods=['POST'])
+def save_player_profile():
+    """Save a player profile to a JSON file."""
+    try:
+        payload = request.get_json(force=True) or {}
+        
+        # Extract profile data
+        profile_data = {
+            "name": payload.get("name", "").strip(),
+            "clan": payload.get("clan", "").strip(),
+            "id": payload.get("id", "").strip(),
+        }
+        
+        # Add character if provided
+        character = payload.get("character", "").strip()
+        game_slug = payload.get("game_slug", "").strip()
+        
+        if character and game_slug:
+            # Use game-specific format
+            profile_data["characters"] = {
+                game_slug: [character]
+            }
+        elif character:
+            # Fallback to simple array if no game slug
+            profile_data["characters"] = [character]
+        
+        # Handle image
+        img_value = payload.get("img", "").strip()
+        img_type = payload.get("img_type", "").strip()  # 'flag' or 'custom'
+        custom_img_data = payload.get("custom_img_data", "").strip()  # base64 data URL
+        
+        if img_type == "flag" and img_value:
+            # It's a flag - save the country code
+            profile_data["img"] = img_value
+        elif img_type == "custom" and custom_img_data:
+            # It's a custom image - save the image file and leave img field empty
+            profile_data["img"] = ""  # Empty but present
+        else:
+            # No image or unknown type
+            profile_data["img"] = ""
+        
+        # Get the file path (relative to profiles/players)
+        file_path = payload.get("file_path", "").strip()
+        if not file_path:
+            return jsonify({"error": "No file path provided"}), 400
+        
+        # Ensure it ends with .json
+        if not file_path.endswith('.json'):
+            file_path += '.json'
+        
+        # Build full path
+        profiles_dir = Path(resource_path("profiles", "players"))
+        full_path = profiles_dir / file_path
+        
+        # Security check: ensure we're still within profiles/players
+        try:
+            full_path.resolve().relative_to(profiles_dir.resolve())
+        except ValueError:
+            return jsonify({"error": "Invalid file path"}), 403
+        
+        # Check if file already exists
+        file_exists = full_path.exists()
+        
+        # If checking for existence (not actually saving yet)
+        if payload.get("check_exists_only"):
+            return jsonify({"exists": file_exists, "file_path": file_path})
+        
+        # Create parent directories if needed
+        full_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Write the profile JSON
+        full_path.write_text(
+            json.dumps(profile_data, ensure_ascii=False, indent=2),
+            encoding="utf-8"
+        )
+        
+        # If custom image, save it next to the profile
+        if img_type == "custom" and custom_img_data:
+            try:
+                import base64
+                import re
+                
+                # Parse the data URL to get mime type and base64 data
+                match = re.match(r'data:image/(\w+);base64,(.+)', custom_img_data)
+                if match:
+                    img_format = match.group(1)  # png, jpeg, etc.
+                    img_base64 = match.group(2)
+                    
+                    # Determine file extension
+                    ext_map = {
+                        'jpeg': 'jpg',
+                        'jpg': 'jpg',
+                        'png': 'png',
+                        'gif': 'gif',
+                        'webp': 'webp',
+                        'svg+xml': 'svg'
+                    }
+                    ext = ext_map.get(img_format.lower(), 'png')
+                    
+                    # Create image file path (same name as profile, different extension)
+                    img_path = full_path.with_suffix(f'.{ext}')
+                    
+                    # Decode and write image
+                    img_data = base64.b64decode(img_base64)
+                    img_path.write_bytes(img_data)
+                    
+                    log.info(f"Saved custom image: {img_path.name}")
+                else:
+                    log.warning("Could not parse custom image data URL")
+            except Exception as e:
+                log.error(f"Failed to save custom image: {e}")
+                # Don't fail the whole save if image save fails
+        
+        action = "Overwritten" if file_exists else "Saved"
+        log.info(f"{action} player profile: {file_path}")
+        return jsonify({"success": True, "file_path": file_path, "overwritten": file_exists})
+        
+    except Exception as e:
+        log.error(f"Failed to save profile: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/profiles/players/directory')
+def get_profiles_directory():
+    """Get the absolute path to the profiles/players directory."""
+    profiles_dir = Path(resource_path("profiles", "players"))
+    profiles_dir.mkdir(parents=True, exist_ok=True)
+    return jsonify({"path": str(profiles_dir.resolve())})
+
 # --- preserve config keys when saving UI updates ---
 PRESERVE_KEYS = ('port', 'active_template')
 def save_data_preserving(update: dict, preserve_keys=PRESERVE_KEYS):

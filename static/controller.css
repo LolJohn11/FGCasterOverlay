@@ -428,6 +428,27 @@ input::placeholder,
    color: #fff;
 }
 
+.profile-split-row {
+    display: flex;
+    border-bottom: 1px solid #444;
+}
+
+.profile-dropdown-item.split-button {
+    flex: 1;
+    text-align: center;
+    font-size: 12px;
+    padding: 6px;
+}
+
+.profile-dropdown-item.split-button.save-btn {
+   /*background-color: #1a4a1a; */
+   border-left: 1px solid #444;
+}
+/*
+.profile-dropdown-item.split-button.save-btn:hover {
+    background-color: #2a5a2a;
+}
+*/
 /* Remove default number input spinners */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
