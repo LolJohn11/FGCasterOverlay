@@ -576,9 +576,11 @@ async function loadPlayerProfiles(path = '') {
     }
 }
 
+
 // Enable or disable profile buttons based on whether profiles exist
 function updateProfileButtonStates(hasProfiles) {
-    const p1Btn = document.getElementById('P1ProfileBtn');
+    /*
+	const p1Btn = document.getElementById('P1ProfileBtn');
     const p2Btn = document.getElementById('P2ProfileBtn');
     
     if (hasProfiles) {
@@ -592,7 +594,9 @@ function updateProfileButtonStates(hasProfiles) {
         p1Btn?.setAttribute('disabled', 'disabled');
         p2Btn?.setAttribute('disabled', 'disabled');
     }
+*/
 }
+
 
 function buildProfileMenu(player) {
     const menu = document.querySelector(player === 1 ? '#p1ProfileDropdown' : '#p2ProfileDropdown');
@@ -1278,7 +1282,8 @@ async function loadTeamProfiles(path = '') {
 }
 
 function updateTeamProfileButtonStates(hasProfiles) {
-    const t1Btn = document.getElementById('team1ProfileBtn');
+    /*
+	const t1Btn = document.getElementById('team1ProfileBtn');
     const t2Btn = document.getElementById('team2ProfileBtn');
     
     if (hasProfiles) {
@@ -1292,6 +1297,7 @@ function updateTeamProfileButtonStates(hasProfiles) {
         t1Btn?.setAttribute('disabled', 'disabled');
         t2Btn?.setAttribute('disabled', 'disabled');
     }
+	*/
 }
 
 function updateTeamProfileButtonColor(team) {
