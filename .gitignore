@@ -9,3 +9,5 @@ profiles/players/*
 !profiles/players/*.txt
 profiles/teams/*
 !profiles/teams/*.txt
+
+*.psd

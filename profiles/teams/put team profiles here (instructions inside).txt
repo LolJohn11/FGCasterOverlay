@@ -1,0 +1,11 @@
+Put the team profile files in this folder next to this text file.
+Sub-folders are supported, so create those for better file organization if needed.
+
+The team profile file must be in the ".json" format, with the following structure (values provided are an example):
+
+{ 
+"name": "Name",
+"img": "us"
+}
+
+If you want to specify a custom image, leave the "img" field value blank (with empty quotes like this "") and put the desired custom image next to the profile file and name it the same as the profile file (or it won't work). Example: Team.json and Team.png

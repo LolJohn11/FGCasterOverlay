@@ -162,7 +162,7 @@ body {
 
 .teamName {
    height: 31px;
-   width: 104px !important;
+   width: 89px !important;
 }
 
 .tooltip,
@@ -639,13 +639,15 @@ input::placeholder {
 }
 
 .teamRow input[type="text"] {
-   border-top-left-radius: 0px;
-   border-bottom-left-radius: 0px;
+  /* border-top-left-radius: 0px;
+   border-bottom-left-radius: 0px; */
+   border-radius: 0px;
+   border-right: none;
 }
 
 .teamScore {
    width: 39px;
-   height: 30px;
+   height: 31px;
    text-align: center;
 }
 

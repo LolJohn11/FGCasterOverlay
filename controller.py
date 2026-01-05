@@ -627,6 +627,221 @@ def get_profiles_directory():
     profiles_dir.mkdir(parents=True, exist_ok=True)
     return jsonify({"path": str(profiles_dir.resolve())})
 
+@app.route('/profiles/teams/list')
+def list_team_profiles():
+    """List all team profile JSON files."""
+    # Get the subfolder path from query parameter
+    subfolder = request.args.get('path', '').strip()
+    
+    # Build the full path
+    if subfolder:
+        profiles_dir = Path(resource_path("profiles", "teams")) / subfolder
+    else:
+        profiles_dir = Path(resource_path("profiles", "teams"))
+    
+    # Ensure base directory exists
+    base_dir = Path(resource_path("profiles", "teams"))
+    base_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Check if requested path exists and is within profiles/teams
+    if not profiles_dir.exists() or not profiles_dir.is_dir():
+        return jsonify({"error": "Path not found"}), 404
+    
+    # Security check
+    try:
+        profiles_dir.resolve().relative_to(base_dir.resolve())
+    except ValueError:
+        return jsonify({"error": "Invalid path"}), 403
+    
+    items = []
+    
+    try:
+        # List folders first, then files
+        entries = sorted(profiles_dir.iterdir(), key=lambda p: (not p.is_dir(), p.name.lower()))
+        
+        for entry in entries:
+            if entry.is_dir():
+                items.append({
+                    "type": "folder",
+                    "name": entry.name,
+                    "path": str(Path(subfolder) / entry.name) if subfolder else entry.name
+                })
+            elif entry.suffix == ".json":
+                try:
+                    data = json.loads(entry.read_text(encoding="utf-8"))
+                    if subfolder:
+                        full_path = str(Path(subfolder) / entry.stem)
+                    else:
+                        full_path = entry.stem
+                    
+                    items.append({
+                        "type": "profile",
+                        "id": entry.stem,
+                        "name": data.get("name", entry.stem),
+                        "file": entry.name,
+                        "path": full_path
+                    })
+                except Exception as e:
+                    log.warning(f"Failed to read team profile {entry.name}: {e}")
+                    continue
+    except Exception as e:
+        log.error(f"Failed to scan team profiles directory: {e}")
+        return jsonify({"error": "Failed to scan directory"}), 500
+    
+    return jsonify({
+        "items": items,
+        "current_path": subfolder,
+        "parent_path": str(Path(subfolder).parent) if subfolder and subfolder != '.' else None
+    })
+
+@app.route('/profiles/teams/<path:profile_id>')
+def get_team_profile(profile_id):
+    """Get a specific team profile by ID."""
+    profiles_dir = Path(resource_path("profiles", "teams"))
+    
+    if not profile_id.endswith('.json'):
+        profile_id = f"{profile_id}.json"
+    
+    profile_path = profiles_dir / profile_id
+    
+    if not profile_path.exists():
+        return jsonify({"error": "Profile not found"}), 404
+    
+    # Security check
+    try:
+        profile_path.resolve().relative_to(profiles_dir.resolve())
+    except ValueError:
+        return jsonify({"error": "Invalid path"}), 403
+    
+    try:
+        data = json.loads(profile_path.read_text(encoding="utf-8"))
+        
+        # Check for custom image if img field is blank
+        if not data.get("img") or data.get("img").strip() == "":
+            image_extensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg']
+            profile_stem = profile_path.stem
+            profile_dir = profile_path.parent
+            
+            for ext in image_extensions:
+                image_path = profile_dir / f"{profile_stem}{ext}"
+                if image_path.exists():
+                    try:
+                        import base64
+                        image_data = image_path.read_bytes()
+                        
+                        mime_types = {
+                            '.png': 'image/png',
+                            '.jpg': 'image/jpeg',
+                            '.jpeg': 'image/jpeg',
+                            '.gif': 'image/gif',
+                            '.webp': 'image/webp',
+                            '.svg': 'image/svg+xml'
+                        }
+                        mime_type = mime_types.get(ext.lower(), 'image/png')
+                        
+                        base64_data = base64.b64encode(image_data).decode('utf-8')
+                        data_url = f"data:{mime_type};base64,{base64_data}"
+                        data['custom_img'] = data_url
+                        log.info(f"Found custom image for team profile {profile_id}: {image_path.name}")
+                        break
+                    except Exception as e:
+                        log.warning(f"Failed to read custom image {image_path.name}: {e}")
+                        continue
+        
+        return jsonify(data)
+    except Exception as e:
+        log.error(f"Failed to read team profile {profile_id}: {e}")
+        return jsonify({"error": "Failed to read profile"}), 500
+
+@app.route('/profiles/teams/save', methods=['POST'])
+def save_team_profile():
+    """Save a team profile to a JSON file."""
+    try:
+        payload = request.get_json(force=True) or {}
+        
+        # Extract profile data
+        profile_data = {
+            "name": payload.get("name", "").strip(),
+        }
+        
+        # Handle image
+        img_value = payload.get("img", "").strip()
+        img_type = payload.get("img_type", "").strip()
+        custom_img_data = payload.get("custom_img_data", "").strip()
+        
+        if img_type == "flag" and img_value:
+            profile_data["img"] = img_value
+        elif img_type == "custom" and custom_img_data:
+            profile_data["img"] = ""
+        else:
+            profile_data["img"] = ""
+        
+        # Get the file path
+        file_path = payload.get("file_path", "").strip()
+        if not file_path:
+            return jsonify({"error": "No file path provided"}), 400
+        
+        if not file_path.endswith('.json'):
+            file_path += '.json'
+        
+        # Build full path
+        profiles_dir = Path(resource_path("profiles", "teams"))
+        full_path = profiles_dir / file_path
+        
+        # Security check
+        try:
+            full_path.resolve().relative_to(profiles_dir.resolve())
+        except ValueError:
+            return jsonify({"error": "Invalid path"}), 403
+        
+        # Check if file exists
+        file_exists = full_path.exists()
+        
+        if payload.get("check_exists_only"):
+            return jsonify({"exists": file_exists, "file_path": file_path})
+        
+        # Create directories
+        full_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Write profile
+        full_path.write_text(
+            json.dumps(profile_data, ensure_ascii=False, indent=2),
+            encoding="utf-8"
+        )
+        
+        # Save custom image if provided
+        if img_type == "custom" and custom_img_data:
+            try:
+                import base64
+                import re
+                
+                match = re.match(r'data:image/(\w+);base64,(.+)', custom_img_data)
+                if match:
+                    img_format = match.group(1)
+                    img_base64 = match.group(2)
+                    
+                    ext_map = {
+                        'jpeg': 'jpg', 'jpg': 'jpg', 'png': 'png',
+                        'gif': 'gif', 'webp': 'webp', 'svg+xml': 'svg'
+                    }
+                    ext = ext_map.get(img_format.lower(), 'png')
+                    
+                    img_path = full_path.with_suffix(f'.{ext}')
+                    img_data = base64.b64decode(img_base64)
+                    img_path.write_bytes(img_data)
+                    
+                    log.info(f"Saved custom team image: {img_path.name}")
+            except Exception as e:
+                log.error(f"Failed to save custom team image: {e}")
+        
+        action = "Overwritten" if file_exists else "Saved"
+        log.info(f"{action} team profile: {file_path}")
+        return jsonify({"success": True, "file_path": file_path, "overwritten": file_exists})
+        
+    except Exception as e:
+        log.error(f"Failed to save team profile: {e}")
+        return jsonify({"error": str(e)}), 500
+
 # --- preserve config keys when saving UI updates ---
 PRESERVE_KEYS = ('port', 'active_template')
 def save_data_preserving(update: dict, preserve_keys=PRESERVE_KEYS):
@@ -1079,12 +1294,14 @@ def reset_teams():
     cleared["team1"] = {
         "name": "",
         "score": 0,
-        "img": ""
+        "img": "",
+        "profile": ""
     }
     cleared["team2"] = {
         "name": "",
         "score": 0,
-        "img": ""
+        "img": "",
+        "profile": ""
     }
 
     # Persist while preserving server-owned keys no matter what
@@ -1125,12 +1342,14 @@ def reset_all():
         "team1": {
             "name": "",
             "score": 0,
-            "img": ""
+            "img": "",
+            "profile": ""
         },
         "team2": {
             "name": "",
             "score": 0,
-            "img": ""
+            "img": "",
+            "profile": ""
         },
         "stage": "",
         "match_type": "",

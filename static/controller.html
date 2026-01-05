@@ -338,7 +338,13 @@
                     </div>
                     <input type="file" id="customImgTeam1" data-team="1" accept="image/*" style="display: none;">
                     <input type="hidden" name="team1Img" id="team1Img" data-team="1" value="" />
-                    <input type="text" name="team1_name" placeholder="Team Name" class="form-control sr-2 teamName" value="" />
+                    <input type="text" name="team1_name" placeholder="T1 Name" class="form-control sr-2 teamName" value="" />
+					<span data-bs-toggle="tooltip" data-bs-placement="bottom" title="T1 Profiles">
+						<button id="team1ProfileBtn" class="btn btn-sm btn-outline-secondary profile-btn" data-team="1" onclick="toggleTeamProfileMenu(1)">
+							<i class="fa-solid fa-caret-down fa-2xs"></i>
+						</button>
+					</span>
+					<div id="team1ProfileDropdown" class="profile-dropdown hidden" data-team="1"></div>
                 </div>
                 <div class="teamRow sb-2 row" style="margin-top: 4px; gap: 4px;">
                     <input type="number" name="team1_score" id="team1_score" class="form-control teamScore" value="" inputmode="numeric" pattern="[0-9]*" />
@@ -356,7 +362,13 @@
                     </div>
                     <input type="file" id="customImgTeam2" data-team="2" accept="image/*" style="display: none;">
                     <input type="hidden" name="team2Img" id="team2Img" data-team="2" value="" />
-                    <input type="text" name="team2_name" placeholder="Team Name" class="form-control sr-2 teamName" value="" />
+                    <input type="text" name="team2_name" placeholder="T2 Name" class="form-control sr-2 teamName" value="" />
+					<span data-bs-toggle="tooltip" data-bs-placement="bottom" title="T2 Profiles">
+						<button id="team2ProfileBtn" class="btn btn-sm btn-outline-secondary profile-btn" data-team="2" onclick="toggleTeamProfileMenu(2)">
+							<i class="fa-solid fa-caret-down fa-2xs"></i>
+						</button>
+					</span>
+					<div id="team2ProfileDropdown" class="profile-dropdown hidden" data-team="2"></div>
                 </div>
                 <div class="teamRow sb-2 row" style="margin-top: 4px; gap: 4px;">
                     <input type="number" name="team2_score" id="team2_score" class="form-control teamScore" value="" inputmode="numeric" pattern="[0-9]*" />
@@ -1209,6 +1221,491 @@ function applyCustomImageToPlayer(player, dataUrl) {
     
     console.log('[PROFILE] Applied custom image to player', player);
 }
+
+// ===== Team Profile Picker =====
+
+let activeTeamProfileDropdown = null;
+window.__teamProfileList = [];
+window.__currentTeamProfilePath = '';
+window.__selectedTeamProfiles = { 1: '', 2: '' };
+
+// Load team profiles from backend
+async function loadTeamProfiles(path = '') {
+    try {
+        const url = '/profiles/teams/list' + (path ? '?path=' + encodeURIComponent(path) : '');
+        const res = await fetch(url, { cache: 'no-store' });
+        
+        if (!res.ok) {
+            console.warn('[TEAM-PROFILE] Failed to load profiles');
+            window.__teamProfileList = [{ type: 'message', name: '— No profiles found —' }];
+            window.__currentTeamProfilePath = '';
+            updateTeamProfileButtonStates(false);
+            return;
+        }
+        
+        const data = await res.json();
+        const items = data.items || [];
+        window.__currentTeamProfilePath = data.current_path || '';
+        
+        window.__teamProfileList = [];
+        
+        // Add "--None--" and "Save" at root
+        if (!window.__currentTeamProfilePath) {
+            window.__teamProfileList.push({ type: 'clear', id: '', name: '--None--' });
+        }
+        
+        // Add back navigation if in subfolder
+        if (data.parent_path !== null) {
+            window.__teamProfileList.push({ 
+                type: 'back', 
+                name: '← Back',
+                path: data.parent_path === '.' ? '' : data.parent_path
+            });
+        }
+        
+        window.__teamProfileList.push(...items);
+        
+        const hasProfiles = items.some(item => item.type === 'profile' || item.type === 'folder');
+        updateTeamProfileButtonStates(hasProfiles);
+        
+        console.log('[TEAM-PROFILE] Loaded', items.length, 'items');
+    } catch (e) {
+        console.error('[TEAM-PROFILE] Error loading profiles:', e);
+        window.__teamProfileList = [{ type: 'message', name: '— Error loading profiles —' }];
+        window.__currentTeamProfilePath = '';
+        updateTeamProfileButtonStates(false);
+    }
+}
+
+function updateTeamProfileButtonStates(hasProfiles) {
+    const t1Btn = document.getElementById('team1ProfileBtn');
+    const t2Btn = document.getElementById('team2ProfileBtn');
+    
+    if (hasProfiles) {
+        t1Btn?.classList.remove('disabled');
+        t2Btn?.classList.remove('disabled');
+        t1Btn?.removeAttribute('disabled');
+        t2Btn?.removeAttribute('disabled');
+    } else {
+        t1Btn?.classList.add('disabled');
+        t2Btn?.classList.add('disabled');
+        t1Btn?.setAttribute('disabled', 'disabled');
+        t2Btn?.setAttribute('disabled', 'disabled');
+    }
+}
+
+function updateTeamProfileButtonColor(team) {
+    const btn = document.getElementById(team === 1 ? 'team1ProfileBtn' : 'team2ProfileBtn');
+    if (!btn) return;
+    
+    const hasProfile = window.__selectedTeamProfiles?.[team] && window.__selectedTeamProfiles[team] !== '';
+    btn.style.color = hasProfile ? '#0ead00' : '#f1f1f1';
+}
+
+function buildTeamProfileMenu(team) {
+    const menu = document.querySelector(team === 1 ? '#team1ProfileDropdown' : '#team2ProfileDropdown');
+    if (!menu) {
+        console.error('Team profile menu not found for team', team);
+        return;
+    }
+
+    const list = window.__teamProfileList || [];
+    menu.innerHTML = '';
+
+    if (list.length === 0) {
+        const loading = document.createElement('div');
+        loading.className = 'profile-dropdown-item';
+        loading.textContent = '— Loading profiles… —';
+        loading.style.pointerEvents = 'none';
+        loading.style.opacity = '0.6';
+        menu.appendChild(loading);
+        return;
+    }
+
+    list.forEach(item => {
+        if (item.type === 'clear') {
+            const splitRow = document.createElement('div');
+            splitRow.className = 'profile-split-row';
+            
+            const noneBtn = document.createElement('div');
+            noneBtn.className = 'profile-dropdown-item split-button';
+            noneBtn.textContent = '--None--';
+            noneBtn.style.fontStyle = 'italic';
+            noneBtn.addEventListener('click', () => clearTeamProfile(team));
+            
+            const saveBtn = document.createElement('div');
+            saveBtn.className = 'profile-dropdown-item split-button save-btn';
+            saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk" style="margin-right: 4px;"></i>Save';
+            saveBtn.addEventListener('click', () => openSaveTeamProfileDialog(team));
+            
+            splitRow.appendChild(noneBtn);
+            splitRow.appendChild(saveBtn);
+            menu.appendChild(splitRow);
+            return;
+        }
+        
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'profile-dropdown-item';
+        
+        if (item.type === 'folder') {
+            itemDiv.innerHTML = `<i class="fa-solid fa-folder" style="margin-right: 8px; color: #ffd700;"><\/i>${item.name}`;
+            itemDiv.addEventListener('click', () => navigateToTeamFolder(team, item.path));
+            
+        } else if (item.type === 'back') {
+            itemDiv.textContent = item.name;
+            itemDiv.style.fontWeight = 'bold';
+            itemDiv.style.borderBottom = '1px solid #444';
+            itemDiv.style.marginBottom = '4px';
+            itemDiv.addEventListener('click', () => navigateToTeamFolder(team, item.path));
+            
+        } else if (item.type === 'profile') {
+            itemDiv.innerHTML = `<i class="fa-solid fa-flag" style="margin-right: 8px; color: #4a9eff;"><\/i>${item.name}`;
+            itemDiv.dataset.profilePath = item.path || item.id;
+            
+            const selectedProfileId = window.__selectedTeamProfiles?.[team] || '';
+            if (selectedProfileId && (item.path === selectedProfileId || item.id === selectedProfileId)) {
+                itemDiv.classList.add('selected');
+            }
+            
+            itemDiv.addEventListener('click', () => {
+                const fullPath = itemDiv.dataset.profilePath;
+                selectTeamProfile(team, fullPath, item.name);
+            });
+            
+        } else {
+            itemDiv.textContent = item.name;
+            itemDiv.style.pointerEvents = 'none';
+            itemDiv.style.opacity = '0.6';
+        }
+        
+        menu.appendChild(itemDiv);
+    });
+    
+    markOverflowingDropdownItems(menu, '.profile-dropdown-item', 180);
+}
+
+async function navigateToTeamFolder(team, path) {
+    await loadTeamProfiles(path);
+    buildTeamProfileMenu(team);
+}
+
+function toggleTeamProfileMenu(team) {
+    const btn = document.getElementById(team === 1 ? 'team1ProfileBtn' : 'team2ProfileBtn');
+    
+    if (btn?.classList.contains('disabled') || btn?.hasAttribute('disabled')) {
+        return;
+    }
+    
+    const menu = document.querySelector(team === 1 ? '#team1ProfileDropdown' : '#team2ProfileDropdown');
+    if (!btn || !menu) return;
+
+    const wasHidden = menu.classList.contains('hidden');
+
+    document.querySelectorAll('.profile-dropdown').forEach(m => {
+        if (!m.classList.contains('hidden')) {
+            m.classList.add('hidden');
+            if (m._profilePortal && m._profilePortal.isPortaled) unportalProfileDropdown(m);
+        }
+    });
+
+    if (wasHidden) {
+        window.__currentTeamProfilePath = '';
+        buildTeamProfileMenu(team);
+
+        const prevStyles = {
+            position: menu.style.position,
+            visibility: menu.style.visibility,
+            display: menu.style.display,
+            width: menu.style.width
+        };
+        menu.classList.remove('hidden');
+        menu.style.visibility = 'hidden';
+        menu.style.display = 'block';
+        menu.style.position = 'absolute';
+
+        const measured = Math.ceil(menu.getBoundingClientRect().width);
+        menu.style.width = measured > 0 ? measured + 'px' : '200px';
+
+        menu.style.position = prevStyles.position;
+        menu.style.visibility = '';
+        menu.style.display = prevStyles.display;
+
+        menu.scrollTop = 0;
+
+        portalProfileDropdown(menu, btn);
+
+        activeTeamProfileDropdown = menu;
+    } else {
+        menu.classList.add('hidden');
+        if (menu._profilePortal && menu._profilePortal.isPortaled) unportalProfileDropdown(menu);
+    }
+}
+
+async function selectTeamProfile(team, profileId, profileName) {
+    console.log(`[TEAM-PROFILE] Team ${team} selected profile:`, profileId, profileName);
+    
+    const menu = document.querySelector(team === 1 ? '#team1ProfileDropdown' : '#team2ProfileDropdown');
+    if (menu) {
+        menu.classList.add('hidden');
+        if (menu._profilePortal && menu._profilePortal.isPortaled) unportalProfileDropdown(menu);
+        if (activeTeamProfileDropdown === menu) {
+            activeTeamProfileDropdown = null;
+        }
+    }
+    
+    if (!profileId) {
+        window.__selectedTeamProfiles[team] = '';
+        updateTeamProfileButtonColor(team);
+        emitUpdate();
+        return;
+    }
+    
+    window.__selectedTeamProfiles[team] = profileId;
+    updateTeamProfileButtonColor(team);
+    
+    try {
+        const res = await fetch(`/profiles/teams/${profileId}`, { cache: 'no-store' });
+        if (!res.ok) {
+            console.error('[TEAM-PROFILE] Failed to fetch profile data');
+            return;
+        }
+        
+        const profileData = await res.json();
+        await applyProfileToTeam(team, profileData);
+        
+    } catch (e) {
+        console.error('[TEAM-PROFILE] Error loading profile:', e);
+    }
+}
+
+async function applyProfileToTeam(team, profileData) {
+    const prevHydrating = isHydrating;
+    isHydrating = true;
+    
+    try {
+        // Update name
+        if (profileData.name) {
+            const nameInput = document.querySelector(`[name="team${team}_name"]`);
+            if (nameInput) {
+                nameInput.value = profileData.name;
+                nameInput.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        }
+        
+        // Update image
+        if (profileData.custom_img) {
+            applyCustomImageToTeam(team, profileData.custom_img);
+        } else if (profileData.img && profileData.img.trim() !== '') {
+            const countryCode = profileData.img.trim().toLowerCase();
+            await applyFlagToTeam(team, countryCode);
+        }
+        
+        console.log('[TEAM-PROFILE] Applied profile to team', team);
+        
+    } finally {
+        isHydrating = prevHydrating;
+        updateTeamToggleColors();
+        emitUpdate();
+    }
+}
+
+async function applyFlagToTeam(team, countryCode) {
+    try {
+        const countries = await fetchCountriesOnce();
+        const country = countries.find(c => c.code.toLowerCase() === countryCode);
+        
+        if (!country) {
+            console.warn('[TEAM-PROFILE] Country code not found:', countryCode);
+            return;
+        }
+        
+        const { btn, hidden } = teamEls(team);
+        if (!btn || !hidden) return;
+        
+        btn.innerHTML = `<img src="/static/flags/flags/1x1/${countryCode}.svg" alt="${country.name}" class="image-selected">`;
+        hidden.value = `/static/flags/flags/4x3/${countryCode}.svg`;
+        selectedImageByTeam[team] = countryCode;
+        
+        console.log('[TEAM-PROFILE] Applied flag:', country.name, 'to team', team);
+    } catch (e) {
+        console.error('[TEAM-PROFILE] Error applying flag:', e);
+    }
+}
+
+function applyCustomImageToTeam(team, dataUrl) {
+    const { btn, hidden } = teamEls(team);
+    if (!btn || !hidden) return;
+    
+    btn.innerHTML = `<img src="${dataUrl}" class="image-selected">`;
+    hidden.value = dataUrl;
+    selectedImageByTeam[team] = "custom";
+    
+    console.log('[TEAM-PROFILE] Applied custom image to team', team);
+}
+
+async function clearTeamProfile(team) {
+    const menu = document.querySelector(team === 1 ? '#team1ProfileDropdown' : '#team2ProfileDropdown');
+    if (menu) {
+        menu.classList.add('hidden');
+        if (menu._profilePortal && menu._profilePortal.isPortaled) unportalProfileDropdown(menu);
+        if (activeTeamProfileDropdown === menu) {
+            activeTeamProfileDropdown = null;
+        }
+    }
+    
+    const hasProfile = window.__selectedTeamProfiles?.[team] && window.__selectedTeamProfiles[team] !== '';
+    
+    if (!hasProfile) {
+        return;
+    }
+    
+    window.__selectedTeamProfiles[team] = '';
+    updateTeamProfileButtonColor(team);
+    
+    const prevHydrating = isHydrating;
+    isHydrating = true;
+    
+    try {
+        const nameInput = document.querySelector(`[name="team${team}_name"]`);
+        if (nameInput) {
+            nameInput.value = '';
+            nameInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        
+        const { btn, hidden } = teamEls(team);
+        if (btn) {
+            btn.innerHTML = '';
+            const icon = document.createElement('i');
+            icon.className = 'fa-regular fa-image';
+            icon.style.color = '#f1f1f1';
+            btn.appendChild(icon);
+        }
+        if (hidden) hidden.value = '';
+        selectedImageByTeam[team] = null;
+        
+    } finally {
+        isHydrating = prevHydrating;
+        updateTeamToggleColors();
+        emitUpdate();
+    }
+}
+
+async function openSaveTeamProfileDialog(team) {
+    const menu = document.querySelector(team === 1 ? '#team1ProfileDropdown' : '#team2ProfileDropdown');
+    if (menu) {
+        menu.classList.add('hidden');
+        if (menu._profilePortal && menu._profilePortal.isPortaled) unportalProfileDropdown(menu);
+        if (activeTeamProfileDropdown === menu) {
+            activeTeamProfileDropdown = null;
+        }
+    }
+    
+    const name = document.querySelector(`[name="team${team}_name"]`)?.value?.trim() || '';
+    
+    if (!name) {
+        alert('Please enter a team name before saving a profile.');
+        return;
+    }
+    
+    const imgHidden = document.getElementById(team === 1 ? 'team1Img' : 'team2Img');
+    const imgValue = imgHidden?.value?.trim() || '';
+    
+    let imgType = '';
+    let imgData = '';
+    let customImgData = '';
+    
+    if (imgValue) {
+        if (imgValue.includes('/flags/flags/')) {
+            const match = imgValue.match(/\/flags\/flags\/\d+x\d+\/([a-z]{2})\.svg/i);
+            if (match) {
+                imgType = 'flag';
+                imgData = match[1].toLowerCase();
+            }
+        } else if (imgValue.startsWith('data:image/')) {
+            imgType = 'custom';
+            customImgData = imgValue;
+        }
+    }
+    
+    const defaultFileName = name.replace(/[^a-zA-Z0-9_\-]/g, '_') + '.json';
+    
+    const fileName = prompt(
+        `Save profile for "${name}":\n\nEnter filename (without .json):`,
+        defaultFileName.replace('.json', '')
+    );
+    
+    if (!fileName) {
+        return;
+    }
+    
+    try {
+        const checkRes = await fetch('/profiles/teams/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                file_path: fileName,
+                check_exists_only: true
+            })
+        });
+        
+        if (!checkRes.ok) {
+            const error = await checkRes.json();
+            throw new Error(error.error || 'Failed to check file');
+        }
+        
+        const checkResult = await checkRes.json();
+        
+        if (checkResult.exists) {
+            const confirmed = confirm(
+                `A profile named "${checkResult.file_path}" already exists.\n\nDo you want to overwrite it?`
+            );
+            
+            if (!confirmed) {
+                return;
+            }
+        }
+        
+        const profileData = {
+            name: name,
+            file_path: fileName
+        };
+        
+        if (imgType) {
+            profileData.img_type = imgType;
+            if (imgType === 'flag') {
+                profileData.img = imgData;
+            } else if (imgType === 'custom') {
+                profileData.custom_img_data = customImgData;
+            }
+        }
+        
+        const saveRes = await fetch('/profiles/teams/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(profileData)
+        });
+        
+        if (!saveRes.ok) {
+            const error = await saveRes.json();
+            throw new Error(error.error || 'Failed to save profile');
+        }
+        
+        const result = await saveRes.json();
+        const action = result.overwritten ? 'overwritten' : 'saved';
+        alert(`Team profile ${action} successfully as:\n${result.file_path}`);
+        
+        await loadTeamProfiles(window.__currentTeamProfilePath);
+        
+    } catch (e) {
+        console.error('[TEAM-PROFILE] Error saving profile:', e);
+        alert(`Failed to save profile:\n${e.message}`);
+    }
+}
+
+// Load team profiles on page load
+document.addEventListener('DOMContentLoaded', () => {
+    loadTeamProfiles();
+});
 
 // Click-outside to close profile menus (independent handler)
 document.addEventListener('click', (e) => {
@@ -3261,12 +3758,14 @@ function getFormData() {
         team1: {
             name: getStr('[name="team1_name"]'),
             score: getNum('[name="team1_score"]'),
-            img: getStr('[name="team1Img"]')
+            img: getStr('[name="team1Img"]'),
+			profile: window.__selectedTeamProfiles?.[1] || ''
         },
         team2: {
             name: getStr('[name="team2_name"]'),
             score: getNum('[name="team2_score"]'),
-            img: getStr('[name="team2Img"]')
+            img: getStr('[name="team2Img"]'),
+			profile: window.__selectedTeamProfiles?.[2] || ''
         },
 
         stage: getCurrentStage(),
@@ -4125,6 +4624,12 @@ function resetTValues() {
 
         uiOnly_ResetTeamImageButton(1);
         uiOnly_ResetTeamImageButton(2);
+		
+		// Clear selected team profiles
+        window.__selectedTeamProfiles[1] = '';
+        window.__selectedTeamProfiles[2] = '';
+        updateTeamProfileButtonColor(1);
+        updateTeamProfileButtonColor(2);
 
         updateTeamToggleColors();
 
@@ -4142,16 +4647,7 @@ function resetAll() {
         resetPValues();
 
         // 2) Teams (names, scores, images)
-        uiOnly_Set(document.querySelector('[name="team1_name"]'), '');
-        uiOnly_Set(document.querySelector('[name="team2_name"]'), '');
-
-        uiOnly_Set(document.querySelector('[name="team1_score"]'), 0);
-        uiOnly_Set(document.querySelector('[name="team2_score"]'), 0);
-
-        uiOnly_ResetTeamImageButton(1);
-        uiOnly_ResetTeamImageButton(2);
-
-        updateTeamToggleColors();
+        resetTValues();
 
         // 3) Top text block
         uiOnly_Set(document.getElementById('topText'), '');

@@ -24,12 +24,14 @@
   "team1": {
     "name": "",
     "score": 0,
-    "img": ""
+    "img": "",
+    "profile": ""
   },
   "team2": {
     "name": "",
     "score": 0,
-    "img": ""
+    "img": "",
+    "profile": ""
   },
   "stage": "",
   "match_type": "",
@@ -45,5 +47,5 @@
   },
   "toptext": "",
   "port": 8008,
-  "active_template": "default"
+  "active_template": "default (EzColor)"
 }
