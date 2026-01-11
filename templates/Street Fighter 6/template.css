@@ -58,11 +58,12 @@ body {
 	height: 49px;
 	padding: 0px 5px 0px 5px;
 	align-content: center;
+	text-align: center;
 	text-shadow: 2px 0 black, -2px 0 black, 0 2px black, 0 -2px black, 1px 1px black, -1px -1px black, 1px -1px black, -1px 1px black;
 }
 
 .name {
-	font-size: 24px;
+	font-size: 26px;
 	white-space: nowrap;
 	text-align: center;
 }

@@ -65,21 +65,22 @@ body {
 	height: 49px;
 	padding: 0px 5px 0px 5px;
 	align-content: center;
+	text-align: center;
 	text-shadow: 0 0 10px black, 2px 0 black, -2px 0 black, 0 2px black, 0 -2px black, 1px 1px black, -1px -1px black, 1px -1px black, -1px 1px black;
 }
 
 .name {
-	font-size: 24px;
+	font-size: 26px;
 	white-space: nowrap;
 	text-align: center;
 }
 
 #nameBlockP1 {
-	margin: 7px 18px 0px 0px;
+	margin: 6px 18px 0px 0px;
 }
 
 #nameBlockP2 {
-	margin: 7px 0px 0px 18px;
+	margin: 6px 0px 0px 18px;
 }
 
 .scoreBlock {

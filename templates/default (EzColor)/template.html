@@ -8,6 +8,7 @@
     <!-- <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@700&display=swap" rel="stylesheet" /> -->
     <link rel="stylesheet" href="./static/fa/css/all.min.css" />
     <link rel="stylesheet" href="{{ asset_url(template_name, 'template.css') }}">
+	<script src="https://cdn.jsdelivr.net/npm/fitty@2.3.7/dist/fitty.min.js"></script>
 </head>
 
 <body>
@@ -353,7 +354,24 @@ function connectSocket() {
    });
 
    socket.on('update_scoreboard', data => {
-      try {
+      
+	  // Update player 1 name
+	  if (data.player1?.name !== undefined) {
+		const p1NameEl = document.getElementById('player1Name');
+		if (p1NameEl) {
+			p1NameEl.textContent = data.player1.name;
+		}
+	  }
+
+	  // Update player 2 name
+	  if (data.player2?.name !== undefined) {
+		const p2NameEl = document.getElementById('player2Name');
+		if (p2NameEl) {
+			p2NameEl.textContent = data.player2.name;
+		}
+	  }
+	  
+	  try {
          const d = data || {};
          const p1 = d.player1 || {
             name: '',
@@ -672,9 +690,48 @@ function connectSocket() {
          // Always signal “first data applied” so the unified orchestrator can start
          markFirstDataAppliedOnce();
       }
+	  
+	  fitAllPlayerNames();
+	  
    });
 }
 connectSocket();
+
+function fitTextToContainer(element, maxFontSize = 32, minFontSize = 16) {
+    if (!element) return;
+    
+    const container = element.closest('.nameBlock');
+    if (!container) return;
+    
+    // Hide the element while resizing
+    element.style.visibility = 'hidden';
+    
+    // Available width: container width - padding - safety buffer
+    const availableWidth = container.offsetWidth - 10; // 10px total padding + 20px buffer
+    
+    let fontSize = maxFontSize;
+    element.style.fontSize = fontSize + 'px';
+    element.style.whiteSpace = 'nowrap';
+    
+    // Reduce font size until it fits
+    while (element.scrollWidth > availableWidth && fontSize > minFontSize) {
+        fontSize -= 0.5;
+        element.style.fontSize = fontSize + 'px';
+    }
+    
+    // Show the element after resizing is complete
+    element.style.visibility = 'visible';
+    
+    console.log(`Fitted text: "${element.textContent}" to ${fontSize}px (width: ${element.scrollWidth}px / ${availableWidth}px)`);
+}
+
+function fitAllPlayerNames() {
+    document.querySelectorAll('.name').forEach(el => {
+        fitTextToContainer(el, 32, 16);
+    });
+}
+
+window.addEventListener('load', fitAllPlayerNames);
 
 //////////// Reload overlay when server announces new template
 socket.on('template_changed', ({

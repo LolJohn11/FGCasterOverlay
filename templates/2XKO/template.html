@@ -348,7 +348,24 @@ function connectSocket() {
    });
 
    socket.on('update_scoreboard', data => {
-      try {
+      
+	  // Update player 1 name
+	  if (data.player1?.name !== undefined) {
+		const p1NameEl = document.getElementById('player1Name');
+		if (p1NameEl) {
+			p1NameEl.textContent = data.player1.name;
+		}
+	  }
+
+	  // Update player 2 name
+	  if (data.player2?.name !== undefined) {
+		const p2NameEl = document.getElementById('player2Name');
+		if (p2NameEl) {
+			p2NameEl.textContent = data.player2.name;
+		}
+	  }
+	  
+	  try {
          const d = data || {};
          const p1 = d.player1 || {
             name: '',
@@ -668,41 +685,47 @@ function connectSocket() {
          markFirstDataAppliedOnce();
       }
 	  
-	  fitPlayerNames;
+	  fitAllPlayerNames();
 	  
    });
 }
 connectSocket();
 
-function fitPlayerNames() {
-    const nameElements = document.querySelectorAll('.name');
+function fitTextToContainer(element, maxFontSize = 22, minFontSize = 12) {
+    if (!element) return;
     
-    nameElements.forEach(el => {
-        const container = el.closest('.nameBlock');
-        if (!container) return;
-        
-        // Calculate available width (container width minus padding)
-        const availableWidth = container.offsetWidth - 10;
-        
-        // Apply fitty
-        fitty(el, {
-            minSize: 12,
-            maxSize: 22,
-            observeWindow: true,
-            multiLine: false
-        });
-        
-        // Additional safety check - reduce size if still overflowing
-        setTimeout(() => {
-            if (el.scrollWidth > availableWidth) {
-                const currentSize = parseFloat(window.getComputedStyle(el).fontSize);
-                el.style.fontSize = (currentSize * 0.95) + 'px'; // Reduce by 8%
-            }
-        }, 1); // Small delay to let Fitty finish
+    const container = element.closest('.nameBlock');
+    if (!container) return;
+    
+    // Hide the element while resizing
+    element.style.visibility = 'hidden';
+    
+    // Available width: container width - padding - safety buffer
+    const availableWidth = container.offsetWidth - 10; // 10px total padding + 20px buffer
+    
+    let fontSize = maxFontSize;
+    element.style.fontSize = fontSize + 'px';
+    element.style.whiteSpace = 'nowrap';
+    
+    // Reduce font size until it fits
+    while (element.scrollWidth > availableWidth && fontSize > minFontSize) {
+        fontSize -= 0.5;
+        element.style.fontSize = fontSize + 'px';
+    }
+    
+    // Show the element after resizing is complete
+    element.style.visibility = 'visible';
+    
+    console.log(`Fitted text: "${element.textContent}" to ${fontSize}px (width: ${element.scrollWidth}px / ${availableWidth}px)`);
+}
+
+function fitAllPlayerNames() {
+    document.querySelectorAll('.name').forEach(el => {
+        fitTextToContainer(el, 22, 12);
     });
 }
 
-window.addEventListener('load', fitPlayerNames);
+window.addEventListener('load', fitAllPlayerNames);
 
 //////////// Reload overlay when server announces new template
 socket.on('template_changed', ({

@@ -7,13 +7,14 @@
   <!-- <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@700&display=swap" rel="stylesheet" /> -->
   <link rel="stylesheet" href="./static/fa/css/all.min.css" />
   <link rel="stylesheet" href="{{ asset_url(template_name, 'template.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/fitty@2.3.7/dist/fitty.min.js"></script>
 </head>
 <body>
 
 <!-- Defines which game's character list to use. -->
 <!-- Write in "value" field the end of the URL of the game's page on https://www.fightersgeneration.com/ -->
 <!-- For example, for Tekken 8, the page is https://www.fightersgeneration.com/games/tekken8.html, so you must write "tekken8" in the value field.-->
-<input type="hidden" id="overlayGame" value="tekken8" />
+<input type="hidden" id="overlayGame" value="" />
 
 <div class="debug-bg-container">
    <!-- Add images like this: -->
@@ -139,7 +140,24 @@ function connectSocket() {
    });
 
    socket.on('update_scoreboard', data => {
-      try {
+      
+	  // Update player 1 name
+	  if (data.player1?.name !== undefined) {
+		const p1NameEl = document.getElementById('player1Name');
+		if (p1NameEl) {
+			p1NameEl.textContent = data.player1.name;
+		}
+	  }
+
+	  // Update player 2 name
+	  if (data.player2?.name !== undefined) {
+		const p2NameEl = document.getElementById('player2Name');
+		if (p2NameEl) {
+			p2NameEl.textContent = data.player2.name;
+		}
+	  }
+	  
+	  try {
          const d = data || {};
          const p1 = d.player1 || {
             name: '',
@@ -176,7 +194,7 @@ function connectSocket() {
 		
 		 const p1ID = (p1.id || '').trim();
 		 const p2ID = (p2.id || '').trim();
-
+		
          const p1Img = document.getElementById('player1Img');
          const p2Img = document.getElementById('player2Img');
 
@@ -443,9 +461,48 @@ function connectSocket() {
          // Always signal “first data applied” so the unified orchestrator can start
          markFirstDataAppliedOnce();
       }
+	  
+	  fitAllPlayerNames();
+	  
    });
 }
 connectSocket();
+
+function fitTextToContainer(element, maxFontSize = 32, minFontSize = 16) {
+    if (!element) return;
+    
+    const container = element.closest('.nameBlock');
+    if (!container) return;
+    
+    // Hide the element while resizing
+    element.style.visibility = 'hidden';
+    
+    // Available width: container width - padding - safety buffer
+    const availableWidth = container.offsetWidth - 10;
+    
+    let fontSize = maxFontSize;
+    element.style.fontSize = fontSize + 'px';
+    element.style.whiteSpace = 'nowrap';
+    
+    // Reduce font size until it fits
+    while (element.scrollWidth > availableWidth && fontSize > minFontSize) {
+        fontSize -= 0.5;
+        element.style.fontSize = fontSize + 'px';
+    }
+    
+    // Show the element after resizing is complete
+    element.style.visibility = 'visible';
+    
+    console.log(`Fitted text: "${element.textContent}" to ${fontSize}px (width: ${element.scrollWidth}px / ${availableWidth}px)`);
+}
+
+function fitAllPlayerNames() {
+    document.querySelectorAll('.name').forEach(el => {
+        fitTextToContainer(el, 32, 16);
+    });
+}
+
+window.addEventListener('load', fitAllPlayerNames);
 
 //////////// Reload overlay when server announces new template
 socket.on('template_changed', ({
