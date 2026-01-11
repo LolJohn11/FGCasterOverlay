@@ -16,7 +16,7 @@
 <!-- Defines which game's character list to use. -->
 <!-- Write in "value" field the end of the URL of the game's page on https://www.fightersgeneration.com/ -->
 <!-- For example, for Tekken 8, the page is https://www.fightersgeneration.com/games/tekken8.html, so you must write "tekken8" in the value field.-->
-<input type="hidden" id="overlayGame" value="" />
+<input type="hidden" id="overlayGame" value="2xko" />
 
 <!-- Defines whether this tempalte is for a tag game. -->
 <!-- Tag game templates support up to 2 players per side and multiple character selection. -->
@@ -26,7 +26,7 @@
 	<!-- Add images like this: -->
 	<!-- <img src="{{ asset_url(template_name, 'img/Image.png') }}" alt=""> -->
 	<!-- Debug background image of a game. Set opacity to 1 or 0 to show or hide -->
-	<img src="{{ asset_url(template_name, 'img/game.jpg') }}" style="opacity: 0;" class="debug-bg" alt="Debug Game Background">
+	<img src="{{ asset_url(template_name, 'img/game.jpg') }}" style="opacity: 1;" class="debug-bg" alt="Debug Game Background">
 
 	<!-- This version of the tempalte uses SVG elements for easier styling. -->
 	<!-- Please refer to the adjacent CSS file if you wish to adjust image visuals. -->
