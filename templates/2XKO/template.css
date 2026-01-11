@@ -1,0 +1,459 @@
+/* ==== SVG ELEMENTS COLOR SETTINGS ==== */
+
+/* == Player Plaques == */
+
+/* Gradient for background/fill - Player 1 */
+#linear-gradient-p1-noimg,
+#linear-gradient-p1-full {
+	--gradient-stop-1: #15bcba; /* 15bcba */
+	--gradient-stop-2: #19c2a4; /* 19c2a4 */
+	--gradient-stop-3: #1ecb8b; /* 1ecb8b */
+}
+/* Gradient for background/fill - Player 2 */
+#linear-gradient-p2-noimg,
+#linear-gradient-p2-full {
+	--gradient-stop-1: #15bcba; /* 15bcba */
+	--gradient-stop-2: #19c2a4; /* 19c2a4 */
+	--gradient-stop-3: #1ecb8b; /* 1ecb8b */
+}
+
+/* Stroke color - Player 1 */
+#P1_bg_stroke_noimg polygon,
+#P1_diag_noimg line,
+#P1_vert_noimg line,
+#P1_bg_stroke polygon,
+#P1_diag line,
+#P1_vert line {
+	stroke: #232323; /* 232323 */
+}
+/* Stroke color - Player 2 */
+#P2_bg_stroke_noimg polygon,
+#P2_diag_noimg line,
+#P2_vert_noimg line,
+#P2_bg_stroke polygon,
+#P2_diag line,
+#P2_vert line {
+	stroke: #232323; /* 232323 */
+}
+
+/* Faint outer glow effect on stroke */
+#coloredGlow {
+	--glow-color: #232323; /* 232323 */
+	--glow-opacity: 1;
+}
+
+/* Drop shadow */
+.playerPlaque {
+	filter: drop-shadow(rgba(0, 0, 0, 0.2) 0px 0px 0.2rem);
+}
+
+/* == Team Plaques == */
+
+/* Background color - Team 1 */
+#T1_noimg_bg,
+#T1_full_bg {
+	fill: #000000; /* 000000 */
+	opacity: 0.9; /* 0.9 */
+}
+/* Background color - Team 2 */
+#T2_noimg_bg,
+#T2_full_bg {
+	fill: #000000; /* 000000 */
+	opacity: 0.9; /* 0.9 */
+}
+
+/* Line color - Team 1 */
+#T1_noimg_line line,
+#T1_full_line line {
+	stroke: #ffffff; /* ffffff */
+}
+/* Line color - Team 2 */
+#T2_noimg_line line,
+#T2_full_line line {
+	stroke: #ffffff; /* ffffff */
+}
+
+/* Drop shadow */
+#T1_noimg_bg,
+#T1_full_bg,
+#T2_noimg_bg,
+#T2_full_bg {
+	filter: drop-shadow(rgba(0, 0, 0, 0.4) 0px 0px 0.3rem);
+}
+
+/* == Top Row == */
+
+/* Drop shadow */
+#topRowShadow {
+	fill: #000000; /* 000000 */
+	opacity: 0.8; /* 0.8 */
+}
+/* Element body */
+#topRowBody {
+	stroke: #000000; /* 000000 */
+	fill: #000000; /* 000000 */
+	opacity: 0.9; /* 0.9 */
+}
+
+/* == Casters Row == */
+
+/* Drop shadow */
+#castersShadow {
+	fill: #000000; /* 000000 */
+	opacity: 0.8; /* 0.8 */
+}
+/* Element body */
+#castersBody {
+	fill: #000000; /* 000000 */
+	opacity: 0.9; /* 0.9 */
+}
+
+/* ==== END OF SVG ELEMENTS COLOR SETTINGS ==== */
+
+
+
+@font-face {
+	font-family: 'Shapiro 115 Plus Ext';
+	src: url('fonts/Shapiro-115-Plus-Extd.otf');
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Shapiro 55 Middle Ext';
+	src: url('fonts/Shapiro 55 Middle Extd.otf');
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Shapiro 45 Welter Text';
+	src: url('fonts/Shapiro 45 Welter Text.otf');
+	font-weight: normal;
+	font-style: normal;
+}
+
+body {
+	margin: 0;
+	font-family: 'Titillium Web', sans-serif; /*<--- Default placeholder font*/
+	font-family: 'Akko Pro', sans-serif;
+	color: white;
+	background: transparent;
+}
+.debug {
+	background-color: var(--debug-bg-color, black) !important; 
+	/* border: solid 1px red;*/
+}
+
+.debug-bg-container {
+	position: fixed;
+	width: 1920px;
+	height: 1080px;
+	overflow: hidden;
+}
+
+.debug-bg {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover; /* keep aspect ratio while filling space */
+	z-index: 0;
+}
+
+.bg-img {
+	z-index: 0;
+}
+
+.scoreboardContainer {
+	display: flex;
+	justify-content: center;
+	align-items: flex-start;
+	height: 54px;
+	padding: 0 20px;
+	background-color: transparent;
+	position: relative;
+	z-index: 1;
+}
+
+.nameBlock {
+	background-color: transparent;
+	width: 334px;
+	height: 36px;
+	padding: 0px 5px 0px 5px;
+	align-content: center;
+	text-align: center;
+	text-shadow: 0 0 10px black, 2px 0 black, -2px 0 black, 0 2px black, 0 -2px black, 1px 1px black, -1px -1px black, 1px -1px black, -1px 1px black;
+}
+
+.name {
+	font-family: 'Shapiro 55 Middle Ext';
+	font-size: 20px;
+	white-space: nowrap;
+	text-align: center;
+}
+
+#nameBlockP1 {
+	margin: 0px 0px 0px 0px;
+}
+
+#nameBlockP2 {
+	margin: 0px 0px 0px 0px;
+}
+
+.scoreBlock {
+	background-color: transparent;
+	padding: 0px;
+	width: 58px;
+	height: 36px;
+	align-content: center;
+	text-align: center;
+	align-items: center;
+	text-shadow: 0 0 4px black, 2px 0 black, -2px 0 black, 0 2px black, 0 -2px black, 1px 1px black, -1px -1px black, 1px -1px black, -1px 1px black, 0px 5px 0px black;
+}
+
+.score {
+	font-family: 'Shapiro 115 Plus Ext';
+	font-size: 24px;
+	text-align: center;
+}
+
+.centerPanel {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+	margin: 0px 0px;
+}
+
+.infoRow {
+	background-color: transparent;
+	display: flex;
+	width: 582px;
+	justify-content: center;
+}
+
+.infoBar {
+	background-color: transparent;
+	text-align: center;
+	align-content: center;
+	padding: 2px 10px;
+	margin: 0px 0px;
+}
+
+#topText {
+	width: 240px;
+	height: 50px;
+	font-size: 20px;
+	font-family: 'Shapiro 45 Welter Text';
+	padding: 2px 0px;
+}
+
+#stageText, #matchTypeText {
+	width: 170px;
+	height: 32px;
+	font-family: 'Shapiro 45 Welter Text';
+	font-size: 16px;
+	padding-left: 0px;
+	padding-right: 0px;
+    padding-bottom: 4px;
+}
+
+.imgBlock {
+	min-width: 65px;
+	height: 49px;
+	vertical-align: middle;
+	align-items: center;
+	display: flex;
+	justify-content: center;
+	margin-top: 14px;
+}
+
+.playerImg {
+	vertical-align: middle;
+}
+
+.flag-style {
+	height: 34.5px;
+	width: 46px;
+}
+
+.custom-image-style {
+	max-height: 34.5px;
+	max-width: 46px;
+}
+
+.team-custom-image-style {
+	max-height: 29px;
+	max-width: 39px;
+}
+
+.teamsContainer {
+	position: absolute;
+	display: flex;
+	justify-content: center;
+	width: 100%;
+	margin-top: -13px;
+}
+
+#teamsDivider {
+	width: 348px;
+}
+
+.team {
+	display: flex;
+	min-width: 276px;
+	min-height: 28px;
+	align-items: center;
+	padding-top: 1px;
+}
+
+.team-left {
+	justify-content: flex-end;
+}
+
+.team-right {
+	justify-content: flex-start;
+}
+
+.teamText {
+	display: flex;
+	gap: 0px;
+}
+
+#team1Name,
+#team2Name {
+	width: 236px;
+	height: 28px;
+	display: inline-flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 16px;
+	font-family: 'Shapiro 55 Middle Ext';
+}
+
+#team1Score,
+#team2Score {
+	height: 28px;
+	width: 40px;
+	display: inline-flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 16px;
+	font-family: 'Shapiro 55 Middle Ext';
+}
+
+.teamImg {
+	width: 39px;
+	height: 29px;
+	object-fit: contain;
+}
+
+.commentators {
+	background-color: transparent;
+	align-items: center;
+	gap: 6px;
+	font-family: 'Shapiro 45 Welter Text';
+	font-size: 14px;
+	display: flex;
+	justify-content: center;
+	height: 20px;
+	position: relative;
+	z-index: 1;
+}
+
+.micIcon {
+	width: 12px;
+	height: 12px;
+	background-color: red;
+	border-radius: 50%;
+}
+
+#casterContainer {
+	align-items: center;
+	height: 18px;
+	position: relative;
+	top: 1002px;
+}
+
+.casterIcon {
+	width: 18px;
+	height: 18px;
+	margin: 0 4px;
+	font-size: 16px;
+	text-align: center;
+	align-content: center;
+}
+
+.casterText {
+	display: inline-flex;
+	height: 18px;
+	width: 130px;
+	align-items: center;
+	justify-content: center;
+}
+
+:root {
+	--fade-duration: 500ms; /* length of .fade animation, set here */
+}
+
+.fade {
+	opacity: 1;
+	transition: opacity var(--fade-duration) ease-in-out;
+}
+
+.fade-hidden {
+	opacity: 0;
+}
+
+/* Default values for the animation */
+[data-anim] {
+	opacity: 0;
+	will-change: transform, opacity;
+	/* Customizable via CSS variables (set by JS from data-*): */
+	--delay: 0ms;
+	--dur: 500ms;
+}
+
+/* After the entrance animations finish, keep everything visible and prevent any replays */
+body.post-entrance [data-anim] {
+	opacity: 1;
+	transform: none;
+	animation: none !important;
+}
+
+/* Types of animations */
+body.anim-start [data-anim="fade"]  { animation: fade-in         var(--dur) ease-out var(--delay) both; }
+body.anim-start [data-anim="up"]    { animation: slide-up-fade   var(--dur) ease-out var(--delay) both; }
+body.anim-start [data-anim="down"]  { animation: slide-down-fade var(--dur) ease-out var(--delay) both; }
+body.anim-start [data-anim="left"]  { animation: slide-left-fade var(--dur) ease-out var(--delay) both; }
+body.anim-start [data-anim="right"] { animation: slide-right-fade var(--dur) ease-out var(--delay) both; }
+
+.bg-img[data-anim] { pointer-events: none; }
+
+/* Overlay animation keyframes */
+@keyframes fade-in {
+	from { opacity: 0 }
+	to   { opacity: 1 }
+}
+
+@keyframes slide-up-fade {
+	from { transform: translateY(24px); opacity: 0 }
+	to   { transform: none;             opacity: 1 }
+}
+
+@keyframes slide-down-fade {
+	from { transform: translateY(-24px); opacity: 0 }
+	to   { transform: none;             opacity: 1 }
+}
+
+@keyframes slide-left-fade {
+	from { transform: translateX(50px); opacity: 0 }
+	to   { transform: none;             opacity: 1 }
+}
+
+@keyframes slide-right-fade {
+	from { transform: translateX(-50px); opacity: 0 }
+	to   { transform: none;              opacity: 1 }
+}
