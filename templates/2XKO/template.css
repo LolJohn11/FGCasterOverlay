@@ -248,6 +248,7 @@ body {
 	font-size: 20px;
 	font-family: 'Shapiro 45 Welter Text';
 	padding: 2px 0px;
+	line-height: 1.2;
 }
 
 #stageText, #matchTypeText {
@@ -355,7 +356,7 @@ body {
 	align-items: center;
 	gap: 6px;
 	font-family: 'Shapiro 45 Welter Text';
-	font-size: 14px;
+	font-size: 16px;
 	display: flex;
 	justify-content: center;
 	height: 20px;
@@ -390,7 +391,7 @@ body {
 	display: inline-flex;
 	height: 18px;
 	width: 130px;
-	align-items: center;
+	align-items: flex-start;
 	justify-content: center;
 }
 

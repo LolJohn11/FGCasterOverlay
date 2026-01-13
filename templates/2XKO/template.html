@@ -349,21 +349,53 @@ function connectSocket() {
 
    socket.on('update_scoreboard', data => {
       
-	  // Update player 1 name
-	  if (data.player1?.name !== undefined) {
-		const p1NameEl = document.getElementById('player1Name');
-		if (p1NameEl) {
-			p1NameEl.textContent = data.player1.name;
-		}
-	  }
-
-	  // Update player 2 name
-	  if (data.player2?.name !== undefined) {
-		const p2NameEl = document.getElementById('player2Name');
-		if (p2NameEl) {
-			p2NameEl.textContent = data.player2.name;
-		}
-	  }
+	// Update player names
+    if (data.player1?.name !== undefined) {
+        const p1NameEl = document.getElementById('player1Name');
+        if (p1NameEl) p1NameEl.textContent = data.player1.name;
+    }
+    if (data.player2?.name !== undefined) {
+        const p2NameEl = document.getElementById('player2Name');
+        if (p2NameEl) p2NameEl.textContent = data.player2.name;
+    }
+    
+    // Update team names
+    if (data.team1?.name !== undefined) {
+        const t1NameEl = document.getElementById('team1Name');
+        if (t1NameEl) t1NameEl.textContent = data.team1.name;
+    }
+    if (data.team2?.name !== undefined) {
+        const t2NameEl = document.getElementById('team2Name');
+        if (t2NameEl) t2NameEl.textContent = data.team2.name;
+    }
+    
+    // Update stage text
+    if (data.stage !== undefined) {
+        const stageEl = document.getElementById('stageText');
+        if (stageEl) stageEl.textContent = data.stage;
+    }
+    
+    // Update top text
+    if (data.top_text !== undefined) {
+        const topEl = document.getElementById('topText');
+        if (topEl) topEl.textContent = data.top_text;
+    }
+    
+    // Update match type
+    if (data.match_type !== undefined) {
+        const matchEl = document.getElementById('matchTypeText');
+        if (matchEl) matchEl.textContent = data.match_type;
+    }
+    
+    // Update casters
+    if (data.commentators && Array.isArray(data.commentators)) {
+        const casterElements = document.querySelectorAll('.casterText');
+        data.commentators.forEach((caster, index) => {
+            if (casterElements[index]) {
+                casterElements[index].textContent = caster.name || '';
+            }
+        });
+    }
 	  
 	  try {
          const d = data || {};
@@ -685,47 +717,212 @@ function connectSocket() {
          markFirstDataAppliedOnce();
       }
 	  
-	  fitAllPlayerNames();
-	  
+	  // Fit all text elements after updating
+	  fitAllTextElements();
+		
+	  // Fit casters again with a delay to account for animations
+	  setTimeout(fitCasterTextElements, 100);
+	  setTimeout(fitCasterTextElements, 500);
+		  
    });
 }
 connectSocket();
 
-function fitTextToContainer(element, maxFontSize = 22, minFontSize = 12) {
+// Configuration for adjusting text size min and max values
+const textFitConfig = {
+    '.name': { min: 12, max: 22, containerSelector: '.nameBlock', multiLine: false },
+    '#team1Name': { min: 10, max: 16, containerSelector: null, multiLine: false },
+    '#team2Name': { min: 10, max: 16, containerSelector: null, multiLine: false },
+    '#stageText': { min: 10, max: 16, containerSelector: '.infoBar', multiLine: false },
+    '#topText': { min: 12, max: 22, containerSelector: '.infoBar', multiLine: false },
+    '#matchTypeText': { min: 10, max: 16, containerSelector: '.infoBar', multiLine: false },
+    '.casterText': { min: 10, max: 16, containerSelector: null, multiLine: false }
+};
+
+function fitTextToContainer(element, maxFontSize = 20, minFontSize = 10, containerSelector = null, bufferPx = 20, multiLine = false) {
     if (!element) return;
     
-    const container = element.closest('.nameBlock');
-    if (!container) return;
+    // Find the container based on selector or use parentElement
+    let container;
+    if (containerSelector) {
+        container = element.closest(containerSelector);
+    } else {
+        container = element.parentElement;
+    }
+    
+    if (!container) {
+        console.warn('No container found for element:', element);
+        return;
+    }
     
     // Hide the element while resizing
     element.style.visibility = 'hidden';
     
-    // Available width: container width - padding - safety buffer
-    const availableWidth = container.offsetWidth - 10; // 10px total padding + 20px buffer
+    // Get the target width (CSS-defined width of the element)
+    const computedStyle = window.getComputedStyle(element);
+    let targetWidth;
     
+    // Try to get explicit width from CSS
+    const cssWidth = parseInt(computedStyle.width);
+    if (cssWidth > 0 && !isNaN(cssWidth)) {
+        targetWidth = cssWidth;
+    } else {
+        // Fallback to container width
+        targetWidth = container.offsetWidth;
+    }
+    
+    // Get target height if multi-line is enabled
+    let targetHeight = null;
+    if (multiLine) {
+        // Use offsetHeight which is the full element height
+        targetHeight = element.offsetHeight;
+        
+        // If offsetHeight is 0 or unreliable, fall back to CSS height
+        if (!targetHeight || targetHeight === 0) {
+            const cssHeight = parseInt(computedStyle.height);
+            if (cssHeight > 0 && !isNaN(cssHeight)) {
+                targetHeight = cssHeight;
+            } else {
+                targetHeight = container.offsetHeight;
+            }
+        }
+    }
+    
+    // Available dimensions
+    const availableWidth = targetWidth - bufferPx;
+    const availableHeight = multiLine && targetHeight ? targetHeight - bufferPx : null;
+    
+    // Start with max font size
     let fontSize = maxFontSize;
     element.style.fontSize = fontSize + 'px';
-    element.style.whiteSpace = 'nowrap';
+    
+    // Set white-space and wrapping based on multi-line option
+    const originalWhiteSpace = element.style.whiteSpace;
+    const originalWordWrap = element.style.wordWrap;
+    const originalWidth = element.style.width;
+    
+    if (multiLine) {
+        element.style.whiteSpace = 'normal';
+        element.style.wordWrap = 'break-word';
+        element.style.width = targetWidth + 'px'; // Set explicit width for wrapping
+        element.style.overflow = 'hidden'; // Clip overflow
+    } else {
+        element.style.whiteSpace = 'nowrap';
+        element.style.width = 'auto'; // Let it expand naturally
+    }
     
     // Reduce font size until it fits
-    while (element.scrollWidth > availableWidth && fontSize > minFontSize) {
-        fontSize -= 0.5;
-        element.style.fontSize = fontSize + 'px';
+    let iterations = 0;
+    const maxIterations = 100;
+    
+    if (multiLine && availableHeight) {
+        // Multi-line: check height
+        // The key insight: we need to measure the TEXT height, not the element height
+        // scrollHeight tells us how much space the content needs
+        
+        // First, let the element expand to measure natural content height
+        const originalHeight = element.style.height;
+        const originalOverflow = element.style.overflow;
+        element.style.height = 'auto';
+        element.style.overflow = 'visible';
+        
+        while (element.scrollHeight > availableHeight && fontSize > minFontSize && iterations < maxIterations) {
+            fontSize -= 0.5;
+            element.style.fontSize = fontSize + 'px';
+            iterations++;
+        }
+        
+        // Restore height constraint
+        element.style.height = originalHeight;
+        element.style.overflow = 'hidden';
+        
+        //console.log(`Fitted "${element.id || element.className}" to ${fontSize}px (scrollHeight: ${element.scrollHeight}px, available: ${availableHeight}px, buffer: ${bufferPx}px, multiLine: true)`);
+    } else {
+        // Single line: check width only
+        while (element.scrollWidth > availableWidth && fontSize > minFontSize && iterations < maxIterations) {
+            fontSize -= 0.5;
+            element.style.fontSize = fontSize + 'px';
+            iterations++;
+        }
+        
+        //console.log(`Fitted "${element.id || element.className}" to ${fontSize}px (textWidth: ${element.scrollWidth}px, available: ${availableWidth}px, buffer: ${bufferPx}px)`);
+    }
+    
+    // Restore original styles for single-line elements
+    if (!multiLine) {
+        element.style.width = originalWidth;
+        element.style.whiteSpace = originalWhiteSpace;
+        element.style.wordWrap = originalWordWrap;
     }
     
     // Show the element after resizing is complete
     element.style.visibility = 'visible';
-    
-    console.log(`Fitted text: "${element.textContent}" to ${fontSize}px (width: ${element.scrollWidth}px / ${availableWidth}px)`);
 }
 
-function fitAllPlayerNames() {
-    document.querySelectorAll('.name').forEach(el => {
-        fitTextToContainer(el, 22, 12);
+function fitAllTextElements() {
+    // Iterate through each configured selector
+    Object.entries(textFitConfig).forEach(([selector, config]) => {
+        document.querySelectorAll(selector).forEach(el => {
+            // Adjust buffer based on element type
+            let buffer = 0; // Default buffer
+            			
+            // Adjust buffers for specific elements
+            if (selector.includes('team')) {
+                buffer = 5;
+            } else if (selector.includes('topText')) {
+                buffer = 15;
+            }
+            			
+            fitTextToContainer(el, config.max, config.min, config.containerSelector, buffer, config.multiLine);
+        });
     });
 }
 
-window.addEventListener('load', fitAllPlayerNames);
+function fitCasterTextElements() {
+    const casterElements = document.querySelectorAll('.casterText');
+    const config = textFitConfig['.casterText'];
+    
+    if (!config) return;
+    
+    casterElements.forEach(el => {
+        // Only fit if element has content
+        if (el.textContent && el.textContent.trim()) {
+            fitTextToContainer(el, config.max, config.min, config.containerSelector, 10, config.multiLine);
+        }
+    });
+}
+
+function setupCasterObserver() {
+    const casterContainer = document.getElementById('casterContainer');
+    if (!casterContainer) return;
+    
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                // Content changed, refit after a small delay
+                setTimeout(fitCasterTextElements, 50);
+            }
+        });
+    });
+    
+    observer.observe(casterContainer, {
+        childList: true,
+        subtree: true,
+        characterData: true
+    });
+}
+
+window.addEventListener('load', function() {
+    fitAllTextElements();
+    
+    // Set up observer for caster changes
+    setupCasterObserver();
+    
+    // Also fit casters with delays to catch any late-loading content
+    setTimeout(fitCasterTextElements, 500);
+    setTimeout(fitCasterTextElements, 1000);
+    setTimeout(fitCasterTextElements, 2000);
+});
 
 //////////// Reload overlay when server announces new template
 socket.on('template_changed', ({
