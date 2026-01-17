@@ -198,6 +198,7 @@ body {
 	display: inline-flex;
 	justify-content: center;
 	align-items: center;
+	text-align: center;
 	font-size: 22px;
 }
 
@@ -209,6 +210,7 @@ body {
 	display: inline-flex;
 	justify-content: center;
 	align-items: center;
+	text-align: center;
 	font-size: 26px;
 }
 
@@ -235,10 +237,10 @@ body {
 	background-color: transparent;
 	align-items: center;
 	gap: 6px;
-	font-size: 14px;
+	font-size: 16px;
 	display: flex;
 	justify-content: center;
-	height: 20px;
+	height: 28px;
 	position: relative;
 	z-index: 1;
 }
@@ -252,9 +254,9 @@ body {
 
 #casterContainer {
 	align-items: center;
-	height: 18px;
+	height: 28px;
 	position: relative;
-	top: 976px;
+	top: 972px;
 }
 
 .casterIcon {
@@ -264,14 +266,16 @@ body {
 	/* font-size: 1.1em; */
 	text-align: center;
 	align-content: center;
+	vertical-align: middle;
 }
 
 .casterText {
 	display: inline-flex;
-	height: 22px;
+	height: 28px;
 	width: 130px;
 	align-items: center;
 	justify-content: center;
+	vertical-align: middle;
 }
 
 :root {

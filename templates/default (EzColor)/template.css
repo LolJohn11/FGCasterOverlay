@@ -225,7 +225,7 @@ body {
 }
 
 #topText {
-	max-width: 250px;
+	width: 200px;
 	height: 30px;
 	font-size: 22px;
 }
@@ -236,7 +236,7 @@ body {
 	font-size: 18px;
 	padding-left: 0px;
 	padding-right: 0px;
-    padding-bottom: 4px;
+    padding-bottom: 0px;
 }
 
 .imgBlock {
@@ -328,7 +328,7 @@ body {
 
 .commentators {
 	background-color: transparent;
-	align-items: center;
+	align-items: flex-end;
 	gap: 6px;
 	font-size: 18px;
 	display: flex;

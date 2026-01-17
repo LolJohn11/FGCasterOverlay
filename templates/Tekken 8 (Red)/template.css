@@ -92,7 +92,7 @@ body {
 	flex-direction: column;
 	align-items: center;
 	gap: 4px;
-	margin: 2px 34px;
+	margin: 2px 35px;
 }
 
 .infoRow {
@@ -114,7 +114,7 @@ body {
 }
 
 #topText {
-	max-width: 250px;
+	width: 200px;
 	height: 30px;
 	font-size: 22px;
 }
@@ -125,7 +125,7 @@ body {
 	font-size: 18px;
 	padding-left: 0px;
 	padding-right: 0px;
-    padding-bottom: 4px;
+    padding-bottom: 0px;
 }
 
 .imgBlock {
@@ -135,7 +135,7 @@ body {
 	align-items: center;
 	display: flex;
 	justify-content: center;
-	margin-top: 15px;
+	margin-top: 14px;
 }
 
 .playerImg {
@@ -230,7 +230,7 @@ body {
 
 .commentators {
 	background-color: transparent;
-	align-items: center;
+	align-items: flex-end;
 	gap: 6px;
 	font-size: 18px;
 	display: flex;
