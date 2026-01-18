@@ -54,6 +54,7 @@ TEMPLATES_ROOT = resource_path("templates")
 STATIC_ROOT    = resource_path("static")
 DATA_FILE      = resource_path("data.json")
 GAME_TAG_RE = re.compile(r'id=["\']overlayGame["\']\s+value=["\']([^"\']+)["\']', re.IGNORECASE)
+TAG_TAG_RE = re.compile(r'id=["\']isTagGame["\']\s+value=["\']([^"\']+)["\']', re.IGNORECASE)
 
 rich_traceback(show_locals=False, width=220)
 console = Console(highlight=False)
@@ -116,8 +117,6 @@ DATA_URL_RE = re.compile(
 )
 
 # Read the <input id="overlayGame" value="..."> from template.html
-GAME_TAG_RE = re.compile(r'id=["\']overlayGame["\']\s+value=["\']([^"\']+)["\']', re.IGNORECASE)
-
 def _extract_game_from_template(template_name: str) -> str | None:
     tpl_path = os.path.join(TEMPLATES_ROOT, template_name, "template.html")
     try:
@@ -1031,21 +1030,6 @@ def ensure_active_template(default_name="default"):
         log.info("No active_template found — set to [bold]{default_name}[/bold]")
     return data["active_template"]
 
-def _extract_game_from_template(template_name: str) -> str | None:
-    """Read templates/<template_name>/template.html and extract the overlayGame hidden input."""
-    tpl_path = os.path.join(TEMPLATES_ROOT, template_name, "template.html")
-    try:
-        with open(tpl_path, "r", encoding="utf-8") as f:
-            # we don't need the whole file, game tag will be near the top
-            head = f.read(4096)
-        m = GAME_TAG_RE.search(head)
-        if m:
-            val = m.group(1).strip()
-            return val or None
-    except OSError:
-        pass
-    return None
-
 def maybe_run_scraper_on_startup():
     try:
         data = load_data() or {}
@@ -1154,6 +1138,58 @@ def sanitize_incoming(update: dict):
     # UI must not change the active template here; use /set-template for that.
     update.pop("active_template", None)
 
+def _is_only_format_conversion(prev: dict, curr: dict) -> bool:
+    """
+    Check if the only changes are character format conversions (string ↔ array).
+    Returns True if we should suppress logging this change.
+    """
+    # Helper to normalize character value for comparison
+    def normalize_char(val):
+        if not val or val == "":
+            return set()  # Empty
+        if isinstance(val, list):
+            return set(val)  # Already a list
+        if isinstance(val, str):
+            try:
+                parsed = json.loads(val)
+                if isinstance(parsed, list):
+                    return set(parsed)
+            except (json.JSONDecodeError, TypeError):
+                pass
+            return {val}  # Single string
+        return set()
+    
+    # Check if anything OTHER than character format changed
+    prev = prev or {}
+    curr = curr or {}
+    
+    # Compare all fields except characters
+    for key in set(prev.keys()) | set(curr.keys()):
+        if key in ('player1', 'player2'):
+            prev_section = prev.get(key, {}) or {}
+            curr_section = curr.get(key, {}) or {}
+            
+            # Check all fields in player sections
+            for field in set(prev_section.keys()) | set(curr_section.keys()):
+                if field == 'character':
+                    # Compare character as normalized sets
+                    prev_chars = normalize_char(prev_section.get('character'))
+                    curr_chars = normalize_char(curr_section.get('character'))
+                    if prev_chars != curr_chars:
+                        # Actual character change (not just format)
+                        return False
+                else:
+                    # Any other field changed
+                    if prev_section.get(field) != curr_section.get(field):
+                        return False
+        else:
+            # Any non-player field changed
+            if prev.get(key) != curr.get(key):
+                return False
+    
+    # If we got here, only character format changed (or nothing changed)
+    return True
+
 # ---- POST that emits overlay data ----
 @app.route('/emit', methods=['POST'])
 def emit_data():
@@ -1173,12 +1209,14 @@ def emit_data():
 
     # Human-friendly diff log
     try:
-        diff = _diff_payload(prev, new_data)
-        if diff:
-            log.info(f"[bold cyan]Broadcast update[/bold cyan] → {diff}")
-        #else:
-            # nothing visible changed (may still include hidden/internal keys)
-            #log.info("Broadcast update → [dim]no visible changes[/dim]")
+        # Skip logging if it's only a format conversion
+        if _is_only_format_conversion(prev, new_data):
+            # Silently update without logging
+            pass
+        else:
+            diff = _diff_payload(prev, new_data)
+            if diff:
+                log.info(f"[bold cyan]Broadcast update[/bold cyan] → {diff}")
     except Exception as e:
         # fall back to the old summary if something went wrong diffing
         log.info(f"[bold cyan]Broadcast update[/bold cyan] → {_summarize_payload(new_data)}  [dim](diff error {e!r})[/dim]")

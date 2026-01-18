@@ -1,6 +1,4 @@
 {
-  "ui_scale": 1,
-  "char_override": false,
   "player1": {
     "name": "",
     "id": "",
@@ -35,6 +33,7 @@
   },
   "stage": "",
   "match_type": "",
+  "toptext": "",
   "caster1": {
     "name": "",
     "twitch": "",
@@ -45,7 +44,8 @@
     "twitch": "",
     "twitter": ""
   },
-  "toptext": "",
+  "ui_scale": 1,
+  "char_override": false,
   "port": 8008,
   "active_template": "default (EzColor)"
 }

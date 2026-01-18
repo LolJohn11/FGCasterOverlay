@@ -1797,6 +1797,58 @@ function updateProfileButtonColor(player) {
     }
 }
 
+// ===== Tag Game Detection (Backend Version) =====
+
+let isTagGameMode = false;
+
+async function detectTagGameMode() {
+    try {
+        const response = await fetch('/scoreboard');
+        if (!response.ok) {
+            console.warn('[TAG-MODE] Failed to fetch overlay');
+            isTagGameMode = false;
+            disableTagGameFeatures();
+            return;
+        }
+        
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+        // Check for the isTagGame hidden input
+        const tagGameInput = doc.getElementById('isTagGame');
+        const tagGameValue = tagGameInput?.value?.trim().toLowerCase();
+        
+        isTagGameMode = (tagGameValue === 'true');
+        
+        if (isTagGameMode) {
+            console.log('[TAG-MODE] Tag game mode activated');
+            enableTagGameFeatures();
+        } else {
+            console.log('[TAG-MODE] Standard game mode');
+            disableTagGameFeatures();
+        }
+        
+    } catch (err) {
+        console.error('[TAG-MODE] Error detecting tag game mode:', err);
+        isTagGameMode = false;
+        disableTagGameFeatures();
+    }
+}
+
+function enableTagGameFeatures() {
+    console.log('[TAG-MODE] Tag game features enabled');
+}
+
+function disableTagGameFeatures() {
+    console.log('[TAG-MODE] Tag game features disabled');
+}
+
+// Call this on page load
+document.addEventListener('DOMContentLoaded', () => {
+    detectTagGameMode();
+});
+
 // ===== Player character picker =====
 
 // fallback when there is no per-game list
@@ -1826,37 +1878,60 @@ function setActiveCharDropdown(dd) {
     dd.dataset.typeaheadTs = '0';
 }
 
-// build the menu for player 1 or 2
+// build the menus for players' character selection
 function buildCharMenu(player) {
     const menu = document.querySelector(player === 1 ? '#p1CharDropdown' : '#p2CharDropdown');
-    if (!menu) return;
+    if (!menu) {
+        console.error('Profile menu not found for player', player);
+        return;
+    }
 
-    const current = document.querySelector('[name="player' + player + '_character"]').value || '';
+    const input = document.querySelector('[name="player' + player + '_character"]');
+    const currentValue = input?.value || '';
+    
+    // Parse current selection (could be string or JSON array)
+    let selectedChars = [];
+    if (isTagGameMode && currentValue) {
+        try {
+            const parsed = JSON.parse(currentValue);
+            selectedChars = Array.isArray(parsed) ? parsed : [parsed];
+        } catch (e) {
+            selectedChars = currentValue ? [currentValue] : [];
+        }
+    } else {
+        selectedChars = currentValue ? [currentValue] : [];
+    }
     
     // Check if we have a prioritized list for this player
     const playerList = window.__playerCharacterLists?.[player];
     const hasPriority = playerList && playerList.hasPriority;
     
     const list = getCharacterSource();
-	
+    
     // If the list is the special "updating" placeholder, render only that row.
     if (list.length === 1 && (list[0].id === '__updating__' || list[0].label === '— Updating list… —')) {
-      menu.innerHTML = '';
-      const upd = document.createElement('div');
-      upd.className = 'char-dropdown-item';
-      upd.textContent = '— Updating list… —';
-      upd.style.pointerEvents = 'none';
-      menu.appendChild(upd);
-      return;
+        menu.innerHTML = '';
+        const upd = document.createElement('div');
+        upd.className = 'char-dropdown-item';
+        upd.textContent = '— Updating list… —';
+        upd.style.pointerEvents = 'none';
+        menu.appendChild(upd);
+        return;
     }
 
     menu.innerHTML = '';
 
-    // Always add "None" / reset at the top
+    // Always add "None" / reset at the top (clears all selections in tag mode)
     const noneItem = document.createElement('div');
     noneItem.className = 'char-dropdown-item';
-    noneItem.textContent = '--None--';
-    if (current === '' || current == null) {
+    
+    if (isTagGameMode) {
+        noneItem.innerHTML = '<i class="fa-solid fa-xmark" style="margin-right: 8px;"></i>Clear All';
+    } else {
+        noneItem.textContent = '--None--';
+    }
+    
+    if (selectedChars.length === 0) {
         noneItem.classList.add('selected');
     }
     noneItem.addEventListener('click', () => {
@@ -1864,20 +1939,45 @@ function buildCharMenu(player) {
     });
     menu.appendChild(noneItem);
 
-    if (hasPriority) {
-        // Add priority characters section (no header, just items)
-        playerList.priority.forEach(item => {
-            const id = item.id ?? item;
-            const label = item.label ?? item;
+    // Helper function to create character item
+    const createCharItem = (item) => {
+        const id = item.id ?? item;
+        const label = item.label ?? item;
+        
+        // Skip empty entries
+        if (id === '' || label === '— No character —') return null;
+
+        const btn = document.createElement('div');
+        btn.className = 'char-dropdown-item';
+        
+        const isSelected = selectedChars.includes(id);
+        
+        if (isTagGameMode) {
+            // Tag mode: show checkbox
+            const checkbox = document.createElement('i');
+            checkbox.className = isSelected ? 'fa-solid fa-square-check' : 'fa-regular fa-square';
+            checkbox.style.marginRight = '8px';
+            checkbox.style.color = isSelected ? '#0ead00' : '#f1f1f1';
             
-            const btn = document.createElement('div');
-            btn.className = 'char-dropdown-item';
+            btn.appendChild(checkbox);
+            btn.appendChild(document.createTextNode(label || id || 'Unknown'));
+        } else {
+            // Standard mode: show selected state
             btn.textContent = label || id || 'Unknown';
-            if ((id || '') === current) {
+            if (isSelected) {
                 btn.classList.add('selected');
             }
-            btn.addEventListener('click', () => selectCharacter(player, id || '', label || id || ''));
-            menu.appendChild(btn);
+        }
+        
+        btn.addEventListener('click', () => selectCharacter(player, id || '', label || id || ''));
+        return btn;
+    };
+
+    if (hasPriority) {
+        // Add priority characters section
+        playerList.priority.forEach(item => {
+            const charItem = createCharItem(item);
+            if (charItem) menu.appendChild(charItem);
         });
         
         // Add divider
@@ -1885,44 +1985,22 @@ function buildCharMenu(player) {
         divider.className = 'char-dropdown-divider';
         menu.appendChild(divider);
         
-        // Add other characters (no header)
+        // Add other characters
         playerList.others.forEach(item => {
-            const id = item.id ?? item;
-            const label = item.label ?? item;
-            
-            const btn = document.createElement('div');
-            btn.className = 'char-dropdown-item';
-            btn.textContent = label || id || 'Unknown';
-            if ((id || '') === current) {
-                btn.classList.add('selected');
-            }
-            btn.addEventListener('click', () => selectCharacter(player, id || '', label || id || ''));
-            menu.appendChild(btn);
+            const charItem = createCharItem(item);
+            if (charItem) menu.appendChild(charItem);
         });
         
     } else {
         // No prioritization - show all characters normally
         list.forEach(item => {
-            const id = item.id ?? item;
-            const label = item.label ?? item;
-
-            // Skip empty entries
-            if (id === '' || label === '— No character —') return;
-
-            const btn = document.createElement('div');
-            btn.className = 'char-dropdown-item';
-            btn.textContent = label || id || 'Unknown';
-            if ((id || '') === current) {
-                btn.classList.add('selected');
-            }
-            btn.addEventListener('click', () => selectCharacter(player, id || '', label || id || ''));
-            menu.appendChild(btn);
+            const charItem = createCharItem(item);
+            if (charItem) menu.appendChild(charItem);
         });
     }
-	
-	// Mark overflowing items for scrolling
+    
+    // Mark overflowing items for scrolling
     markOverflowingDropdownItems(menu, '.char-dropdown-item', 128);
-	
 }
 
 // Reorder character list to prioritize profile characters
@@ -2140,23 +2218,112 @@ function unportalDropdown(menu) {
     menu._portal.isPortaled = false;
 }
 
+// Update checkboxes in tag mode without rebuilding the entire menu
+function updateCharacterCheckboxes(player, selectedChars) {
+    const menu = document.querySelector(player === 1 ? '#p1CharDropdown' : '#p2CharDropdown');
+    if (!menu) return;
+    
+    // Update all character items
+    const items = menu.querySelectorAll('.char-dropdown-item');
+    items.forEach(item => {
+        // Skip the "Clear All" button
+        if (item.textContent.includes('Clear All')) return;
+        
+        // Get the character ID from the click handler or text
+        const charText = item.textContent.trim();
+        const isSelected = selectedChars.some(id => {
+            // Match against both the ID and label
+            return charText === id || charText.includes(id);
+        });
+        
+        // Find the checkbox icon
+        const checkbox = item.querySelector('i.fa-square-check, i.fa-square');
+        if (checkbox) {
+            // Update checkbox appearance
+            if (isSelected) {
+                checkbox.className = 'fa-solid fa-square-check';
+                checkbox.style.color = '#0ead00';
+            } else {
+                checkbox.className = 'fa-regular fa-square';
+                checkbox.style.color = '#f1f1f1';
+            }
+        }
+    });
+}
+
 function selectCharacter(player, charId, label) {
     const input = document.querySelector('[name="player' + player + '_character"]');
-    if (input) {
+    if (!input) return;
+    
+    if (isTagGameMode) {
+        // Tag mode: toggle character in/out of array
+        let currentChars = [];
+        try {
+            const val = input.value.trim();
+            if (val) {
+                // Try to parse as JSON array first
+                currentChars = JSON.parse(val);
+                if (!Array.isArray(currentChars)) {
+                    // If it's a string, convert to array
+                    currentChars = [val];
+                }
+            }
+        } catch (e) {
+            // If parse fails, treat as single string
+            if (input.value.trim()) {
+                currentChars = [input.value.trim()];
+            }
+        }
+        
+        // Special case: "Clear All" clears everything and closes menu
+        if (charId === '') {
+            currentChars = [];
+            input.value = JSON.stringify(currentChars);
+            updateCharacterButtonColor(player);
+            
+            // Close the menu when clearing
+            const menu = document.querySelector(player === 1 ? '#p1CharDropdown' : '#p2CharDropdown');
+            if (menu) {
+                menu.classList.add('hidden');
+                if (activeCharDropdown === menu) {
+                    activeCharDropdown = null;
+                }
+            }
+        } else {
+            // Toggle the character
+            const index = currentChars.indexOf(charId);
+            if (index > -1) {
+                // Character already selected, remove it
+                currentChars.splice(index, 1);
+            } else {
+                // Character not selected, add it
+                currentChars.push(charId);
+            }
+            
+            // Store as JSON array
+            input.value = JSON.stringify(currentChars);
+            updateCharacterButtonColor(player);
+            
+            // Update checkboxes WITHOUT rebuilding the entire menu
+            updateCharacterCheckboxes(player, currentChars);
+        }
+        
+    } else {
+        // Standard mode: single character selection
         input.value = charId;
-    }
-    updateCharacterButtonColor(player);
-
-    const menu = document.querySelector(player === 1 ? '#p1CharDropdown' : '#p2CharDropdown');
-    if (menu) {
-        menu.classList.add('hidden');
-        if (activeCharDropdown === menu) {
-            activeCharDropdown = null;
+        updateCharacterButtonColor(player);
+        
+        // Close the menu in standard mode
+        const menu = document.querySelector(player === 1 ? '#p1CharDropdown' : '#p2CharDropdown');
+        if (menu) {
+            menu.classList.add('hidden');
+            if (activeCharDropdown === menu) {
+                activeCharDropdown = null;
+            }
         }
     }
-
-    // push to backend
-    emitUpdate && emitUpdate();
+    
+    emitUpdate();
 }
 
 function updateCharacterButtonColor(player) {
@@ -2164,11 +2331,28 @@ function updateCharacterButtonColor(player) {
     const btn   = document.querySelector(player === 1 ? '#p1CharBtn' : '#p2CharBtn');
     if (!input || !btn) return;
 
-    if (input.value && input.value.trim() !== '') {
-        btn.style.color = '#0ead00';
-    } else {
-        btn.style.color = '#f1f1f1';
+    const value = input.value && input.value.trim();
+    
+    // Check if there's actually any character selected
+    let hasCharacter = false;
+    
+    if (value) {
+        if (isTagGameMode) {
+            // In tag mode, check if the array has any items
+            try {
+                const parsed = JSON.parse(value);
+                hasCharacter = Array.isArray(parsed) && parsed.length > 0;
+            } catch (e) {
+                // If it's not valid JSON, treat as a single character
+                hasCharacter = true;
+            }
+        } else {
+            // In standard mode, just check if value exists
+            hasCharacter = true;
+        }
     }
+    
+    btn.style.color = hasCharacter ? '#0ead00' : '#f1f1f1';
 }
 
 async function fetchCharacterListWithRetry(game, tries = 8, delayMs = 300) {
@@ -2219,9 +2403,23 @@ async function fetchCharacterListWithRetry(game, tries = 8, delayMs = 300) {
 document.addEventListener('click', (e) => {
     const isMenu = e.target.closest('.char-dropdown');
     const isBtn  = e.target.closest('.char-select-btn');
+    
+    // In tag mode, only close if clicking outside both menu and button
+    // In standard mode, close on any outside click
     if (!isMenu && !isBtn) {
         document.querySelectorAll('.char-dropdown').forEach(m => m.classList.add('hidden'));
         activeCharDropdown = null;
+    }
+    
+    // In standard mode, also close when clicking inside the menu (selecting a char)
+    // In tag mode, keep it open when clicking menu items
+    if (!isTagGameMode && isMenu && !isBtn) {
+        // Only close if we clicked on a character item (not scrollbar, etc.)
+        const isCharItem = e.target.closest('.char-dropdown-item');
+        if (isCharItem) {
+            document.querySelectorAll('.char-dropdown').forEach(m => m.classList.add('hidden'));
+            activeCharDropdown = null;
+        }
     }
 });
 
@@ -2411,7 +2609,7 @@ async function restoreProfilePrioritization() {
     }
 }
 
-// --- Initial load (no extra template change listeners here; your existing UI handles that) ---
+// --- Initial load ---
 document.addEventListener('DOMContentLoaded', () => {
 	loadCharacterListForActiveGame();
 	loadPlayerProfiles();
@@ -2422,9 +2620,8 @@ document.addEventListener('DOMContentLoaded', () => {
 	if (cb) cb.addEventListener('change', () => { if (typeof emitUpdate === 'function') emitUpdate(); });
 });
 
-// --- Helper to show a proper, disabled placeholder like your special options ---
+// --- Helper to show a proper, disabled placeholder ---
 function showUpdatingCharacterListPlaceholder() {
-  // same look/feel as your special rows (em-dashes), not selectable
   window.__characterList = [{ id: '__updating__', label: '— Updating list… —' }];
   buildCharMenu(1);
   buildCharMenu(2);
@@ -3507,6 +3704,52 @@ async function populateTemplateSelect() {
     sel.value = saved || active || (templates[0] || '');
 }
 
+// Convert character format when switching between standard and tag modes
+function convertCharacterFormat(player) {
+    const input = document.querySelector('[name="player' + player + '_character"]');
+    if (!input) return;
+    
+    const currentValue = input.value.trim();
+    
+    if (isTagGameMode) {
+        // Converting TO tag mode
+        if (currentValue === '' || currentValue === '""') {
+            // Empty string -> empty array
+            input.value = '[]';
+        } else if (!currentValue.startsWith('[')) {
+            // Single character string -> array with one item
+            try {
+                // Try to parse in case it's already JSON
+                JSON.parse(currentValue);
+            } catch (e) {
+                // Not JSON, wrap in array
+                input.value = JSON.stringify([currentValue]);
+            }
+        }
+        // If it's already an array format, leave it
+    } else {
+        // Converting TO standard mode
+        if (currentValue === '[]') {
+            // Empty array -> empty string
+            input.value = '';
+        } else if (currentValue.startsWith('[')) {
+            // Array -> take first item or empty string
+            try {
+                const parsed = JSON.parse(currentValue);
+                if (Array.isArray(parsed)) {
+                    input.value = parsed.length > 0 ? parsed[0] : '';
+                }
+            } catch (e) {
+                // Invalid JSON, clear it
+                input.value = '';
+            }
+        }
+        // If it's already a single value, leave it
+    }
+    
+    updateCharacterButtonColor(player);
+}
+
 // when the user changes, tell the server and persist to data.json
 function bindTemplateSelect() {
     const sel = document.getElementById('templateSelect');
@@ -3531,6 +3774,13 @@ function bindTemplateSelect() {
                     startScraperCompletionPoll(game);
                 }
             }
+            
+            // Re-detect tag game mode after template change
+            await detectTagGameMode();
+            
+            // Convert character formats for both players
+            convertCharacterFormat(1);
+            convertCharacterFormat(2);
             
             // refresh char list for the chosen template
             await loadCharacterListForActiveGame(choice);
@@ -3709,6 +3959,25 @@ function restoreMatchTypeButtons() {
     updateMatchTypeUI();
 }
 
+function parseCharacterField(charValue) {
+    if (!charValue || charValue.trim() === '') {
+        return isTagGameMode ? [] : '';
+    }
+    
+    // Try to parse as JSON array
+    try {
+        const parsed = JSON.parse(charValue);
+        if (Array.isArray(parsed)) {
+            return parsed;
+        }
+        // If it parsed but isn't an array, treat as single value
+        return isTagGameMode ? [parsed] : parsed;
+    } catch (e) {
+        // Not valid JSON, treat as plain string
+        return isTagGameMode ? [charValue] : charValue;
+    }
+}
+
 let isShortLabel = false;
 
 function toggleShortLabel() {
@@ -3745,7 +4014,7 @@ function getFormData() {
             clan: json.player1_clan,
             wl: json.player1_wl,
             score: json.player1_score,
-            character: json.player1_character,
+            character: parseCharacterField(json.player1_character),
             img: json.player1Img || '',
             profile: window.__selectedProfiles?.[1] || ''
         },
@@ -3755,7 +4024,7 @@ function getFormData() {
             clan: json.player2_clan,
             wl: json.player2_wl,
             score: json.player2_score,
-            character: json.player2_character,
+            character: parseCharacterField(json.player2_character),
             img: json.player2Img || '',
             profile: window.__selectedProfiles?.[2] || ''
         },
@@ -3875,7 +4144,22 @@ async function loadDataAndHydrate() {
 		updatePlayerIdToggleColor(2);
 		loadCharacterListForActiveGame(window.__savedData?.active_template);
 		
-		// Character list override tiggle
+		// Restore characters
+		const p1Char = data.player1?.character;
+		if (Array.isArray(p1Char)) {
+			document.querySelector('[name="player1_character"]').value = JSON.stringify(p1Char);
+		} else {
+			document.querySelector('[name="player1_character"]').value = p1Char ?? '';
+		}
+
+		const p2Char = data.player2?.character;
+		if (Array.isArray(p2Char)) {
+			document.querySelector('[name="player2_character"]').value = JSON.stringify(p2Char);
+		} else {
+			document.querySelector('[name="player2_character"]').value = p2Char ?? '';
+		}
+		
+		// Character list override toggle
 		const elOverride = document.getElementById('charOverride');
 		if (elOverride) elOverride.checked = !!(data.char_override);
 		
@@ -4588,8 +4872,13 @@ function resetPValues() {
         document.querySelectorAll(".WLside button").forEach((btn) => btn.classList.remove("active"));
 
 		// Characters
-		uiOnly_Set(document.querySelector('[name="player1_character"]'), '');
-        uiOnly_Set(document.querySelector('[name="player2_character"]'), '');
+		if (isTagGameMode) {
+			uiOnly_Set(document.querySelector('[name="player1_character"]'), '[]');
+			uiOnly_Set(document.querySelector('[name="player2_character"]'), '[]');
+		} else {
+			uiOnly_Set(document.querySelector('[name="player1_character"]'), '');
+			uiOnly_Set(document.querySelector('[name="player2_character"]'), '');
+		}
 		// repaint the character buttons
         updateCharacterButtonColor(1);
         updateCharacterButtonColor(2);
