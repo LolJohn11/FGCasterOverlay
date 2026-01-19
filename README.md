@@ -20,6 +20,7 @@ FGCaster Overlay  | Other overlay apps
 ![Controller Screenshot](static/img/controller.png)
 * Separate fields for player name, clan tag, score, in-game player ID, and "winners/losers" side display.
 * Player character selectors that automatically load the correct character lists for the selected overlay template.
+* Tag/team game support with up to 2 players per side and multi-character selection.
 * Support for team names and scores (for example, for team battle events).
 * Set a country flag or upload a custom image for any of the players or teams.
 * Player and team presets for easy and fast data entry on the go.
@@ -35,21 +36,26 @@ FGCaster Overlay  | Other overlay apps
 	* Tekken 8
 	* Street Fighter 6
 	* Guilty Gear -Strive-
+	* 2XKO
 * Built-in templates include basic animations, which you can adjust or build upon if needed.
 * Easy to edit or create your own templates using HTML, CSS, and JS.
 	* Includes "EzColor" template for fast customization if you just want to tweak the colors.
 ### 📋 Planned Features
-* Tag/Team-based fighting games support
 * Localization support
 * Integrations with Start.gg and Challonge
+* More pre-made templates
 * And more...
 ### 💡 Have an idea for a new feature?
 Submit your thoughts in the ["Issues"](https://github.com/LolJohn11/FGCasterOverlay/issues) tab!
 
-## 🖼️ Screenshots
-| Tekken 8  | Street Fighter 6 | Guilty Gear -Strive- |
-| ------------- |:-------------:|:-------------:|
-| ![Screenshot - T8](static/img/example_T8.png) | ![Screenshot - SF6](static/img/example_SF6.png) | ![Screenshot - GGST](static/img/example_GGST.png) |
+## 🖼️ Overlay Examples
+| Tekken 8  | Street Fighter 6 |
+|:-------------:|:-------------:|
+| ![Screenshot - T8](static/img/example_T8.png) | ![Screenshot - SF6](static/img/example_SF6.png) |
+
+| Guilty Gear -Strive- | 2XKO |
+|:-------------:|:-------------:|
+| ![Screenshot - GGST](static/img/example_GGST.png) | ![Screenshot - 2XKO](static/img/example_2XKO.png) |
 
 ## ⚙️ How to use
 1. Download the `.zip` file of the [latest release](https://github.com/LolJohn11/FGCasterOverlay/releases/latest) version and extract the contents into any folder of your choosing.
