@@ -461,8 +461,12 @@ function connectSocket() {
          const name2 = (p2.name || '')
             .trim();
 		
-		 const p1Char = (p1.character || '').trim();
-		 const p2Char = (p2.character || '').trim();
+		 const p1Char = Array.isArray(p1.character) 
+			? p1.character.join(', ') 
+			: (p1.character || '').trim();
+		 const p2Char = Array.isArray(p2.character) 
+			? p2.character.join(', ') 
+			: (p2.character || '').trim();
 		
 		 const p1ID = (p1.id || '').trim();
 		 const p2ID = (p2.id || '').trim();
