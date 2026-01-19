@@ -254,7 +254,8 @@
 		<div class="nameBlock" id="nameBlockP1" data-anim="down">
 			<div class="name">
 				<span id="player1Clan"></span> <span id="separator1">|</span>
-				<span id="player1Name"></span>
+				<span id="player1Name"></span> <span id="separator1-1">|</span>
+				<span id="player1-1Name"></span>
 				<span id="player1WL"></span>
 			</div>
 		</div>
@@ -276,7 +277,8 @@
 		<div class="nameBlock" id="nameBlockP2" data-anim="down">
 			<div class="name">
 				<span id="player2Clan"></span> <span id="separator2">|</span>
-				<span id="player2Name"></span>
+				<span id="player2Name"></span> <span id="separator2-2">|</span>
+				<span id="player2-2Name"></span>
 				<span id="player2WL"></span>
 			</div>
 		</div>
@@ -445,11 +447,20 @@ function connectSocket() {
          const clan1 = (p1.clan || '')
             .trim();
          const name1 = (p1.name || '')
-            .trim();
-         const clan2 = (p2.clan || '')
+			.trim()
+			.replace(/\s*&&\s*.*$/, "");
+		 const name11 = p1.name?.match(/\s*&&\s*/)
+			? p1.name.replace(/^.*?\s*&&\s*/, '').trim()
+			: '';
+        
+ 		 const clan2 = (p2.clan || '')
             .trim();
          const name2 = (p2.name || '')
-            .trim();
+			.trim()
+			.replace(/\s*&&\s*.*$/, "");
+		 const name22 = p2.name?.match(/\s*&&\s*/)
+			? p2.name.replace(/^.*?\s*&&\s*/, '').trim()
+			: '';
 		
 		 const p1Char = Array.isArray(p1.character) 
 			? p1.character.join(', ') 
@@ -510,6 +521,8 @@ function connectSocket() {
 
          document.getElementById('player1Name')
             .textContent = name1;
+		 document.getElementById('player1-1Name')
+            .textContent = name11 || '';
          document.getElementById('player1Clan')
             .textContent = clan1;
          document.getElementById('player1WL')
@@ -519,6 +532,8 @@ function connectSocket() {
 
          document.getElementById('player2Name')
             .textContent = name2;
+		 document.getElementById('player2-2Name')
+		    .textContent = name22 || '';
          document.getElementById('player2Clan')
             .textContent = clan2;
          document.getElementById('player2WL')
@@ -530,7 +545,12 @@ function connectSocket() {
             .style.display = (clan1 && name1) ? 'inline' : 'none';
          document.getElementById('separator2')
             .style.display = (clan2 && name2) ? 'inline' : 'none';
-
+		// Insert a "|" separator between two player names if both are present
+		 document.getElementById('separator1-1')
+		    .style.display = (name1 && name11) ? 'inline' : 'none';
+		 document.getElementById('separator2-2')
+		    .style.display = (name2 && name22) ? 'inline' : 'none';
+		
          const stage = (data.stage || '')
             .trim();
          const matchType = (data.match_type || '')
