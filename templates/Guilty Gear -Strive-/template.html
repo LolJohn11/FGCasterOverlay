@@ -1,14 +1,16 @@
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <title>FGCaster Overlay</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- Backup font just in case -->
-  <!-- <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@700&display=swap" rel="stylesheet" /> -->
-  <link rel="stylesheet" href="./static/fa/css/all.min.css" />
-  <link rel="stylesheet" href="{{ asset_url(template_name, 'template.css') }}">
-  <script src="https://cdn.jsdelivr.net/npm/fitty@2.3.7/dist/fitty.min.js"></script>
+	<meta charset="UTF-8" />
+	<title>FGCaster Overlay</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<!-- Backup font just in case -->
+	<!-- <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@700&display=swap" rel="stylesheet" /> -->
+	<link rel="stylesheet" href="./static/fa/css/all.min.css" />
+	<link rel="stylesheet" href="{{ asset_url(template_name, 'template.css') }}">
+	<script src="https://cdn.jsdelivr.net/npm/fitty@2.3.7/dist/fitty.min.js"></script>
 </head>
+
 <body>
 
 <!-- Defines which game's character list to use. -->
@@ -26,7 +28,7 @@
 
 	<!-- Debug background image of a game. Set opacity to 1 or 0 to show or hide -->
 	<img src="{{ asset_url(template_name, 'img/game.jpg') }}" style="opacity: 0" class="debug-bg" alt="Debug Game Background">
-   
+
 	<!-- This version of the tempalte uses SVG elements for easier styling. -->
 	<!-- Please refer to the adjacent CSS file if you wish to adjust image visuals. -->
 
@@ -34,41 +36,32 @@
 	<svg style="width: 0; height: 0; position: absolute;" aria-hidden="true">
 		<defs>
 			<filter id="coloredGlow_p1" x="-50%" y="-50%" width="200%" height="200%">
-			  <feFlood flood-color="var(--glow-color, #F70041)" 
-					   flood-opacity="var(--glow-opacity, 1)" 
-					   result="glowColor"/>
-			  <feComposite in="glowColor" in2="SourceAlpha" operator="in" result="coloredShape"/>
-			  <feGaussianBlur in="coloredShape" 
-							  stdDeviation="2" 
-							  result="blurredGlow"/>
-			  <feMerge>
-				<feMergeNode in="blurredGlow"/>
-				<feMergeNode in="SourceGraphic"/>
-			  </feMerge>
+				<feFlood flood-color="var(--glow-color, #F70041)" flood-opacity="var(--glow-opacity, 1)" result="glowColor" />
+				<feComposite in="glowColor" in2="SourceAlpha" operator="in" result="coloredShape" />
+				<feGaussianBlur in="coloredShape" stdDeviation="2" result="blurredGlow" />
+				<feMerge>
+					<feMergeNode in="blurredGlow" />
+					<feMergeNode in="SourceGraphic" />
+				</feMerge>
 			</filter>
 			<filter id="coloredGlow_p2" x="-50%" y="-50%" width="200%" height="200%">
-			  <feFlood flood-color="var(--glow-color, #F70041)" 
-					   flood-opacity="var(--glow-opacity, 1)" 
-					   result="glowColor"/>
-			  <feComposite in="glowColor" in2="SourceAlpha" operator="in" result="coloredShape"/>
-			  <feGaussianBlur in="coloredShape" 
-							  stdDeviation="2" 
-							  result="blurredGlow"/>
-			  <feMerge>
-				<feMergeNode in="blurredGlow"/>
-				<feMergeNode in="SourceGraphic"/>
-			  </feMerge>
+				<feFlood flood-color="var(--glow-color, #F70041)" flood-opacity="var(--glow-opacity, 1)" result="glowColor" />
+				<feComposite in="glowColor" in2="SourceAlpha" operator="in" result="coloredShape" />
+				<feGaussianBlur in="coloredShape" stdDeviation="2" result="blurredGlow" />
+				<feMerge>
+					<feMergeNode in="blurredGlow" />
+					<feMergeNode in="SourceGraphic" />
+				</feMerge>
 			</filter>
 			<filter id="elShadow" x="-50%" y="-50%" width="200%" height="200%">
-                <feColorMatrix type="matrix" values="1 0 0 0 0 
-                                                     0 1 0 0 0 
-                                                     0 0 1 0 0 
-                                                     0 0 0 100 0"
-                                                     result="boostedInput"/>
-                                                   
-                <feGaussianBlur stdDeviation="5"/>
-                <feComposite operator="out" in2="boostedInput"/>
-            </filter>
+				<feColorMatrix type="matrix" values="1 0 0 0 0 
+													 0 1 0 0 0 
+													 0 0 1 0 0 
+													 0 0 0 100 0" result="boostedInput" />
+
+				<feGaussianBlur stdDeviation="5" />
+				<feComposite operator="out" in2="boostedInput" />
+			</filter>
 			<linearGradient id="linear-gradient-p1-noimg" x1="6.58" y1="32.49" x2="451.08" y2="32.49" gradientUnits="userSpaceOnUse">
 				<stop offset="0.13" stop-color="var(--gradient-stop-1, #d4174f)" />
 				<stop offset="0.34" stop-color="var(--gradient-stop-2, #bf1747)" />
@@ -95,15 +88,15 @@
 			</linearGradient>
 		</defs>
 	</svg>
-   
-   <!-- Top row -->
+
+	<!-- Top row -->
 	<div style="display: flex; position: absolute; width: 100%; justify-content: center;">
 		<svg id="topRowBG" xmlns="http://www.w3.org/2000/svg" width="700" height="60" viewBox="0 0 573.4 60" data-anim="down" class="bg-img" alt="Top Text Row" style="margin-top: 0px; display: block;">
 			<path id="topRowShadow" filter="url(#elShadow)" d="M1246.79.3H673.39l16.88,34.09a5,5,0,0,0,4.49,2.78H864.19a5,5,0,0,1,4.27,2.39l3.08,5A5,5,0,0,0,875.81,47h168.38a5,5,0,0,0,4.27-2.39l3.07-5a5,5,0,0,1,4.26-2.4h169.63a5,5,0,0,0,4.48-2.78Z" transform="translate(-673.39 -0.3)" stroke="none" fill-opacity="0.1" />
 			<path id="topRowBody" d="M1246.79.3H673.39l16.88,34.09a5,5,0,0,0,4.49,2.78H864.19a5,5,0,0,1,4.27,2.39l3.08,5A5,5,0,0,0,875.81,47h168.38a5,5,0,0,0,4.27-2.39l3.07-5a5,5,0,0,1,4.26-2.4h169.63a5,5,0,0,0,4.48-2.78Z" transform="translate(-673.39 -0.3)" />
 		</svg>
 	</div>
-   
+
 	<!-- Player plaques -->
 	<div style="display: flex; position: absolute; width: 100%; justify-content: center; gap: 567px; top: 0px;">
 		<div style="position: relative; width: 100%;">
@@ -199,7 +192,7 @@
 			</svg>
 		</div>
 	</div>
-	
+
 	<!-- Teams -->
 	<div style="display: flex; position: absolute; top: 62px; width: 100%; justify-content: center; gap: 490px;">
 		<div style="position: relative; width: 100%;">
@@ -269,730 +262,791 @@
 			<path id="castersBody" d="M789.88,1080h340.24l-12.4-25a5,5,0,0,0-4.49-2.79H806.77a5,5,0,0,0-4.49,2.79Z" transform="translate(-789.88 -1052.17)" />
 		</svg>
 	</div>
-	
+
 	<!-- MAIN CONTENT SECTION -->
 	<div class="scoreboardContainer">
-	  <!-- LEFT: Player 1 -->
-	  <div class="nameBlock" id="nameBlockP1" data-anim="right">
-		 <div class="name">
-			<span id="player1Clan"></span> <span id="separator1">|</span>
-			<span id="player1Name"></span>
-			<span id="player1WL"></span>
-		 </div>
-	  </div>
-	  <div class="scoreBlock" data-anim="right">
-		 <div class="score" id="player1Score"></div>
-	  </div>
-	  <!-- CENTER: Stage, Match Type, Top Text, etc. -->
-	  <div class="centerPanel" data-anim="down">
-		 <div class="infoRow">
-			<div class="infoBar" id="stageText"></div>
-			<div class="infoBar" id="topText"></div>
-			<div class="infoBar" id="matchTypeText"></div>
-		 </div>
-	  </div>
-	  <!-- RIGHT: Player 2 -->
-	  <div class="scoreBlock" data-anim="left">
-		 <div class="score" id="player2Score"></div>
-	  </div>
-	  <div class="nameBlock" id="nameBlockP2" data-anim="left">
-		 <div class="name">
-			<span id="player2Clan"></span> <span id="separator2">|</span>
-			<span id="player2Name"></span>
-			<span id="player2WL"></span>
-		 </div>
-	  </div>
+		<!-- LEFT: Player 1 -->
+		<div class="nameBlock" id="nameBlockP1" data-anim="right">
+			<div class="name">
+				<span id="player1Clan"></span> <span id="separator1">|</span>
+				<span id="player1Name"></span>
+				<span id="player1WL"></span>
+			</div>
+		</div>
+		<div class="scoreBlock" data-anim="right">
+			<div class="score" id="player1Score"></div>
+		</div>
+		<!-- CENTER: Stage, Match Type, Top Text, etc. -->
+		<div class="centerPanel" data-anim="down">
+			<div class="infoRow">
+				<div class="infoBar" id="stageText"></div>
+				<div class="infoBar" id="topText"></div>
+				<div class="infoBar" id="matchTypeText"></div>
+			</div>
+		</div>
+		<!-- RIGHT: Player 2 -->
+		<div class="scoreBlock" data-anim="left">
+			<div class="score" id="player2Score"></div>
+		</div>
+		<div class="nameBlock" id="nameBlockP2" data-anim="left">
+			<div class="name">
+				<span id="player2Clan"></span> <span id="separator2">|</span>
+				<span id="player2Name"></span>
+				<span id="player2WL"></span>
+			</div>
+		</div>
 	</div>
 	<!-- TEAMS -->
 	<div class="teamsContainer">
-	  <div class="team team-left" data-anim="right">
-		 <div class="teamText">
-			<span id="team1Name"></span>
-			<span id="team1Score"></span>
-		 </div>
-	  </div>
-	  <div id="teamsDivider"></div>
-	  <div class="team team-right" data-anim="left">
-		 <div class="teamText">
-			<span id="team2Score"></span>
-			<span id="team2Name"></span>
-		 </div>
-	  </div>
+		<div class="team team-left" data-anim="right">
+			<div class="teamText">
+				<span id="team1Name"></span>
+				<span id="team1Score"></span>
+			</div>
+		</div>
+		<div id="teamsDivider"></div>
+		<div class="team team-right" data-anim="left">
+			<div class="teamText">
+				<span id="team2Score"></span>
+				<span id="team2Name"></span>
+			</div>
+		</div>
 	</div>
 	<!-- CASTERS -->
 	<div id="casterContainer" class="scoreboardContainer" data-anim="up">
-	  <div class="commentators" id="commentatorsBlock">
-		 <span id="casterCycleWrapper" class="fade">
-			<span id="caster1Display" class="casterText"></span>
-			<span class="casterIcon" id="micIcon" style="display: none;"><i class="fa-solid fa-headset"></i></span>
-			<span class="casterIcon" id="twitchIcon" style="display: none;"><i class="fa-brands fa-twitch" style="color: #772CE8"></i></span>
-			<span class="casterIcon" id="twitterIcon" style="display: none;"><i class="fa-brands fa-x-twitter" style="color: #1DA1F2"></i></span>
-			<span id="caster2Display" class="casterText"></span>
-		 </span>
-	  </div>
+		<div class="commentators" id="commentatorsBlock">
+			<span id="casterCycleWrapper" class="fade">
+				<span id="caster1Display" class="casterText"></span>
+				<span class="casterIcon" id="micIcon" style="display: none;"><i class="fa-solid fa-headset"></i></span>
+				<span class="casterIcon" id="twitchIcon" style="display: none;"><i class="fa-brands fa-twitch" style="color: #772CE8"></i></span>
+				<span class="casterIcon" id="twitterIcon" style="display: none;"><i class="fa-brands fa-x-twitter" style="color: #1DA1F2"></i></span>
+				<span id="caster2Display" class="casterText"></span>
+			</span>
+		</div>
 	</div>
 </div>
-
 
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
 let socket;
 
 function connectSocket() {
-   socket = io({
-      reconnection: true,
-      reconnectionAttempts: Infinity,
-      reconnectionDelay: 2000,
-      timeout: 5000
-   });
+	socket = io({
+		reconnection: true,
+		reconnectionAttempts: Infinity,
+		reconnectionDelay: 2000,
+		timeout: 5000
+	});
 
-   socket.on('connect', () => {
-      console.log('%c[Overlay] Connected to server', 'color: green');
-   });
+	socket.on('connect', () => {
+		console.log('%c[Overlay] Connected to server', 'color: green');
+	});
 
-   socket.on('disconnect', (reason) => {
-      console.warn('[Overlay] Disconnected:', reason);
-   });
+	socket.on('disconnect', (reason) => {
+		console.warn('[Overlay] Disconnected:', reason);
+	});
 
-   socket.on('reconnect_attempt', () => {
-      console.log('[Overlay] Attempting to reconnect...');
-   });
+	socket.on('reconnect_attempt', () => {
+		console.log('[Overlay] Attempting to reconnect...');
+	});
 
-   socket.on('reconnect', (attemptNumber) => {
-      console.log(`[Overlay] Reconnected after ${attemptNumber} attempt(s)`);
-   });
+	socket.on('reconnect', (attemptNumber) => {
+		console.log(`[Overlay] Reconnected after ${attemptNumber} attempt(s)`);
+	});
 
-   // When the controller changes the template, reload once to get the new HTML/CSS
-   socket.on('template_changed', (msg) => {
-      // Only reload if the message says a different template than what this page was rendered with
-      if (msg && msg.template && msg.template !== "{{ template_name }}") {
-         location.reload();
-      }
-   });
+	// When the controller changes the template, reload once to get the new HTML/CSS
+	socket.on('template_changed', (msg) => {
+		// Only reload if the message says a different template than what this page was rendered with
+		if (msg && msg.template && msg.template !== "{{ template_name }}") {
+			location.reload();
+		}
+	});
 
-   socket.on('update_scoreboard', data => {
-      
-	// For adjusting text font size (autofit) 
-	// Update player names
-    if (data.player1?.name !== undefined) {
-        const p1NameEl = document.getElementById('player1Name');
-        if (p1NameEl) p1NameEl.textContent = data.player1.name;
-    }
-    if (data.player2?.name !== undefined) {
-        const p2NameEl = document.getElementById('player2Name');
-        if (p2NameEl) p2NameEl.textContent = data.player2.name;
-    }
-    
-    // Update player scores
-    if (data.player1?.score !== undefined) {
-        const p1ScoreEl = document.getElementById('player1Score');
-        if (p1ScoreEl) p1ScoreEl.textContent = data.player1.score;
-    }
-    if (data.player2?.score !== undefined) {
-        const p2ScoreEl = document.getElementById('player2Score');
-        if (p2ScoreEl) p2ScoreEl.textContent = data.player2.score;
-    }
-    
-    // Update team names
-    if (data.team1?.name !== undefined) {
-        const t1NameEl = document.getElementById('team1Name');
-        if (t1NameEl) t1NameEl.textContent = data.team1.name;
-    }
-    if (data.team2?.name !== undefined) {
-        const t2NameEl = document.getElementById('team2Name');
-        if (t2NameEl) t2NameEl.textContent = data.team2.name;
-    }
-    
-    // Update team scores
-    if (data.team1?.score !== undefined) {
-        const t1ScoreEl = document.getElementById('team1Score');
-        if (t1ScoreEl) t1ScoreEl.textContent = data.team1.score;
-    }
-    if (data.team2?.score !== undefined) {
-        const t2ScoreEl = document.getElementById('team2Score');
-        if (t2ScoreEl) t2ScoreEl.textContent = data.team2.score;
-    }
-    
-    // Update stage text
-    if (data.stage !== undefined) {
-        const stageEl = document.getElementById('stageText');
-        if (stageEl) stageEl.textContent = data.stage;
-    }
-    
-    // Update top text
-    if (data.top_text !== undefined) {
-        const topEl = document.getElementById('topText');
-        if (topEl) topEl.textContent = data.top_text;
-    }
-    
-    // Update match type
-    if (data.match_type !== undefined) {
-        const matchEl = document.getElementById('matchTypeText');
-        if (matchEl) matchEl.textContent = data.match_type;
-    }
-    
-    // Update casters
-    if (data.commentators && Array.isArray(data.commentators)) {
-        const casterElements = document.querySelectorAll('.casterText');
-        data.commentators.forEach((caster, index) => {
-            if (casterElements[index]) {
-                casterElements[index].textContent = caster.name || '';
-            }
-        });
-    }
-	  
-	  try {
-         const d = data || {};
-         const p1 = d.player1 || {
-            name: '',
-			id: '',
-            clan: '',
-            wl: '',
-            score: 0,
-			character: '',
-            img: ''
-         };
-         const p2 = d.player2 || {
-            name: '',
-			id: '',
-            clan: '',
-            wl: '',
-            score: 0,
-			character: '',
-            img: ''
-         };
+	socket.on('update_scoreboard', data => {
 
-		 //////// Players
+		// For adjusting text font size (autofit) 
+		// Update player names
+		if (data.player1?.name !== undefined) {
+			const p1NameEl = document.getElementById('player1Name');
+			if (p1NameEl) p1NameEl.textContent = data.player1.name;
+		}
+		if (data.player2?.name !== undefined) {
+			const p2NameEl = document.getElementById('player2Name');
+			if (p2NameEl) p2NameEl.textContent = data.player2.name;
+		}
 
-         const clan1 = (p1.clan || '')
-            .trim();
-         const name1 = (p1.name || '')
-            .trim();
-         const clan2 = (p2.clan || '')
-            .trim();
-         const name2 = (p2.name || '')
-            .trim();
-		
-		 const p1Char = Array.isArray(p1.character) 
-			? p1.character.join(', ') 
-			: (p1.character || '').trim();
-		 const p2Char = Array.isArray(p2.character) 
-			? p2.character.join(', ') 
-			: (p2.character || '').trim();
-		
-		 const p1ID = (p1.id || '').trim();
-		 const p2ID = (p2.id || '').trim();
+		// Update player scores
+		if (data.player1?.score !== undefined) {
+			const p1ScoreEl = document.getElementById('player1Score');
+			if (p1ScoreEl) p1ScoreEl.textContent = data.player1.score;
+		}
+		if (data.player2?.score !== undefined) {
+			const p2ScoreEl = document.getElementById('player2Score');
+			if (p2ScoreEl) p2ScoreEl.textContent = data.player2.score;
+		}
 
-         const p1Img = document.getElementById('player1Img');
-         const p2Img = document.getElementById('player2Img');
+		// Update team names
+		if (data.team1?.name !== undefined) {
+			const t1NameEl = document.getElementById('team1Name');
+			if (t1NameEl) t1NameEl.textContent = data.team1.name;
+		}
+		if (data.team2?.name !== undefined) {
+			const t2NameEl = document.getElementById('team2Name');
+			if (t2NameEl) t2NameEl.textContent = data.team2.name;
+		}
 
-         //p1Img.src = p1.img || '';
-		 
-		 const p1absoluteUrl = new URL(p1.img, window.location.href).href;
-         p1Img.setAttributeNS('http://www.w3.org/1999/xlink', 'href', p1absoluteUrl || '');
-		 p1Img.setAttribute('href', p1absoluteUrl || '');
-		 
-         p1Img.style.display = p1.img ? 'inline-block' : 'none';
-         p1Img.classList.remove('flag-style', 'custom-image-style');
-         p1Img.classList.add(p1.img && p1.img.includes('/flags/') && p1.img.endsWith('.svg') ? 'flag-style' : 'custom-image-style');
+		// Update team scores
+		if (data.team1?.score !== undefined) {
+			const t1ScoreEl = document.getElementById('team1Score');
+			if (t1ScoreEl) t1ScoreEl.textContent = data.team1.score;
+		}
+		if (data.team2?.score !== undefined) {
+			const t2ScoreEl = document.getElementById('team2Score');
+			if (t2ScoreEl) t2ScoreEl.textContent = data.team2.score;
+		}
 
-         if (!p1.img) { // BG partial/full
-            document.getElementById('p1BGpartial')
-               .style.display = 'block';
-            document.getElementById('p1BGfull')
-               .style.display = 'none';
-         } else {
-            document.getElementById('p1BGfull')
-               .style.display = 'block';
-            document.getElementById('p1BGpartial')
-               .style.display = 'none';
-         }
+		// Update stage text
+		if (data.stage !== undefined) {
+			const stageEl = document.getElementById('stageText');
+			if (stageEl) stageEl.textContent = data.stage;
+		}
 
-         //p2Img.src = p2.img || '';
+		// Update top text
+		if (data.top_text !== undefined) {
+			const topEl = document.getElementById('topText');
+			if (topEl) topEl.textContent = data.top_text;
+		}
 
-		 const p2absoluteUrl = new URL(p2.img, window.location.href).href;
-         p2Img.setAttributeNS('http://www.w3.org/1999/xlink', 'href', p2absoluteUrl || '');
-		 p2Img.setAttribute('href', p2absoluteUrl || '');
-		 
-         p2Img.style.display = p2.img ? 'inline-block' : 'none';
-         p2Img.classList.remove('flag-style', 'custom-image-style');
-         p2Img.classList.add(p2.img && p2.img.includes('/flags/') && p2.img.endsWith('.svg') ? 'flag-style' : 'custom-image-style');
+		// Update match type
+		if (data.match_type !== undefined) {
+			const matchEl = document.getElementById('matchTypeText');
+			if (matchEl) matchEl.textContent = data.match_type;
+		}
 
-         if (!p2.img) {
-            document.getElementById('p2BGpartial')
-               .style.display = 'block';
-            document.getElementById('p2BGfull')
-               .style.display = 'none';
-         } else {
-            document.getElementById('p2BGfull')
-               .style.display = 'block';
-            document.getElementById('p2BGpartial')
-               .style.display = 'none';
-         }
+		// Update casters
+		if (data.commentators && Array.isArray(data.commentators)) {
+			const casterElements = document.querySelectorAll('.casterText');
+			data.commentators.forEach((caster, index) => {
+				if (casterElements[index]) {
+					casterElements[index].textContent = caster.name || '';
+				}
+			});
+		}
 
-         document.getElementById('player1Name')
-            .textContent = name1;
-         document.getElementById('player1Clan')
-            .textContent = clan1;
-         document.getElementById('player1WL')
-            .textContent = p1.wl || '';
-         document.getElementById('player1Score')
-            .textContent = Number.isFinite(p1.score) ? p1.score : 0;
+		try {
+			const d = data || {};
+			const p1 = d.player1 || {
+				name: '',
+				id: '',
+				clan: '',
+				wl: '',
+				score: 0,
+				character: '',
+				img: ''
+			};
+			const p2 = d.player2 || {
+				name: '',
+				id: '',
+				clan: '',
+				wl: '',
+				score: 0,
+				character: '',
+				img: ''
+			};
 
-         document.getElementById('player2Name')
-            .textContent = name2;
-         document.getElementById('player2Clan')
-            .textContent = clan2;
-         document.getElementById('player2WL')
-            .textContent = p2.wl || '';
-         document.getElementById('player2Score')
-            .textContent = Number.isFinite(p2.score) ? p2.score : 0;
-		// Insert a "|" separator between player name and clan tag if both are present
-         document.getElementById('separator1')
-            .style.display = (clan1 && name1) ? 'inline' : 'none';
-         document.getElementById('separator2')
-            .style.display = (clan2 && name2) ? 'inline' : 'none';
+			//////// Players
 
-         const stage = (data.stage || '')
-            .trim();
-         const matchType = (data.match_type || '')
-            .trim();
-         const topText = (data.toptext || '')
-            .trim();
-		
-		 //////// Top info bar
-		 
-         document.getElementById('stageText')
-            .textContent = stage;
-         document.getElementById('matchTypeText')
-            .textContent = matchType;
-         document.getElementById('topText')
-            .textContent = topText;
+			const clan1 = (p1.clan || '')
+				.trim();
+			const name1 = (p1.name || '')
+				.trim();
+			const clan2 = (p2.clan || '')
+				.trim();
+			const name2 = (p2.name || '')
+				.trim();
 
-         // Toggle topRowBG visibility based on whether any top info exists
-         const topRowBG = document.getElementById('topRowBG');
-         if (stage || matchType || topText) {
-            topRowBG.style.display = 'block'; // show if any value exists
-         } else {
-            topRowBG.style.display = 'none'; // hide if all are empty
-         }
+			const p1Char = Array.isArray(p1.character) ?
+				p1.character.join(', ') :
+				(p1.character || '')
+				.trim();
+			const p2Char = Array.isArray(p2.character) ?
+				p2.character.join(', ') :
+				(p2.character || '')
+				.trim();
 
-		 //////// Teams
+			const p1ID = (p1.id || '')
+				.trim();
+			const p2ID = (p2.id || '')
+				.trim();
 
-         const t1 = data.team1 || {
-            name: '',
-            score: 0,
-            img: ''
-         };
-         const t2 = data.team2 || {
-            name: '',
-            score: 0,
-            img: ''
-         };
+			const p1Img = document.getElementById('player1Img');
+			const p2Img = document.getElementById('player2Img');
 
-         const t1Name = (t1.name || '')
-            .trim();
-         const t2Name = (t2.name || '')
-            .trim();
-         const t1Score = Number.isFinite(t1.score) ? t1.score : 0;
-         const t2Score = Number.isFinite(t2.score) ? t2.score : 0;
+			//p1Img.src = p1.img || '';
 
-         const team1BG = document.getElementById('team1BG');
-         const team1BGFull = document.getElementById('team1BGFull');
-         const team2BG = document.getElementById('team2BG');
-         const team2BGFull = document.getElementById('team2BGFull');
+			const p1absoluteUrl = new URL(p1.img, window.location.href)
+				.href;
+			p1Img.setAttributeNS('http://www.w3.org/1999/xlink', 'href', p1absoluteUrl || '');
+			p1Img.setAttribute('href', p1absoluteUrl || '');
 
-         const hasAny1 = !!(t1Name || t1Score > 0 || (t1.img && t1.img.trim()));
-         const hasAny2 = !!(t2Name || t2Score > 0 || (t2.img && t2.img.trim()));
+			p1Img.style.display = p1.img ? 'inline-block' : 'none';
+			p1Img.classList.remove('flag-style', 'custom-image-style');
+			p1Img.classList.add(p1.img && p1.img.includes('/flags/') && p1.img.endsWith('.svg') ? 'flag-style' : 'custom-image-style');
 
-         const hasImg1 = !!(t1.img && t1.img.trim());
-		 const hasImg2 = !!(t2.img && t2.img.trim());
+			if (!p1.img) { // BG partial/full
+				document.getElementById('p1BGpartial')
+					.style.display = 'block';
+				document.getElementById('p1BGfull')
+					.style.display = 'none';
+			} else {
+				document.getElementById('p1BGfull')
+					.style.display = 'block';
+				document.getElementById('p1BGpartial')
+					.style.display = 'none';
+			}
 
-		 function show(el, on) { if (el) el.style.display = on ? 'block' : 'none'; }
+			//p2Img.src = p2.img || '';
 
-		 if (!hasAny1) {
-		   show(team1BG, false);
-		   show(team1BGFull, false);
-		 } else {
-		   show(team1BGFull, hasImg1);     // full when any image (flag or custom)
-		   show(team1BG, !hasImg1);        // partial when no image but some team data
-		 }
-		
-		 if (!hasAny2) {
-		   show(team2BG, false);
-		   show(team2BGFull, false);
-		 } else {
-		   show(team2BGFull, hasImg2);
-		   show(team2BG, !hasImg2);
-		 }
+			const p2absoluteUrl = new URL(p2.img, window.location.href)
+				.href;
+			p2Img.setAttributeNS('http://www.w3.org/1999/xlink', 'href', p2absoluteUrl || '');
+			p2Img.setAttribute('href', p2absoluteUrl || '');
 
-         document.getElementById('team1Name')
-            .textContent = t1Name;
-         document.getElementById('team2Name')
-            .textContent = t2Name;
-         document.getElementById('team1Score')
-            .textContent = t1Score;
-         document.getElementById('team2Score')
-            .textContent = t2Score;
+			p2Img.style.display = p2.img ? 'inline-block' : 'none';
+			p2Img.classList.remove('flag-style', 'custom-image-style');
+			p2Img.classList.add(p2.img && p2.img.includes('/flags/') && p2.img.endsWith('.svg') ? 'flag-style' : 'custom-image-style');
 
-         // Hide teams display if score = 0 AND neither BG is shown
-         const team1ScoreEl = document.getElementById('team1Score');
-         const team2ScoreEl = document.getElementById('team2Score');
+			if (!p2.img) {
+				document.getElementById('p2BGpartial')
+					.style.display = 'block';
+				document.getElementById('p2BGfull')
+					.style.display = 'none';
+			} else {
+				document.getElementById('p2BGfull')
+					.style.display = 'block';
+				document.getElementById('p2BGpartial')
+					.style.display = 'none';
+			}
 
-         function isShown(el) {
-            return !!(el && el.style.display !== 'none');
-         }
+			document.getElementById('player1Name')
+				.textContent = name1;
+			document.getElementById('player1Clan')
+				.textContent = clan1;
+			document.getElementById('player1WL')
+				.textContent = p1.wl || '';
+			document.getElementById('player1Score')
+				.textContent = Number.isFinite(p1.score) ? p1.score : 0;
 
-         const hideScore1 = (t1Score === 0) && !isShown(team1BG) && !isShown(team1BGFull);
-         const hideScore2 = (t2Score === 0) && !isShown(team2BG) && !isShown(team2BGFull);
+			document.getElementById('player2Name')
+				.textContent = name2;
+			document.getElementById('player2Clan')
+				.textContent = clan2;
+			document.getElementById('player2WL')
+				.textContent = p2.wl || '';
+			document.getElementById('player2Score')
+				.textContent = Number.isFinite(p2.score) ? p2.score : 0;
+			// Insert a "|" separator between player name and clan tag if both are present
+			document.getElementById('separator1')
+				.style.display = (clan1 && name1) ? 'inline' : 'none';
+			document.getElementById('separator2')
+				.style.display = (clan2 && name2) ? 'inline' : 'none';
 
-         team1ScoreEl.textContent = hideScore1 ? '' : String(t1Score);
-         team2ScoreEl.textContent = hideScore2 ? '' : String(t2Score);
+			const stage = (data.stage || '')
+				.trim();
+			const matchType = (data.match_type || '')
+				.trim();
+			const topText = (data.toptext || '')
+				.trim();
 
-         const t1ImgEl = document.getElementById('team1Img');
-         const t2ImgEl = document.getElementById('team2Img');
-		 
-		 const t1absoluteUrl = new URL(t1.img, window.location.href).href;
-		 const t2absoluteUrl = new URL(t2.img, window.location.href).href;
+			//////// Top info bar
 
-         t1ImgEl.setAttributeNS('http://www.w3.org/1999/xlink', 'href', t1absoluteUrl || '');
-		 t1ImgEl.setAttribute('href', t1absoluteUrl || '');
-         t2ImgEl.setAttributeNS('http://www.w3.org/1999/xlink', 'href', t2absoluteUrl || '');
-		 t2ImgEl.setAttribute('href', t2absoluteUrl || '');
+			document.getElementById('stageText')
+				.textContent = stage;
+			document.getElementById('matchTypeText')
+				.textContent = matchType;
+			document.getElementById('topText')
+				.textContent = topText;
 
-         t1ImgEl.style.display = t1.img ? 'inline-block' : 'none';
-         t2ImgEl.style.display = t2.img ? 'inline-block' : 'none';
+			// Toggle topRowBG visibility based on whether any top info exists
+			const topRowBG = document.getElementById('topRowBG');
+			if (stage || matchType || topText) {
+				topRowBG.style.display = 'block'; // show if any value exists
+			} else {
+				topRowBG.style.display = 'none'; // hide if all are empty
+			}
 
-         // reset + set style classes depending on whether it’s a flag SVG or a custom image
-		 [t1ImgEl, t2ImgEl].forEach(el => el.classList.remove('flag-style', 'custom-image-style'));
-         if (t1.img) {
-            t1ImgEl.classList.add(t1.img.includes('/flags/') && t1.img.endsWith('.svg') ? 'flag-style' : 'team-custom-image-style');
-         }
-         if (t2.img) {
-            t2ImgEl.classList.add(t2.img.includes('/flags/') && t2.img.endsWith('.svg') ? 'flag-style' : 'team-custom-image-style');
-         }
+			//////// Teams
 
-		 //////// Casters
+			const t1 = data.team1 || {
+				name: '',
+				score: 0,
+				img: ''
+			};
+			const t2 = data.team2 || {
+				name: '',
+				score: 0,
+				img: ''
+			};
 
-         const c1Name = (data.caster1?.name ?? "")
-            .trim();
-         const c2Name = (data.caster2?.name ?? "")
-            .trim();
-         const c1Twitch = (data.caster1?.twitch ?? "")
-            .trim();
-         const c2Twitch = (data.caster2?.twitch ?? "")
-            .trim();
-         const c1Twitter = (data.caster1?.twitter ?? "")
-            .trim();
-         const c2Twitter = (data.caster2?.twitter ?? "")
-            .trim();
+			const t1Name = (t1.name || '')
+				.trim();
+			const t2Name = (t2.name || '')
+				.trim();
+			const t1Score = Number.isFinite(t1.score) ? t1.score : 0;
+			const t2Score = Number.isFinite(t2.score) ? t2.score : 0;
 
-         // Show casters row/bg only if any of the caster's names exist
-         const hasAnyCaster = !!(c1Name || c2Name);
-         const castersBG = document.getElementById('castersBG');
-         const casterContainer = document.getElementById('casterContainer');
-         if (castersBG) castersBG.style.display = hasAnyCaster ? 'block' : 'none';
-         if (casterContainer) casterContainer.style.display = hasAnyCaster ? 'block' : 'none';
+			const team1BG = document.getElementById('team1BG');
+			const team1BGFull = document.getElementById('team1BGFull');
+			const team2BG = document.getElementById('team2BG');
+			const team2BGFull = document.getElementById('team2BGFull');
 
-         const newDataHash = JSON.stringify([c1Name, c2Name, c1Twitch, c2Twitch, c1Twitter, c2Twitter]);
+			const hasAny1 = !!(t1Name || t1Score > 0 || (t1.img && t1.img.trim()));
+			const hasAny2 = !!(t2Name || t2Score > 0 || (t2.img && t2.img.trim()));
 
-         const changed = newDataHash !== lastCasterData;
-         if (changed) lastCasterData = newDataHash;
+			const hasImg1 = !!(t1.img && t1.img.trim());
+			const hasImg2 = !!(t2.img && t2.img.trim());
 
-         // Hide everything if no caster names
-         if (!c1Name && !c2Name) {
-            clearInterval(casterCycleTimeout);
-            document.getElementById("casterCycleWrapper")
-               .classList.add("fade-hidden");
-         }
+			function show(el, on) {
+				if (el) el.style.display = on ? 'block' : 'none';
+			}
 
-         // Store structured data
-         caster1Info = {
-            name: c1Name,
-            twitch: c1Twitch,
-            twitter: c1Twitter.trim()
-               .startsWith("@") ? c1Twitter.trim() : "@" + c1Twitter.trim()
-            // if you don't want an @ tag in the beginning - replace previous line with this one:
-            //twitter: c1Twitter
-         };
+			if (!hasAny1) {
+				show(team1BG, false);
+				show(team1BGFull, false);
+			} else {
+				show(team1BGFull, hasImg1); // full when any image (flag or custom)
+				show(team1BG, !hasImg1); // partial when no image but some team data
+			}
 
-         caster2Info = {
-            name: c2Name,
-            twitch: c2Twitch,
-            twitter: c2Twitter.trim()
-               .startsWith("@") ? c2Twitter.trim() : "@" + c2Twitter.trim()
-            // if you don't want an @ tag in the beginning - replace previous line with this one:
-            //twitter: c2Twitter
-         };
-		 
-		 //////// Caster animation handling
-         // Build / (re)start rotation only if data actually changed
-         if (changed) {
-            displayPhases = [];
-            if (c1Name || c2Name) displayPhases.push("name");
-            if (c1Twitch || c2Twitch) displayPhases.push("twitch");
-            if (c1Twitter || c2Twitter) displayPhases.push("twitter");
+			if (!hasAny2) {
+				show(team2BG, false);
+				show(team2BGFull, false);
+			} else {
+				show(team2BGFull, hasImg2);
+				show(team2BG, !hasImg2);
+			}
 
-            clearTimeout(casterCycleTimeout);
+			document.getElementById('team1Name')
+				.textContent = t1Name;
+			document.getElementById('team2Name')
+				.textContent = t2Name;
+			document.getElementById('team1Score')
+				.textContent = t1Score;
+			document.getElementById('team2Score')
+				.textContent = t2Score;
 
-            // Ensure wrapper starts hidden until we decide what to do
-            const wrapper = document.getElementById('casterCycleWrapper');
-            if (wrapper) wrapper.classList.add('fade-hidden');
+			// Hide teams display if score = 0 AND neither BG is shown
+			const team1ScoreEl = document.getElementById('team1Score');
+			const team2ScoreEl = document.getElementById('team2Score');
 
-            const container = document.getElementById('casterContainer');
+			function isShown(el) {
+				return !!(el && el.style.display !== 'none');
+			}
 
-            // Make sure wrapper starts hidden
-            if (wrapper) wrapper.classList.add('fade-hidden');
+			const hideScore1 = (t1Score === 0) && !isShown(team1BG) && !isShown(team1BGFull);
+			const hideScore2 = (t2Score === 0) && !isShown(team2BG) && !isShown(team2BGFull);
 
-            // Start only after the entrance is done (but only once)
-            const kick = () => startCasterCycle();
+			team1ScoreEl.textContent = hideScore1 ? '' : String(t1Score);
+			team2ScoreEl.textContent = hideScore2 ? '' : String(t2Score);
 
-            if (!casterEntranceSynced) {
-               casterEntranceSynced = true;
-               waitForEntranceEnd(container, 3000)
-                  .then(kick);
-            } else {
-               kick();
-            }
-         }
+			const t1ImgEl = document.getElementById('team1Img');
+			const t2ImgEl = document.getElementById('team2Img');
 
-      } catch (err) {
-         console.error('[overlay] update_scoreboard crashed:', err);
-      } finally {
-         // Always signal “first data applied” so the unified orchestrator can start
-         markFirstDataAppliedOnce();
-      }
-	  
-	  // Fit all text elements after updating
-	  fitAllTextElements();
-		
-	  // Fit casters again with a delay to account for animations
-	  setTimeout(fitCasterTextElements, 100);
-	  setTimeout(fitCasterTextElements, 500);
-	  
-   });
+			const t1absoluteUrl = new URL(t1.img, window.location.href)
+				.href;
+			const t2absoluteUrl = new URL(t2.img, window.location.href)
+				.href;
+
+			t1ImgEl.setAttributeNS('http://www.w3.org/1999/xlink', 'href', t1absoluteUrl || '');
+			t1ImgEl.setAttribute('href', t1absoluteUrl || '');
+			t2ImgEl.setAttributeNS('http://www.w3.org/1999/xlink', 'href', t2absoluteUrl || '');
+			t2ImgEl.setAttribute('href', t2absoluteUrl || '');
+
+			t1ImgEl.style.display = t1.img ? 'inline-block' : 'none';
+			t2ImgEl.style.display = t2.img ? 'inline-block' : 'none';
+
+			// reset + set style classes depending on whether it’s a flag SVG or a custom image
+			[t1ImgEl, t2ImgEl].forEach(el => el.classList.remove('flag-style', 'custom-image-style'));
+			if (t1.img) {
+				t1ImgEl.classList.add(t1.img.includes('/flags/') && t1.img.endsWith('.svg') ? 'flag-style' : 'team-custom-image-style');
+			}
+			if (t2.img) {
+				t2ImgEl.classList.add(t2.img.includes('/flags/') && t2.img.endsWith('.svg') ? 'flag-style' : 'team-custom-image-style');
+			}
+
+			//////// Casters
+
+			const c1Name = (data.caster1?.name ?? "")
+				.trim();
+			const c2Name = (data.caster2?.name ?? "")
+				.trim();
+			const c1Twitch = (data.caster1?.twitch ?? "")
+				.trim();
+			const c2Twitch = (data.caster2?.twitch ?? "")
+				.trim();
+			const c1Twitter = (data.caster1?.twitter ?? "")
+				.trim();
+			const c2Twitter = (data.caster2?.twitter ?? "")
+				.trim();
+
+			// Show casters row/bg only if any of the caster's names exist
+			const hasAnyCaster = !!(c1Name || c2Name);
+			const castersBG = document.getElementById('castersBG');
+			const casterContainer = document.getElementById('casterContainer');
+			if (castersBG) castersBG.style.display = hasAnyCaster ? 'block' : 'none';
+			if (casterContainer) casterContainer.style.display = hasAnyCaster ? 'block' : 'none';
+
+			const newDataHash = JSON.stringify([c1Name, c2Name, c1Twitch, c2Twitch, c1Twitter, c2Twitter]);
+
+			const changed = newDataHash !== lastCasterData;
+			if (changed) lastCasterData = newDataHash;
+
+			// Hide everything if no caster names
+			if (!c1Name && !c2Name) {
+				clearInterval(casterCycleTimeout);
+				document.getElementById("casterCycleWrapper")
+					.classList.add("fade-hidden");
+			}
+
+			// Store structured data
+			caster1Info = {
+				name: c1Name,
+				twitch: c1Twitch,
+				twitter: c1Twitter.trim()
+					.startsWith("@") ? c1Twitter.trim() : "@" + c1Twitter.trim()
+				// if you don't want an @ tag in the beginning - replace previous line with this one:
+				//twitter: c1Twitter
+			};
+
+			caster2Info = {
+				name: c2Name,
+				twitch: c2Twitch,
+				twitter: c2Twitter.trim()
+					.startsWith("@") ? c2Twitter.trim() : "@" + c2Twitter.trim()
+				// if you don't want an @ tag in the beginning - replace previous line with this one:
+				//twitter: c2Twitter
+			};
+
+			//////// Caster animation handling
+			// Build / (re)start rotation only if data actually changed
+			if (changed) {
+				displayPhases = [];
+				if (c1Name || c2Name) displayPhases.push("name");
+				if (c1Twitch || c2Twitch) displayPhases.push("twitch");
+				if (c1Twitter || c2Twitter) displayPhases.push("twitter");
+
+				clearTimeout(casterCycleTimeout);
+
+				// Ensure wrapper starts hidden until we decide what to do
+				const wrapper = document.getElementById('casterCycleWrapper');
+				if (wrapper) wrapper.classList.add('fade-hidden');
+
+				const container = document.getElementById('casterContainer');
+
+				// Make sure wrapper starts hidden
+				if (wrapper) wrapper.classList.add('fade-hidden');
+
+				// Start only after the entrance is done (but only once)
+				const kick = () => startCasterCycle();
+
+				if (!casterEntranceSynced) {
+					casterEntranceSynced = true;
+					waitForEntranceEnd(container, 3000)
+						.then(kick);
+				} else {
+					kick();
+				}
+			}
+
+		} catch (err) {
+			console.error('[overlay] update_scoreboard crashed:', err);
+		} finally {
+			// Always signal “first data applied” so the unified orchestrator can start
+			markFirstDataAppliedOnce();
+		}
+
+		// Fit all text elements after updating
+		fitAllTextElements();
+
+		// Fit casters again with a delay to account for animations
+		setTimeout(fitCasterTextElements, 100);
+		setTimeout(fitCasterTextElements, 500);
+
+	});
 }
 connectSocket();
 
 //////// Text Autofit
 // Configuration for adjusting text size min and max values
 const textFitConfig = {
-    '.name': { min: 12, max: 26, containerSelector: '.nameBlock', multiLine: false },
-    '#team1Name': { min: 12, max: 22, containerSelector: null, multiLine: false },
-    '#team2Name': { min: 12, max: 22, containerSelector: null, multiLine: false },
-    '#stageText': { min: 10, max: 16, containerSelector: '.infoBar', multiLine: false },
-    '#topText': { min: 10, max: 18, containerSelector: '.infoBar', multiLine: true },
-    '#matchTypeText': { min: 10, max: 16, containerSelector: '.infoBar', multiLine: false },
-    '.casterText': { min: 8, max: 14, containerSelector: null, multiLine: false },
-	'.score': { min: 28, max: 36, containerSelector: '.scoreBlock', multiLine: false },
-    '#team1Score': { min: 20, max: 26, containerSelector: null, multiLine: false },
-    '#team2Score': { min: 20, max: 26, containerSelector: null, multiLine: false }
+	'.name': {
+		min: 12,
+		max: 26,
+		containerSelector: '.nameBlock',
+		multiLine: false
+	},
+	'#team1Name': {
+		min: 12,
+		max: 22,
+		containerSelector: null,
+		multiLine: false
+	},
+	'#team2Name': {
+		min: 12,
+		max: 22,
+		containerSelector: null,
+		multiLine: false
+	},
+	'#stageText': {
+		min: 10,
+		max: 16,
+		containerSelector: '.infoBar',
+		multiLine: false
+	},
+	'#topText': {
+		min: 10,
+		max: 18,
+		containerSelector: '.infoBar',
+		multiLine: true
+	},
+	'#matchTypeText': {
+		min: 10,
+		max: 16,
+		containerSelector: '.infoBar',
+		multiLine: false
+	},
+	'.casterText': {
+		min: 8,
+		max: 14,
+		containerSelector: null,
+		multiLine: false
+	},
+	'.score': {
+		min: 28,
+		max: 36,
+		containerSelector: '.scoreBlock',
+		multiLine: false
+	},
+	'#team1Score': {
+		min: 20,
+		max: 26,
+		containerSelector: null,
+		multiLine: false
+	},
+	'#team2Score': {
+		min: 20,
+		max: 26,
+		containerSelector: null,
+		multiLine: false
+	}
 };
 
 function fitTextToContainer(element, maxFontSize = 20, minFontSize = 10, containerSelector = null, bufferPx = 20, multiLine = false) {
-    if (!element) return;
-    
-    // Find the container based on selector or use parentElement
-    let container;
-    if (containerSelector) {
-        container = element.closest(containerSelector);
-    } else {
-        container = element.parentElement;
-    }
-    
-    if (!container) {
-        console.warn('No container found for element:', element);
-        return;
-    }
-    
-    // Hide the element while resizing
-    element.style.visibility = 'hidden';
-    
-    // Get the target width (CSS-defined width of the element)
-    const computedStyle = window.getComputedStyle(element);
-    let targetWidth;
-    
-    // Try to get explicit width from CSS
-    const cssWidth = parseInt(computedStyle.width);
-    if (cssWidth > 0 && !isNaN(cssWidth)) {
-        targetWidth = cssWidth;
-    } else {
-        // Fallback to container width
-        targetWidth = container.offsetWidth;
-    }
-    
-    // Get target height if multi-line is enabled
-    let targetHeight = null;
-    if (multiLine) {
-        // Use offsetHeight which is the full element height
-        targetHeight = element.offsetHeight;
-        
-        // If offsetHeight is 0 or unreliable, fall back to CSS height
-        if (!targetHeight || targetHeight === 0) {
-            const cssHeight = parseInt(computedStyle.height);
-            if (cssHeight > 0 && !isNaN(cssHeight)) {
-                targetHeight = cssHeight;
-            } else {
-                targetHeight = container.offsetHeight;
-            }
-        }
-    }
-    
-    // Available dimensions
-    const availableWidth = targetWidth - bufferPx;
-    const availableHeight = multiLine && targetHeight ? targetHeight - bufferPx : null;
-    
-    // Start with max font size
-    let fontSize = maxFontSize;
-    element.style.fontSize = fontSize + 'px';
-    
-    // Set white-space and wrapping based on multi-line option
-    const originalWhiteSpace = element.style.whiteSpace;
-    const originalWordWrap = element.style.wordWrap;
-    const originalWidth = element.style.width;
-    const originalDisplay = element.style.display;
-    
-    if (multiLine) {
-        element.style.whiteSpace = 'normal';
-        element.style.wordWrap = 'break-word';
-        element.style.width = targetWidth + 'px'; // Set explicit width for wrapping
-        element.style.overflow = 'hidden'; // Clip overflow
-    } else {
-        element.style.whiteSpace = 'nowrap';
-        element.style.display = 'inline-block'; // Force inline-block for proper width measurement
-        element.style.width = 'auto'; // Let it expand naturally
-    }
-    
-    // Reduce font size until it fits
-    let iterations = 0;
-    const maxIterations = 100;
-    
-    if (multiLine && availableHeight) {
-        // Multi-line: check height
-        const originalHeight = element.style.height;
-        const originalOverflow = element.style.overflow;
-        element.style.height = 'auto';
-        element.style.overflow = 'visible';
-        
-        while (element.scrollHeight > availableHeight && fontSize > minFontSize && iterations < maxIterations) {
-            fontSize -= 0.5;
-            element.style.fontSize = fontSize + 'px';
-            iterations++;
-        }
-        
-        // Restore height constraint
-        element.style.height = originalHeight;
-        element.style.overflow = 'hidden';
-        
-        console.log(`Fitted "${element.id || element.className}" to ${fontSize}px (scrollHeight: ${element.scrollHeight}px, available: ${availableHeight}px, buffer: ${bufferPx}px, multiLine: true)`);
-    } else {
-        // Single line: check width
-        // Force a reflow to ensure width calculation is accurate
-        void element.offsetWidth;
-        
-        while (element.scrollWidth > availableWidth && fontSize > minFontSize && iterations < maxIterations) {
-            fontSize -= 0.5;
-            element.style.fontSize = fontSize + 'px';
-            // Force reflow after each size change
-            void element.offsetWidth;
-            iterations++;
-        }
-        
-        console.log(`Fitted "${element.id || element.className}" to ${fontSize}px (textWidth: ${element.scrollWidth}px, available: ${availableWidth}px, buffer: ${bufferPx}px)`);
-    }
-    
-    // Restore original styles
-    element.style.width = originalWidth;
-    element.style.whiteSpace = originalWhiteSpace;
-    element.style.wordWrap = originalWordWrap;
-    element.style.display = originalDisplay;
-    
-    // Show the element after resizing is complete
-    element.style.visibility = 'visible';
+	if (!element) return;
+
+	// Find the container based on selector or use parentElement
+	let container;
+	if (containerSelector) {
+		container = element.closest(containerSelector);
+	} else {
+		container = element.parentElement;
+	}
+
+	if (!container) {
+		console.warn('No container found for element:', element);
+		return;
+	}
+
+	// Hide the element while resizing
+	element.style.visibility = 'hidden';
+
+	// Get the target width (CSS-defined width of the element)
+	const computedStyle = window.getComputedStyle(element);
+	let targetWidth;
+
+	// Try to get explicit width from CSS
+	const cssWidth = parseInt(computedStyle.width);
+	if (cssWidth > 0 && !isNaN(cssWidth)) {
+		targetWidth = cssWidth;
+	} else {
+		// Fallback to container width
+		targetWidth = container.offsetWidth;
+	}
+
+	// Get target height if multi-line is enabled
+	let targetHeight = null;
+	if (multiLine) {
+		// Use offsetHeight which is the full element height
+		targetHeight = element.offsetHeight;
+
+		// If offsetHeight is 0 or unreliable, fall back to CSS height
+		if (!targetHeight || targetHeight === 0) {
+			const cssHeight = parseInt(computedStyle.height);
+			if (cssHeight > 0 && !isNaN(cssHeight)) {
+				targetHeight = cssHeight;
+			} else {
+				targetHeight = container.offsetHeight;
+			}
+		}
+	}
+
+	// Available dimensions
+	const availableWidth = targetWidth - bufferPx;
+	const availableHeight = multiLine && targetHeight ? targetHeight - bufferPx : null;
+
+	// Start with max font size
+	let fontSize = maxFontSize;
+	element.style.fontSize = fontSize + 'px';
+
+	// Set white-space and wrapping based on multi-line option
+	const originalWhiteSpace = element.style.whiteSpace;
+	const originalWordWrap = element.style.wordWrap;
+	const originalWidth = element.style.width;
+	const originalDisplay = element.style.display;
+
+	if (multiLine) {
+		element.style.whiteSpace = 'normal';
+		element.style.wordWrap = 'break-word';
+		element.style.width = targetWidth + 'px'; // Set explicit width for wrapping
+		element.style.overflow = 'hidden'; // Clip overflow
+	} else {
+		element.style.whiteSpace = 'nowrap';
+		element.style.display = 'inline-block'; // Force inline-block for proper width measurement
+		element.style.width = 'auto'; // Let it expand naturally
+	}
+
+	// Reduce font size until it fits
+	let iterations = 0;
+	const maxIterations = 100;
+
+	if (multiLine && availableHeight) {
+		// Multi-line: check height
+		const originalHeight = element.style.height;
+		const originalOverflow = element.style.overflow;
+		element.style.height = 'auto';
+		element.style.overflow = 'visible';
+
+		while (element.scrollHeight > availableHeight && fontSize > minFontSize && iterations < maxIterations) {
+			fontSize -= 0.5;
+			element.style.fontSize = fontSize + 'px';
+			iterations++;
+		}
+
+		// Restore height constraint
+		element.style.height = originalHeight;
+		element.style.overflow = 'hidden';
+
+		console.log(`Fitted "${element.id || element.className}" to ${fontSize}px (scrollHeight: ${element.scrollHeight}px, available: ${availableHeight}px, buffer: ${bufferPx}px, multiLine: true)`);
+	} else {
+		// Single line: check width
+		// Force a reflow to ensure width calculation is accurate
+		void element.offsetWidth;
+
+		while (element.scrollWidth > availableWidth && fontSize > minFontSize && iterations < maxIterations) {
+			fontSize -= 0.5;
+			element.style.fontSize = fontSize + 'px';
+			// Force reflow after each size change
+			void element.offsetWidth;
+			iterations++;
+		}
+
+		console.log(`Fitted "${element.id || element.className}" to ${fontSize}px (textWidth: ${element.scrollWidth}px, available: ${availableWidth}px, buffer: ${bufferPx}px)`);
+	}
+
+	// Restore original styles
+	element.style.width = originalWidth;
+	element.style.whiteSpace = originalWhiteSpace;
+	element.style.wordWrap = originalWordWrap;
+	element.style.display = originalDisplay;
+
+	// Show the element after resizing is complete
+	element.style.visibility = 'visible';
 }
 
 function fitAllTextElements() {
-    // Iterate through each configured selector
-    Object.entries(textFitConfig).forEach(([selector, config]) => {
-        document.querySelectorAll(selector).forEach(el => {
-            // Adjust buffer based on element type
-            let buffer = 0; // Default buffer
-            			
-            // Adjust buffers for specific elements
-            if (selector.includes('team1Name') || selector.includes('team2Name')) {
-                buffer = 0;
-            } else if (selector.includes('topText')) {
-                buffer = 0;
-			} else if (selector.includes('.score')) {
-                buffer = 0;
-			} else if (selector.includes('team1Score') || selector.includes('team2Score')) {
-                buffer = 0;
-            }
-            			
-            fitTextToContainer(el, config.max, config.min, config.containerSelector, buffer, config.multiLine);
-        });
-    });
+	// Iterate through each configured selector
+	Object.entries(textFitConfig)
+		.forEach(([selector, config]) => {
+			document.querySelectorAll(selector)
+				.forEach(el => {
+					// Adjust buffer based on element type
+					let buffer = 0; // Default buffer
+
+					// Adjust buffers for specific elements
+					if (selector.includes('team1Name') || selector.includes('team2Name')) {
+						buffer = 0;
+					} else if (selector.includes('topText')) {
+						buffer = 0;
+					} else if (selector.includes('.score')) {
+						buffer = 0;
+					} else if (selector.includes('team1Score') || selector.includes('team2Score')) {
+						buffer = 0;
+					}
+
+					fitTextToContainer(el, config.max, config.min, config.containerSelector, buffer, config.multiLine);
+				});
+		});
 }
 
 function fitCasterTextElements() {
-    const casterElements = document.querySelectorAll('.casterText');
-    const config = textFitConfig['.casterText'];
-    
-    if (!config) return;
-    
-    casterElements.forEach(el => {
-        // Only fit if element has content
-        if (el.textContent && el.textContent.trim()) {
-            fitTextToContainer(el, config.max, config.min, config.containerSelector, 10, config.multiLine);
-        }
-    });
+	const casterElements = document.querySelectorAll('.casterText');
+	const config = textFitConfig['.casterText'];
+
+	if (!config) return;
+
+	casterElements.forEach(el => {
+		// Only fit if element has content
+		if (el.textContent && el.textContent.trim()) {
+			fitTextToContainer(el, config.max, config.min, config.containerSelector, 10, config.multiLine);
+		}
+	});
 }
 
 function setupCasterObserver() {
-    const casterContainer = document.getElementById('casterContainer');
-    if (!casterContainer) return;
-    
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            if (mutation.type === 'childList' || mutation.type === 'characterData') {
-                // Content changed, refit after a small delay
-                setTimeout(fitCasterTextElements, 50);
-            }
-        });
-    });
-    
-    observer.observe(casterContainer, {
-        childList: true,
-        subtree: true,
-        characterData: true
-    });
+	const casterContainer = document.getElementById('casterContainer');
+	if (!casterContainer) return;
+
+	const observer = new MutationObserver((mutations) => {
+		mutations.forEach((mutation) => {
+			if (mutation.type === 'childList' || mutation.type === 'characterData') {
+				// Content changed, refit after a small delay
+				setTimeout(fitCasterTextElements, 50);
+			}
+		});
+	});
+
+	observer.observe(casterContainer, {
+		childList: true,
+		subtree: true,
+		characterData: true
+	});
 }
 
 window.addEventListener('load', function() {
-    fitAllTextElements();
-    
-    // Set up observer for caster changes
-    setupCasterObserver();
-    
-    // Also fit casters with delays to catch any late-loading content
-    setTimeout(fitCasterTextElements, 500);
-    setTimeout(fitCasterTextElements, 1000);
-    setTimeout(fitCasterTextElements, 2000);
+	fitAllTextElements();
+
+	// Set up observer for caster changes
+	setupCasterObserver();
+
+	// Also fit casters with delays to catch any late-loading content
+	setTimeout(fitCasterTextElements, 500);
+	setTimeout(fitCasterTextElements, 1000);
+	setTimeout(fitCasterTextElements, 2000);
 });
 
 //////////// Reload overlay when server announces new template
 socket.on('template_changed', ({
-   template
+	template
 }) => {
-   location.reload();
+	location.reload();
 });
 
 //////////// Debug functions
 function setDebugBg() {
-   const randomColor = "#" + ((1 << 24) * Math.random() | 0)
-      .toString(16);
+	const randomColor = "#" + ((1 << 24) * Math.random() | 0)
+		.toString(16);
 
-   document.documentElement.style.setProperty('--debug-bg-color', randomColor);
+	document.documentElement.style.setProperty('--debug-bg-color', randomColor);
 }
 setDebugBg();
 
@@ -1006,7 +1060,7 @@ let casterEntranceSynced = false; // waitForEntranceEnd only once
 let isTransitioning = false; // true during fade-out + fade-in
 let restartPending = false; // request restart after transition
 const FADE_MS = parseFloat(getComputedStyle(document.documentElement)
-   .getPropertyValue('--fade-duration')) || 500; //get value from the CSS to match the .fade animation duration
+	.getPropertyValue('--fade-duration')) || 500; //get value from the CSS to match the .fade animation duration
 let isCycling = false; // Prevents desync from restarts
 let lastCasterData = ""; // To track data changes
 
@@ -1014,116 +1068,116 @@ let lastCasterData = ""; // To track data changes
 
 // How long each caster's value will stay on screen (in ms)
 const displayDurations = {
-   name: 20000,
-   twitch: 6000,
-   twitter: 6000
+	name: 20000,
+	twitch: 6000,
+	twitter: 6000
 };
 
 function updateCasterDisplayCycle() {
-   const wrapper = document.getElementById("casterCycleWrapper");
-   isTransitioning = true;
+	const wrapper = document.getElementById("casterCycleWrapper");
+	isTransitioning = true;
 
-   // Safety: if phases got cleared, stop cleanly
-   if (!displayPhases.length) {
-      wrapper.classList.add("fade-hidden");
-      isTransitioning = false;
-      isCycling = false;
-      return;
-   }
+	// Safety: if phases got cleared, stop cleanly
+	if (!displayPhases.length) {
+		wrapper.classList.add("fade-hidden");
+		isTransitioning = false;
+		isCycling = false;
+		return;
+	}
 
-   // Fade out current phase
-   wrapper.classList.add("fade-hidden");
+	// Fade out current phase
+	wrapper.classList.add("fade-hidden");
 
-   setTimeout(() => {
-      const phase = displayPhases[currentPhaseIndex];
+	setTimeout(() => {
+		const phase = displayPhases[currentPhaseIndex];
 
-      // Update content + icons
-      renderCasterPhase(phase);
+		// Update content + icons
+		renderCasterPhase(phase);
 
-      // When fade-in finishes, we are no longer in a transition
-      const onEnd = (e) => {
-         if (e.target !== wrapper || e.propertyName !== 'opacity') return;
-         wrapper.removeEventListener('transitionend', onEnd, true);
-         isTransitioning = false;
+		// When fade-in finishes, we are no longer in a transition
+		const onEnd = (e) => {
+			if (e.target !== wrapper || e.propertyName !== 'opacity') return;
+			wrapper.removeEventListener('transitionend', onEnd, true);
+			isTransitioning = false;
 
-         // If a restart was requested during the transition, honor it now
-         if (restartPending) {
-            restartPending = false;
-            startCasterCycle();
-            return;
-         }
+			// If a restart was requested during the transition, honor it now
+			if (restartPending) {
+				restartPending = false;
+				startCasterCycle();
+				return;
+			}
 
-         // Schedule next phase
-		 if (displayPhases.length) {
-			currentPhaseIndex = (currentPhaseIndex + 1) % displayPhases.length;
-		  } else {
-			isCycling = false;
-			return;
-		 }
-		 
-         casterCycleTimeout = setTimeout(() => {
-            updateCasterDisplayCycle();
-         }, displayDurations[phase]);
-      };
-      wrapper.addEventListener('transitionend', onEnd, true);
+			// Schedule next phase
+			if (displayPhases.length) {
+				currentPhaseIndex = (currentPhaseIndex + 1) % displayPhases.length;
+			} else {
+				isCycling = false;
+				return;
+			}
 
-   }, FADE_MS); // matches CSS fade-out duration
+			casterCycleTimeout = setTimeout(() => {
+				updateCasterDisplayCycle();
+			}, displayDurations[phase]);
+		};
+		wrapper.addEventListener('transitionend', onEnd, true);
+
+	}, FADE_MS); // matches CSS fade-out duration
 }
 
 function renderCasterPhase(phase) {
-   const wrapper = document.getElementById("casterCycleWrapper");
-   const c1Display = document.getElementById("caster1Display");
-   const c2Display = document.getElementById("caster2Display");
-   const micIcon = document.getElementById("micIcon");
-   const twitchIcon = document.getElementById("twitchIcon");
-   const twitterIcon = document.getElementById("twitterIcon");
+	const wrapper = document.getElementById("casterCycleWrapper");
+	const c1Display = document.getElementById("caster1Display");
+	const c2Display = document.getElementById("caster2Display");
+	const micIcon = document.getElementById("micIcon");
+	const twitchIcon = document.getElementById("twitchIcon");
+	const twitterIcon = document.getElementById("twitterIcon");
 
-   c1Display.textContent = caster1Info[phase] || "";
-   c2Display.textContent = caster2Info[phase] || "";
+	c1Display.textContent = caster1Info[phase] || "";
+	c2Display.textContent = caster2Info[phase] || "";
 
-   micIcon.style.display = phase === "name" ? "inline-block" : "none";
-   twitchIcon.style.display = phase === "twitch" ? "inline-block" : "none";
-   twitterIcon.style.display = phase === "twitter" ? "inline-block" : "none";
+	micIcon.style.display = phase === "name" ? "inline-block" : "none";
+	twitchIcon.style.display = phase === "twitch" ? "inline-block" : "none";
+	twitterIcon.style.display = phase === "twitter" ? "inline-block" : "none";
 
-   wrapper.classList.remove("fade-hidden"); // show it
+	wrapper.classList.remove("fade-hidden"); // show it
 }
 
 function startCasterCycle() {
-   const wrapper = document.getElementById("casterCycleWrapper");
+	const wrapper = document.getElementById("casterCycleWrapper");
 
-   // No phases at all → hide and bail
-   if (!displayPhases.length) {
-	  clearTimeout(casterCycleTimeout);
-	  isCycling = false;
-	  restartPending = false;
-	  wrapper.classList.add("fade-hidden");
-      return;
-   }
+	// No phases at all → hide and bail
+	if (!displayPhases.length) {
+		clearTimeout(casterCycleTimeout);
+		isCycling = false;
+		restartPending = false;
+		wrapper.classList.add("fade-hidden");
+		return;
+	}
 
-   // Single (or zero) phase → just render once, do NOT schedule rotation
-   if (displayPhases.length <= 1) {
-      clearTimeout(casterCycleTimeout);
-      isCycling = false;
-      restartPending = false;
-      if (displayPhases.length === 1) {
-         renderCasterPhase(displayPhases[0]);
-      } else {
-         // no phases, stay hidden
-         wrapper.classList.add("fade-hidden");
-      }
-      return;
-   }
+	// Single (or zero) phase → just render once, do NOT schedule rotation
+	if (displayPhases.length <= 1) {
+		clearTimeout(casterCycleTimeout);
+		isCycling = false;
+		restartPending = false;
+		if (displayPhases.length === 1) {
+			renderCasterPhase(displayPhases[0]);
+		} else {
+			// no phases, stay hidden
+			wrapper.classList.add("fade-hidden");
+		}
+		return;
+	}
 
-   // Don't restart in the middle of a fade transition
-   if (isTransitioning) {
-      restartPending = true;
-      return;
-   }
+	// Don't restart in the middle of a fade transition
+	if (isTransitioning) {
+		restartPending = true;
+		return;
+	}
 
-   clearTimeout(casterCycleTimeout);
-   isCycling = true;
-   currentPhaseIndex = 0;
-   updateCasterDisplayCycle();
+	clearTimeout(casterCycleTimeout);
+	isCycling = true;
+	currentPhaseIndex = 0;
+	updateCasterDisplayCycle();
 }
 
 //////////// Global animations
@@ -1133,13 +1187,13 @@ const entranceDone = new Promise(res => (resolveEntranceDone = res));
 
 // 1) Prepare CSS variables from data attributes so its possible to control timing per element
 function primeAnimVariables() {
-   document.querySelectorAll('[data-anim]')
-      .forEach(el => {
-         const d = el.getAttribute('data-delay');
-         const u = el.getAttribute('data-dur');
-         if (d) el.style.setProperty('--delay', `${parseInt(d,10)}ms`);
-         if (u) el.style.setProperty('--dur', `${parseInt(u,10)}ms`);
-      });
+	document.querySelectorAll('[data-anim]')
+		.forEach(el => {
+			const d = el.getAttribute('data-delay');
+			const u = el.getAttribute('data-dur');
+			if (d) el.style.setProperty('--delay', `${parseInt(d,10)}ms`);
+			if (u) el.style.setProperty('--dur', `${parseInt(u,10)}ms`);
+		});
 }
 
 // 2) Gate #1: resolve when the FIRST scoreboard payload has been applied (one-shot)
@@ -1148,78 +1202,78 @@ let _resolveFirst;
 const firstDataReady = new Promise(res => (_resolveFirst = res));
 
 function markFirstDataAppliedOnce() {
-   if (_firstApplied) return;
-   _firstApplied = true;
-   try {
-      _resolveFirst();
-   } catch (e) {}
+	if (_firstApplied) return;
+	_firstApplied = true;
+	try {
+		_resolveFirst();
+	} catch (e) {}
 }
 
 // 3) Gate #2: wait for decode on BGs that will actually be visible after that first update
 function visibleBgImgs() {
-   return Array.from(document.querySelectorAll('.bg-img'))
-      .filter(el => getComputedStyle(el)
-         .display !== 'none' && el.offsetParent !== null);
+	return Array.from(document.querySelectorAll('.bg-img'))
+		.filter(el => getComputedStyle(el)
+			.display !== 'none' && el.offsetParent !== null);
 }
 
 function waitForDecodeOn(imgs, capMs = 1500) {
-   if (!imgs.length) return Promise.resolve();
-   const jobs = imgs.map(img => {
-      if (typeof img.decode !== 'function') return Promise.resolve();
-      return img.decode()
-         .catch(() => {}); // treat SVG decode errors as ready
-   });
-   return Promise.race([
-Promise.all(jobs)
-      .catch(() => {}),
-new Promise(r => setTimeout(r, capMs))
-]);
+	if (!imgs.length) return Promise.resolve();
+	const jobs = imgs.map(img => {
+		if (typeof img.decode !== 'function') return Promise.resolve();
+		return img.decode()
+			.catch(() => {}); // treat SVG decode errors as ready
+	});
+	return Promise.race([
+		Promise.all(jobs)
+		.catch(() => {}),
+		new Promise(r => setTimeout(r, capMs))
+	]);
 }
 
 // 4) One-shot start
 let animStarted = false;
 async function startAnimationsWhenReady() {
-   if (animStarted) return;
-   animStarted = true;
+	if (animStarted) return;
+	animStarted = true;
 
-   // FIRST, ensure elements know their per-element timings
-   primeAnimVariables();
+	// FIRST, ensure elements know their per-element timings
+	primeAnimVariables();
 
-   // Wait for the first data to be applied
-   const DATA_CAP = 2000;
-   await Promise.race([firstDataReady, new Promise(r => setTimeout(r, DATA_CAP))]);
+	// Wait for the first data to be applied
+	const DATA_CAP = 2000;
+	await Promise.race([firstDataReady, new Promise(r => setTimeout(r, DATA_CAP))]);
 
-   // After first update decided which BGs are visible, wait for those to decode (bounded)
-   const decodeTargets = visibleBgImgs();
-   const DECODE_CAP = 2000;
-   await waitForDecodeOn(decodeTargets, DECODE_CAP);
+	// After first update decided which BGs are visible, wait for those to decode (bounded)
+	const decodeTargets = visibleBgImgs();
+	const DECODE_CAP = 2000;
+	await waitForDecodeOn(decodeTargets, DECODE_CAP);
 
-   // Open the entrance window: trigger keyframes once
-   document.body.classList.add('anim-start');
+	// Open the entrance window: trigger keyframes once
+	document.body.classList.add('anim-start');
 
-   // Compute how long to keep the window open
-   const visibleAnimEls = Array.from(document.querySelectorAll('[data-anim]'))
-      .filter(el => getComputedStyle(el)
-         .display !== 'none' && el.offsetParent !== null);
+	// Compute how long to keep the window open
+	const visibleAnimEls = Array.from(document.querySelectorAll('[data-anim]'))
+		.filter(el => getComputedStyle(el)
+			.display !== 'none' && el.offsetParent !== null);
 
-   const longestMs = visibleAnimEls.reduce((max, el) => {
-      const delay = parseInt(el.getAttribute('data-delay') || '0', 10) || 0;
-      const dur = parseInt(el.getAttribute('data-dur') || '500', 10) || 500;
-      return Math.max(max, delay + dur);
-   }, 0);
+	const longestMs = visibleAnimEls.reduce((max, el) => {
+		const delay = parseInt(el.getAttribute('data-delay') || '0', 10) || 0;
+		const dur = parseInt(el.getAttribute('data-dur') || '500', 10) || 500;
+		return Math.max(max, delay + dur);
+	}, 0);
 
-   // Close the window right after the longest entrance finishes, then lock final states and prevent any future replays
-   const ENTRANCE_MS = Math.max(700, longestMs + 1000); // safety margin
-   setTimeout(() => {
-      document.body.classList.add('post-entrance'); // persist final state, no replays
-      document.body.classList.remove('anim-start'); // stop matching the animation selectors
-      try {
-         resolveEntranceDone?.();
-      } catch {}
-   }, ENTRANCE_MS);
+	// Close the window right after the longest entrance finishes, then lock final states and prevent any future replays
+	const ENTRANCE_MS = Math.max(700, longestMs + 1000); // safety margin
+	setTimeout(() => {
+		document.body.classList.add('post-entrance'); // persist final state, no replays
+		document.body.classList.remove('anim-start'); // stop matching the animation selectors
+		try {
+			resolveEntranceDone?.();
+		} catch {}
+	}, ENTRANCE_MS);
 
-   // (Optional) watchdog in case something crazy happened earlier
-   //setTimeout(() => { document.body.classList.add('anim-start'); }, 4000);
+	// (Optional) watchdog in case something crazy happened earlier
+	//setTimeout(() => { document.body.classList.add('anim-start'); }, 4000);
 }
 
 // 5) Kick off animations at file parse time
@@ -1231,55 +1285,55 @@ startAnimationsWhenReady();
 // - resolves on entranceDone (from orchestrator)
 // - also resolves if the element’s own animation ends OR is cancelled
 function waitForEntranceEnd(el, capMs = 3000) {
-   if (document.body.classList.contains('post-entrance')) {
-      return Promise.resolve();
-   }
-   return new Promise(resolve => {
-      let settled = false;
-      const done = () => {
-         if (settled) return;
-         settled = true;
-         cleanup();
-         resolve();
-      };
+	if (document.body.classList.contains('post-entrance')) {
+		return Promise.resolve();
+	}
+	return new Promise(resolve => {
+		let settled = false;
+		const done = () => {
+			if (settled) return;
+			settled = true;
+			cleanup();
+			resolve();
+		};
 
-      // Global entrance completion
-      entranceDone.then(done)
-         .catch(done);
+		// Global entrance completion
+		entranceDone.then(done)
+			.catch(done);
 
-      // Element-level fallbacks (end or cancel)
-      const onEnd = e => {
-         if (!el || e.target === el) done();
-      };
-      const onCancel = e => {
-         if (!el || e.target === el) done();
-      };
-      if (el) {
-         el.addEventListener('animationend', onEnd, true);
-         el.addEventListener('animationcancel', onCancel, true);
-      }
+		// Element-level fallbacks (end or cancel)
+		const onEnd = e => {
+			if (!el || e.target === el) done();
+		};
+		const onCancel = e => {
+			if (!el || e.target === el) done();
+		};
+		if (el) {
+			el.addEventListener('animationend', onEnd, true);
+			el.addEventListener('animationcancel', onCancel, true);
+		}
 
-      // Body class flip observed
-      const mo = new MutationObserver(() => {
-         if (document.body.classList.contains('post-entrance')) done();
-      });
-      mo.observe(document.body, {
-         attributes: true,
-         attributeFilter: ['class']
-      });
+		// Body class flip observed
+		const mo = new MutationObserver(() => {
+			if (document.body.classList.contains('post-entrance')) done();
+		});
+		mo.observe(document.body, {
+			attributes: true,
+			attributeFilter: ['class']
+		});
 
-      // Hard cap
-      const to = setTimeout(done, capMs);
+		// Hard cap
+		const to = setTimeout(done, capMs);
 
-      function cleanup() {
-         clearTimeout(to);
-         mo.disconnect();
-         if (el) {
-            el.removeEventListener('animationend', onEnd, true);
-            el.removeEventListener('animationcancel', onCancel, true);
-         }
-      }
-   });
+		function cleanup() {
+			clearTimeout(to);
+			mo.disconnect();
+			if (el) {
+				el.removeEventListener('animationend', onEnd, true);
+				el.removeEventListener('animationcancel', onCancel, true);
+			}
+		}
+	});
 }
 
 </script>

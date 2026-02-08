@@ -36,8 +36,13 @@
 	stroke: #232323; /* 232323 */
 }
 
-/* Faint outer glow effect on stroke */
-#coloredGlow {
+/* Faint outer glow effect on stroke - Player 1 */
+#coloredGlow_p1 {
+	--glow-color: #232323; /* 232323 */
+	--glow-opacity: 1;
+}
+/* Faint outer glow effect on stroke - Player 2 */
+#coloredGlow_p2 {
 	--glow-color: #232323; /* 232323 */
 	--glow-opacity: 1;
 }
