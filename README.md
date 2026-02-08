@@ -1,5 +1,8 @@
-# 🥊🕹️🎥 FGCaster Overlay
+<h1 align="center">🥊🕹️🎥 FGCaster Overlay</h1>
+
+<p align="center">
 A stream overlay app for software like OBS, designed for broadcasting fighting game matches and events.
+</p>
 
 ## ❔ Why?
 

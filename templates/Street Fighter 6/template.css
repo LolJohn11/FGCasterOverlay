@@ -1,3 +1,114 @@
+/* ==== SVG ELEMENTS COLOR SETTINGS ==== */
+
+/* == Player Plaques == */
+
+/* Gradient for background/fill - Player 1 */
+#linear-gradient-p1-noimg,
+#linear-gradient-p1-full {
+	--gradient-stop-1: #7a172f; /* 7a172f */
+	--gradient-stop-2: #881734; /* 881734 */
+	--gradient-stop-3: #bf1747; /* bf1747 */
+	--gradient-stop-4: #d4174f; /* d4174f */
+}
+/* Gradient for background/fill - Player 2 */
+#linear-gradient-p2-noimg,
+#linear-gradient-p2-full {
+	--gradient-stop-1: #144395; /* 144395 */
+	--gradient-stop-2: #134798; /* 134798 */
+	--gradient-stop-3: #0f5cac; /* 0f5cac */
+}
+
+/* Stroke color - Player 1 */
+#P1_bg_stroke_noimg polygon,
+#P1_diag_noimg line,
+#P1_vert_noimg line,
+#P1_bg_stroke polygon,
+#P1_diag line,
+#P1_vert line {
+	stroke: #f984c1; /* f984c1 */
+}
+/* Stroke color - Player 2 */
+#P2_bg_stroke_noimg polygon,
+#P2_diag_noimg line,
+#P2_vert_noimg line,
+#P2_bg_stroke polygon,
+#P2_diag line,
+#P2_vert line {
+	stroke: #79cfff; /* ff648d */
+}
+
+/* Faint outer glow effect on stroke - Player 1 */
+#coloredGlow_p1 {
+	--glow-color: #FF64A3; /* FF64A3 */
+	--glow-opacity: 1;
+}
+/* Faint outer glow effect on stroke - Player 2 */
+#coloredGlow_p2 {
+	--glow-color: #00C3FF; /* 00C3FF */
+	--glow-opacity: 1;
+}
+
+/* Drop shadow */
+.playerPlaque {
+	filter: drop-shadow(black 0px 0px 0.2rem);
+}
+
+/* == Team Plaques == */
+
+/* Background color - Team 1 */
+#T1_noimg_bg,
+#T1_full_bg {
+	fill: #000000; /* 000000 */
+	opacity: 0.9; /* 0.9 */
+}
+/* Background color - Team 2 */
+#T2_noimg_bg,
+#T2_full_bg {
+	fill: #000000; /* 000000 */
+	opacity: 0.9; /* 0.9 */
+}
+
+/* Line color - Team 1 */
+#T1_noimg_line line,
+#T1_full_line line {
+	stroke: #ffffff; /* ffffff */
+}
+/* Line color - Team 2 */
+#T2_noimg_line line,
+#T2_full_line line {
+	stroke: #ffffff; /* ffffff */
+}
+
+/* == Top Row == */
+
+/* Drop shadow */
+#topRowShadow {
+	fill: #000000; /* 000000 */
+	opacity: 0.8; /* 0.8 */
+}
+/* Element body */
+#topRowBody {
+	stroke: #000000; /* 000000 */
+	fill: #000000; /* 000000 */
+	opacity: 0.9; /* 0.9 */
+}
+
+/* == Casters Row == */
+
+/* Drop shadow */
+#castersShadow {
+	fill: #000000; /* 000000 */
+	opacity: 0.8; /* 0.8 */
+}
+/* Element body */
+#castersBody {
+	fill: #000000; /* 000000 */
+	opacity: 0.9; /* 0.9 */
+}
+
+/* ==== END OF SVG ELEMENTS COLOR SETTINGS ==== */
+
+
 @font-face {
 	font-family: 'Noto Sans Bold';
 	src: url('fonts/NotoSans-Bold.ttf');
@@ -7,7 +118,7 @@
 
 @font-face {
 	font-family: 'Noto Sans Condensed';
-	src: url('fonts/NotoSans-Condensed.ttf');
+	src: url('fonts/NotoSans-Condensed.otf');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -31,13 +142,17 @@ body {
 	overflow: hidden;
 }
 
-.debug-bg, .bg-img {
+.debug-bg {
 	position: absolute;
 	top: 0;
 	left: 0;
 	width: 100%;
 	height: 100%;
 	object-fit: cover; /* keep aspect ratio while filling space */
+	z-index: 0;
+}
+
+.bg-img {
 	z-index: 0;
 }
 
@@ -101,7 +216,7 @@ body {
 .infoRow {
 	background-color: transparent;
 	display: flex;
-	width: 532px;
+	width: 533px;
 	gap: 10px;
 	align-items: flex-start;
 	justify-content: center;
@@ -218,19 +333,6 @@ body {
 	width: 71px;
 	height: 53px;
 	object-fit: contain;
-	display: none; 
-}
-
-#team1Img {
-	mask-image: url('img/img_mask_t1.png');
-	mask-size: 71px 49px;
-	mask-position: 0px 3px; /* mask alignment is hard, good luck :( */
-}
-
-#team2Img {
-	mask-image: url('img/img_mask_t2.png');
-	mask-size: 71px 49px;
-	mask-position: 0px 3px;
 }
 
 .commentators {
@@ -266,7 +368,6 @@ body {
 	/* font-size: 1.1em; */
 	text-align: center;
 	align-content: center;
-	vertical-align: middle;
 }
 
 .casterText {
@@ -275,7 +376,6 @@ body {
 	width: 130px;
 	align-items: center;
 	justify-content: center;
-	vertical-align: middle;
 }
 
 :root {

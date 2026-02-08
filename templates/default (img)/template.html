@@ -1,16 +1,14 @@
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <title>FGCaster Overlay</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Backup font just in case -->
-    <!-- <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@700&display=swap" rel="stylesheet" /> -->
-    <link rel="stylesheet" href="./static/fa/css/all.min.css" />
-    <link rel="stylesheet" href="{{ asset_url(template_name, 'template.css') }}">
-	<script src="https://cdn.jsdelivr.net/npm/fitty@2.3.7/dist/fitty.min.js"></script>
+  <meta charset="UTF-8" />
+  <title>FGCaster Overlay</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Backup font just in case -->
+  <!-- <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@700&display=swap" rel="stylesheet" /> -->
+  <link rel="stylesheet" href="./static/fa/css/all.min.css" />
+  <link rel="stylesheet" href="{{ asset_url(template_name, 'template.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/fitty@2.3.7/dist/fitty.min.js"></script>
 </head>
-
 <body>
 
 <!-- Defines which game's character list to use. -->
@@ -23,302 +21,91 @@
 <input type="hidden" id="isTagGame" value="false" />
 
 <div class="debug-bg-container">
-	<!-- Add images like this: -->
-	<!-- <img src="{{ asset_url(template_name, 'img/Image.png') }}" alt=""> -->
-	<!-- Debug background image of a game. Set opacity to 1 or 0 to show or hide -->
-	<img src="{{ asset_url(template_name, 'img/game.jpg') }}" style="opacity: 0;" class="debug-bg" alt="Debug Game Background">
-
-	<!-- This version of the tempalte uses SVG elements for easier styling. -->
-	<!-- Please refer to the adjacent CSS file if you wish to adjust image visuals. -->
-
-	<!-- Hidden SVG for shared definitions -->
-	<svg style="width: 0; height: 0; position: absolute;" aria-hidden="true">
-		<defs>
-			<filter id="coloredGlow" x="-50%" y="-50%" width="200%" height="200%">
-			  <feFlood flood-color="var(--glow-color, #F70041)" 
-					   flood-opacity="var(--glow-opacity, 1)" 
-					   result="glowColor"/>
-			  <feComposite in="glowColor" in2="SourceAlpha" operator="in" result="coloredShape"/>
-			  <feGaussianBlur in="coloredShape" 
-							  stdDeviation="2" 
-							  result="blurredGlow"/>
-			  <feMerge>
-				<feMergeNode in="blurredGlow"/>
-				<feMergeNode in="SourceGraphic"/>
-			  </feMerge>
-			</filter>
-			<filter id="elShadow" x="-50%" y="-50%" width="200%" height="200%">
-                <feColorMatrix type="matrix" values="1 0 0 0 0 
-                                                     0 1 0 0 0 
-                                                     0 0 1 0 0 
-                                                     0 0 0 100 0"
-                                                     result="boostedInput"/>
-                                                   
-                <feGaussianBlur stdDeviation="5"/>
-                <feComposite operator="out" in2="boostedInput"/>
-            </filter>
-			<linearGradient id="linear-gradient-p1-noimg" x1="6.58" y1="32.49" x2="451.08" y2="32.49" gradientUnits="userSpaceOnUse">
-				<stop offset="0.13" stop-color="var(--gradient-stop-1, #d4174f)" />
-				<stop offset="0.34" stop-color="var(--gradient-stop-2, #bf1747)" />
-				<stop offset="0.76" stop-color="var(--gradient-stop-3, #881734)" />
-				<stop offset="0.87" stop-color="var(--gradient-stop-4, #7a172f)" />
-			</linearGradient>
-			<linearGradient id="linear-gradient-p1-full" x1="6.56" y1="32.49" x2="517.08" y2="32.49" gradientUnits="userSpaceOnUse">
-				<stop offset="0.13" stop-color="var(--gradient-stop-1, #d4174f)" />
-				<stop offset="0.34" stop-color="var(--gradient-stop-2, #bf1747)" />
-				<stop offset="0.76" stop-color="var(--gradient-stop-3, #881734)" />
-				<stop offset="0.87" stop-color="var(--gradient-stop-4, #7a172f)" />
-			</linearGradient>
-			<linearGradient id="linear-gradient-p2-noimg" x1="6.58" y1="32.49" x2="451.08" y2="32.49" gradientUnits="userSpaceOnUse">
-				<stop offset="0.13" stop-color="var(--gradient-stop-1, #d4174f)" />
-				<stop offset="0.34" stop-color="var(--gradient-stop-2, #bf1747)" />
-				<stop offset="0.76" stop-color="var(--gradient-stop-3, #881734)" />
-				<stop offset="0.87" stop-color="var(--gradient-stop-4, #7a172f)" />
-			</linearGradient>
-			<linearGradient id="linear-gradient-p2-full" x1="6.56" y1="32.49" x2="517.08" y2="32.49" gradientUnits="userSpaceOnUse">
-				<stop offset="0.13" stop-color="var(--gradient-stop-1, #d4174f)" />
-				<stop offset="0.34" stop-color="var(--gradient-stop-2, #bf1747)" />
-				<stop offset="0.76" stop-color="var(--gradient-stop-3, #881734)" />
-				<stop offset="0.87" stop-color="var(--gradient-stop-4, #7a172f)" />
-			</linearGradient>
-		</defs>
-	</svg>
-
-	<!-- Top row -->
-	<div style="display: flex; position: absolute; width: 100%; justify-content: center;">
-		<svg id="topRowBG" xmlns="http://www.w3.org/2000/svg" width="700" height="66.87" viewBox="0 0 573.4 66.87" data-anim="down" class="bg-img" alt="Top Text Row" style="margin-top: 1px; display: block;">
-			<path id="topRowShadow" filter="url(#elShadow)" d="M1246.48-.74H673.08L690,33.35a5,5,0,0,0,4.48,2.78h530.66a5,5,0,0,0,4.49-2.78Z" transform="translate(-673.08 0.74)" stroke="none" fill-opacity="0.1" />
-			<path id="topRowBody" d="M1246.48-.74H673.08L690,33.35a5,5,0,0,0,4.48,2.78h530.66a5,5,0,0,0,4.49-2.78Z" transform="translate(-673.08 0.74)" />
-		</svg>
-	</div>
-
-	<!-- Player plaques -->
-	<div style="display: flex; position: absolute; width: 100%; justify-content: center; gap: 557px; top: 6px;">
-		<div style="position: relative; width: 100%;">
-			<svg id="p1BGpartial" data-anim="right" class="bg-img playerPlaque" alt="Player 1 Plaque" style="position: absolute; top: 0px; right: 0;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="458" height="64" viewBox="0 0 458 64">
-				<g id="P1_noimg" data-name="P1 noimg">
-					<g>
-						<g id="P1_bg_noimg" data-name="P1 bg noimg">
-							<polygon points="437.19 57.49 6.58 57.49 6.58 7.49 451.08 7.49 437.19 57.49" style="fill: url(#linear-gradient-p1-noimg)" />
-						</g>
-					</g>
-					<g filter="url(#coloredGlow)">
-						<g id="P1_bg_stroke_noimg" data-name="P1 bg stroke noimg">
-							<polygon points="437.19 57.49 6.58 57.49 6.58 7.49 451.08 7.49 437.19 57.49" style="fill: none; stroke-miterlimit: 10" />
-						</g>
-						<g id="P1_diag_noimg" data-name="P1 diag noimg">
-							<line x1="382.28" y1="57.49" x2="396.17" y2="7.49" style="fill: none; stroke-miterlimit: 10" />
-						</g>
-						<g id="P1_vert_noimg" data-name="P1 vert noimg">
-							<line x1="6.58" y1="7.49" x2="6.58" y2="57.49" style="fill: none; stroke-miterlimit: 10" />
-						</g>
-					</g>
-				</g>
-			</svg>
-			<svg id="p1BGfull" data-anim="right" class="bg-img playerPlaque" alt="Player 1 Plaque" style="position: absolute; top: 0px; right: 0;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="524" height="64" viewBox="0 0 524 64">
-				<defs>
-					<clipPath id="p1-clip-path">
-						<rect x="7.08" y="7.99" width="65" height="49" />
-					</clipPath>
-				</defs>
-				<g id="P1_full" data-name="P1 full">
-					<g id="P1_bg" data-name="P1 bg">
-						<polygon points="503.19 57.49 6.56 57.49 6.56 7.49 517.08 7.49 503.19 57.49" style="fill: url(#linear-gradient-p1-full)" />
-					</g>
-					<g filter="url(#coloredGlow)">
-						<g id="P1_bg_stroke" data-name="P1 bg stroke">
-							<polygon points="503.19 57.49 6.56 57.49 6.56 7.49 517.08 7.49 503.19 57.49" style="fill: none;stroke-miterlimit: 10" />
-						</g>
-						<g id="P1_diag" data-name="P1 diag">
-							<line x1="448.28" y1="57.49" x2="462.17" y2="7.49" style="fill: none;stroke-miterlimit: 10" />
-						</g>
-						<g id="P1_vert" data-name="P1 vert">
-							<line x1="72.58" y1="7.49" x2="72.58" y2="57.49" style="fill: none;stroke-miterlimit: 10" />
-						</g>
-					</g>
-				</g>
-				<image id="player1Img" class="playerImg" href="" width="65" height="49" x="7" y="8" preserveAspectRatio="xMidYMid meet" clip-path="url(#p1-clip-path)" />
-			</svg>
-		</div>
-		<div style="position: relative; width: 100%;">
-			<svg id="p2BGpartial" data-anim="left" class="bg-img playerPlaque" alt="Player 2 Plaque" style="position: absolute; top: 0px; left: 0;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="459" height="64" viewBox="0 0 459 64">
-				<g id="P2_noimg" data-name="P2 noimg" transform="matrix(-1 0 0 1 459 0)">
-					<g>
-						<g id="P2_bg_noimg" data-name="P2 bg noimg">
-							<polygon points="437.19 57.49 6.58 57.49 6.58 7.49 451.08 7.49 437.19 57.49" style="fill: url(#linear-gradient-p2-noimg)" />
-						</g>
-					</g>
-					<g filter="url(#coloredGlow)">
-						<g id="P2_bg_stroke_noimg" data-name="P2 bg stroke noimg">
-							<polygon points="437.19 57.49 6.58 57.49 6.58 7.49 451.08 7.49 437.19 57.49" style="fill: none;stroke-miterlimit: 10" />
-						</g>
-						<g id="P2_diag_noimg" data-name="P2 diag noimg">
-							<line x1="382.28" y1="57.49" x2="396.17" y2="7.49" style="fill: none;stroke-miterlimit: 10" />
-						</g>
-						<g id="P2_vert_noimg" data-name="P2 vert noimg">
-							<line x1="6.58" y1="7.49" x2="6.58" y2="57.49" style="fill: none;stroke-miterlimit: 10" />
-						</g>
-					</g>
-				</g>
-			</svg>
-			<svg id="p2BGfull" data-anim="left" class="bg-img playerPlaque" alt="Player 2 Plaque" style="position: absolute; top: 0px; left: 0px;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="524" height="64" viewBox="0 0 524 64">
-				<defs>
-					<clipPath id="p2-clip-path">
-						<rect x="452.92" y="7.99" width="65" height="49" />
-					</clipPath>
-				</defs>
-				<g id="P2_full" data-name="P2 full" transform="matrix(-1 0 0 1 525 0)">
-					<g id="P2_bg" data-name="P2 bg">
-						<polygon points="503.19 57.49 6.56 57.49 6.56 7.49 517.08 7.49 503.19 57.49" style="fill: url(#linear-gradient-p2-full)"></polygon>
-					</g>
-					<g filter="url(#coloredGlow)">
-						<g id="P2_bg_stroke" data-name="P2 bg stroke">
-							<polygon points="503.19 57.49 6.56 57.49 6.56 7.49 517.08 7.49 503.19 57.49" style="fill: none;stroke-miterlimit: 10"></polygon>
-						</g>
-						<g id="P2_diag" data-name="P2 diag">
-							<line x1="448.28" y1="57.49" x2="462.17" y2="7.49" style="fill: none;stroke-miterlimit: 10"></line>
-						</g>
-						<g id="P2_vert" data-name="P2 vert">
-							<line x1="72.58" y1="7.49" x2="72.58" y2="57.49" style="fill: none;stroke-miterlimit: 10"></line>
-						</g>
-					</g>
-				</g>
-				<image id="player2Img" class="playerImg" href="" width="65" height="49" x="453" y="8" preserveAspectRatio="xMidYMid meet" clip-path="url(#p2-clip-path)" />
-			</svg>
-		</div>
-	</div>
-
-	<!-- Teams -->
-	<div style="display: flex; position: absolute; top: 140px; width: 100%; justify-content: center; gap: 18px;">
-		<div style="position: relative; width: 100%;">
-			<svg id="team1BG" data-anim="right" class="bg-img" alt="Team 1 Plaque" style="position: absolute; top: 0; right: 0;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="369.95" height="42.94" viewBox="0 0 369.95 42.94">
-				<defs>
-					<clipPath id="clip-path" transform="translate(-578.65 -139.18)">
-						<polygon id="bg" points="948.59 179.96 578.65 179.96 578.65 142 910.99 142 948.59 179.96" />
-					</clipPath>
-				</defs>
-				<g id="T1_noimg" data-name="T1 noimg">
-					<polygon id="T1_noimg_bg" data-name="T1 noimg bg" points="369.94 40.77 0 40.77 0 2.82 332.35 2.82 369.94 40.77" />
-					<g id="T1_noimg_line" style="clip-path: url(#clip-path)">
-						<line x1="255.28" y1="0.35" x2="297.73" y2="42.58" style="stroke-miterlimit: 10" />
-					</g>
-				</g>
-			</svg>
-			<svg id="team1BGFull" data-anim="right" class="bg-img" alt="Team 1 Plaque" style="position: absolute; top: 0; right: 0;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="437.74" height="42.94" viewBox="0 0 437.74 42.94">
-				<defs>
-					<clipPath id="clip-path-t1" transform="translate(-510.85 -139.18)">
-						<polygon id="bg" points="948.59 179.96 510.85 179.96 510.85 142 910.99 142 948.59 179.96" />
-					</clipPath>
-				</defs>
-				<g id="T1_full" data-name="T1 full">
-					<polygon id="T1_full_bg" data-name="T1 full bg" points="437.74 40.77 0 40.77 0 2.82 400.14 2.82 437.74 40.77" />
-					<g id="T1_full_line" style="clip-path: url(#clip-path-t1)">
-						<line x1="323.07" y1="0.35" x2="365.53" y2="42.58" style="stroke-miterlimit: 10" />
-					</g>
-				</g>
-				<image id="team1Img" class="teamImg" href="" x="0" y="-4.5" preserveAspectRatio="xMidYMid meet" clip-path="url(#clip-path-t1)" />
-			</svg>
-		</div>
-		<div style="position: relative; width: 100%;">
-			<svg id="team2BG" data-anim="left" class="bg-img" alt="Team 1 Plaque" style="position: absolute; top: 0; left: 0;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="369.95" height="42.94" viewBox="0 0 369.95 42.94">
-				<defs>
-					<clipPath id="clip-path" transform="translate(-971.37 -139.18)">
-						<polygon id="bg" points="971.37 179.96 1341.32 179.96 1341.32 142 1008.97 142 971.37 179.96" />
-					</clipPath>
-				</defs>
-				<g id="T2_noimg" data-name="T2 noimg">
-					<polygon id="T2_noimg_bg" data-name="T2 noimg bg" points="0 40.77 369.94 40.77 369.94 2.82 37.6 2.82 0 40.77" />
-					<g id="T2_noimg_line" style="clip-path: url(#clip-path)">
-						<line x1="114.67" y1="0.35" x2="72.21" y2="42.58" style="stroke-miterlimit: 10" />
-					</g>
-				</g>
-			</svg>
-			<svg id="team2BGFull" data-anim="left" class="bg-img" alt="Team 1 Plaque" style="position: absolute; top: 0; left: 0;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="437.74" height="42.94" viewBox="0 0 437.74 42.94">
-				<defs>
-					<clipPath id="clip-path-t2" transform="translate(-971.37 -139.18)">
-						<polygon id="bg" points="971.37 179.96 1409.11 179.96 1409.11 142 1008.97 142 971.37 179.96" />
-					</clipPath>
-				</defs>
-				<g id="T2_full" data-name="T2 full">
-					<polygon id="T2_full_bg" data-name="T2 full bg" points="0 40.77 437.74 40.77 437.74 2.82 37.6 2.82 0 40.77" />
-					<g id="T2_full_line" style="clip-path: url(#clip-path-t2)">
-						<line x1="114.67" y1="0.35" x2="72.21" y2="42.58" style="stroke-miterlimit: 10" />
-					</g>
-				</g>
-				<image id="team2Img" class="teamImg" href="" x="367" y="-4.5" preserveAspectRatio="xMidYMid meet" clip-path="url(#clip-path-t2)" />
-			</svg>
-		</div>
-	</div>
-
-	<!-- Caster row -->
-	<div style="display: flex; position: absolute; bottom:0; width: 100%; justify-content: center;">
-		<svg id="castersBG" xmlns="http://www.w3.org/2000/svg" width="700" height="67.83" viewBox="0 -40 340.24 67.83" data-anim="up" class="bg-img" alt="Casters Row">
-			<path id="castersShadow" filter="url(#elShadow)" d="M789.88,1080h340.24l-12.4-25a5,5,0,0,0-4.49-2.79H806.77a5,5,0,0,0-4.49,2.79Z" transform="translate(-789.88 -1052.17)" stroke="none" fill-opacity="0.1" />
-			<path id="castersBody" d="M789.88,1080h340.24l-12.4-25a5,5,0,0,0-4.49-2.79H806.77a5,5,0,0,0-4.49,2.79Z" transform="translate(-789.88 -1052.17)" />
-		</svg>
-	</div>
-
-	<!-- MAIN CONTENT SECTION -->
-	<div class="scoreboardContainer">
-		<!-- LEFT: Player 1 -->
-		<div class="nameBlock" id="nameBlockP1" data-anim="right">
-			<div class="name">
-				<span id="player1Clan"></span> <span id="separator1">|</span>
-				<span id="player1Name"></span>
-				<span id="player1WL"></span>
-			</div>
-		</div>
-		<div class="scoreBlock" data-anim="right">
-			<div class="score" id="player1Score"></div>
-		</div>
-		<!-- CENTER: Stage, Match Type, Top Text, etc. -->
-		<div class="centerPanel" data-anim="down">
-			<div class="infoRow">
-				<div class="infoBar" id="stageText"></div>
-				<div class="infoBar" id="topText"></div>
-				<div class="infoBar" id="matchTypeText"></div>
-			</div>
-		</div>
-		<!-- RIGHT: Player 2 -->
-		<div class="scoreBlock" data-anim="left">
-			<div class="score" id="player2Score"></div>
-		</div>
-		<div class="nameBlock" id="nameBlockP2" data-anim="left">
-			<div class="name">
-				<span id="player2Clan"></span> <span id="separator2">|</span>
-				<span id="player2Name"></span>
-				<span id="player2WL"></span>
-			</div>
-		</div>
-	</div>
-	<!-- TEAMS -->
-	<div class="teamsContainer">
-		<div class="team team-left" data-anim="right">
-			<div class="teamText">
-				<span id="team1Name"></span>
-				<span id="team1Score"></span>
-			</div>
-		</div>
-		<div id="teamsDivider"></div>
-		<div class="team team-right" data-anim="left">
-			<div class="teamText">
-				<span id="team2Score"></span>
-				<span id="team2Name"></span>
-			</div>
-		</div>
-	</div>
-	<!-- CASTERS -->
-	<div id="casterContainer" class="scoreboardContainer" data-anim="up">
-		<div class="commentators" id="commentatorsBlock">
-			<span id="casterCycleWrapper" class="fade">
-				<span id="caster1Display" class="casterText"></span>
-				<span class="casterIcon" id="micIcon" style="display: none;"><i class="fa-solid fa-headset"></i></span>
-				<span class="casterIcon" id="twitchIcon" style="display: none;"><i class="fa-brands fa-twitch" style="color: #772CE8"></i></span>
-				<span class="casterIcon" id="twitterIcon" style="display: none;"><i class="fa-brands fa-x-twitter" style="color: #1DA1F2"></i></span>
-				<span id="caster2Display" class="casterText"></span>
-			</span>
-		</div>
-	</div>
+   <!-- Add images like this: -->
+   <!-- <img src="{{ asset_url(template_name, 'img/Image.png') }}" alt=""> -->
+   
+   <!-- Debug background image of a game. Set opacity to 1 or 0 to show or hide -->
+   <img src="{{ asset_url(template_name, 'img/game.jpg') }}" style="opacity: 0;" class="debug-bg" alt="Debug Game Background">
+   
+   <img id="p1BGpartial" src="{{ asset_url(template_name, 'img/img_p1_noimg.png') }}" data-anim="right" class="bg-img" alt="Player 1 Plaque">
+   <img id="p2BGpartial" src="{{ asset_url(template_name, 'img/img_p2_noimg.png') }}" data-anim="left" class="bg-img" alt="Player 2 Plaque">
+   <img id="p1BGfull" src="{{ asset_url(template_name, 'img/img_p1.png') }}" data-anim="right" class="bg-img" alt="Player 1 Plaque">
+   <img id="p2BGfull" src="{{ asset_url(template_name, 'img/img_p2.png') }}" data-anim="left" class="bg-img" alt="Player 2 Plaque">
+   <img id="topRowBG" src="{{ asset_url(template_name, 'img/img_toprow.png') }}" data-anim="down" class="bg-img" alt="Top Text Row">
+   <img id="team1BG" src="{{ asset_url(template_name, 'img/img_team_1_noimg.png') }}" data-anim="right" class="bg-img" alt="Team 1 Plaque">
+   <img id="team2BG" src="{{ asset_url(template_name, 'img/img_team_2_noimg.png') }}" data-anim="left" class="bg-img" alt="Team 1 Plaque">
+   <img id="team1BGFull" src="{{ asset_url(template_name, 'img/img_team_1.png') }}" data-anim="right" class="bg-img" alt="Team 1 Plaque">
+   <img id="team2BGFull" src="{{ asset_url(template_name, 'img/img_team_2.png') }}" data-anim="left" class="bg-img" alt="Team 1 Plaque">
+   <img id="castersBG" src="{{ asset_url(template_name, 'img/img_casters.png') }}" data-anim="up" class="bg-img" alt="Casters Row">
+   <!-- MAIN TOP SECTION -->
+   <div class="scoreboardContainer">
+      <!-- LEFT: Player 1 -->
+      <div class="imgBlock" data-anim="right">
+         <img id="player1Img" class="playerImg" src="" alt="" />
+      </div>
+      <div class="nameBlock" id="nameBlockP1" data-anim="right">
+         <div class="name">
+            <span id="player1Clan"></span> <span id="separator1">|</span>
+            <span id="player1Name"></span>
+            <span id="player1WL"></span>
+         </div>
+      </div>
+      <div class="scoreBlock" data-anim="right">
+         <div class="score" id="player1Score"></div>
+      </div>
+      <!-- CENTER: Stage, Match Type, Top Text, etc. -->
+      <div class="centerPanel" data-anim="down">
+         <div class="infoRow">
+            <div class="infoBar" id="stageText"></div>
+            <div class="infoBar" id="topText"></div>
+            <div class="infoBar" id="matchTypeText"></div>
+         </div>
+      </div>
+      <!-- RIGHT: Player 2 -->
+      <div class="scoreBlock" data-anim="left">
+         <div class="score" id="player2Score"></div>
+      </div>
+      <div class="nameBlock" id="nameBlockP2" data-anim="left">
+         <div class="name">
+            <span id="player2Clan"></span> <span id="separator2">|</span>
+            <span id="player2Name"></span>
+            <span id="player2WL"></span>
+         </div>
+      </div>
+      <div class="imgBlock" data-anim="left">
+         <img id="player2Img" class="playerImg" src="" alt="" />
+      </div>
+   </div>
+   <!-- TEAMS -->
+   <div class="teamsContainer">
+      <div class="team team-left" data-anim="right">
+         <img id="team1Img" class="teamImg" src="" alt="" />
+         <div class="teamText">
+            <span id="team1Name"></span>
+            <span id="team1Score"></span>
+         </div>
+      </div>
+      <div id="teamsDivider"></div>
+      <div class="team team-right" data-anim="left">
+         <div class="teamText">
+            <span id="team2Score"></span>
+            <span id="team2Name"></span>
+         </div>
+         <img id="team2Img" class="teamImg" src="" alt="" />
+      </div>
+   </div>
+   <!-- CASTERS -->
+   <div id="casterContainer" class="scoreboardContainer" data-anim="up">
+      <div class="commentators" id="commentatorsBlock">
+         <span id="casterCycleWrapper" class="fade">
+            <span id="caster1Display" class="casterText"></span>
+            <span class="casterIcon" id="micIcon" style="display: none;"><i class="fa-solid fa-headset"></i></span>
+            <span class="casterIcon" id="twitchIcon" style="display: none;"><i class="fa-brands fa-twitch" style="color: #772CE8"></i></span>
+            <span class="casterIcon" id="twitterIcon" style="display: none;"><i class="fa-brands fa-x-twitter" style="color: #1DA1F2"></i></span>
+            <span id="caster2Display" class="casterText"></span>
+         </span>
+      </div>
+   </div>
 </div>
 
 
@@ -474,12 +261,7 @@ function connectSocket() {
          const p1Img = document.getElementById('player1Img');
          const p2Img = document.getElementById('player2Img');
 
-         //p1Img.src = p1.img || '';
-		 
-		 const p1absoluteUrl = new URL(p1.img, window.location.href).href;
-         p1Img.setAttributeNS('http://www.w3.org/1999/xlink', 'href', p1absoluteUrl || '');
-		 p1Img.setAttribute('href', p1absoluteUrl || '');
-		 
+         p1Img.src = p1.img || '';
          p1Img.style.display = p1.img ? 'inline-block' : 'none';
          p1Img.classList.remove('flag-style', 'custom-image-style');
          p1Img.classList.add(p1.img && p1.img.includes('/flags/') && p1.img.endsWith('.svg') ? 'flag-style' : 'custom-image-style');
@@ -496,12 +278,7 @@ function connectSocket() {
                .style.display = 'none';
          }
 
-         //p2Img.src = p2.img || '';
-
-		 const p2absoluteUrl = new URL(p2.img, window.location.href).href;
-         p2Img.setAttributeNS('http://www.w3.org/1999/xlink', 'href', p2absoluteUrl || '');
-		 p2Img.setAttribute('href', p2absoluteUrl || '');
-		 
+         p2Img.src = p2.img || '';
          p2Img.style.display = p2.img ? 'inline-block' : 'none';
          p2Img.classList.remove('flag-style', 'custom-image-style');
          p2Img.classList.add(p2.img && p2.img.includes('/flags/') && p2.img.endsWith('.svg') ? 'flag-style' : 'custom-image-style');
@@ -641,14 +418,9 @@ function connectSocket() {
 
          const t1ImgEl = document.getElementById('team1Img');
          const t2ImgEl = document.getElementById('team2Img');
-		 
-		 const t1absoluteUrl = new URL(t1.img, window.location.href).href;
-		 const t2absoluteUrl = new URL(t2.img, window.location.href).href;
 
-         t1ImgEl.setAttributeNS('http://www.w3.org/1999/xlink', 'href', t1absoluteUrl || '');
-		 t1ImgEl.setAttribute('href', t1absoluteUrl || '');
-         t2ImgEl.setAttributeNS('http://www.w3.org/1999/xlink', 'href', t2absoluteUrl || '');
-		 t2ImgEl.setAttribute('href', t2absoluteUrl || '');
+         t1ImgEl.src = t1.img || '';
+         t2ImgEl.src = t2.img || '';
 
          t1ImgEl.style.display = t1.img ? 'inline-block' : 'none';
          t2ImgEl.style.display = t2.img ? 'inline-block' : 'none';
