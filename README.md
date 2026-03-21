@@ -28,7 +28,7 @@ FGCaster Overlay  | Other overlay apps
 * Set a country flag or upload a custom image for any of the players or teams.
 * Player and team presets for easy and fast data entry on the go.
 * Presets for setting event stage, match type (can be set to custom values).
-* Fields for up to 2 casters/commentators with their names, Twitch, and X tags.
+* Fields for up to 2 casters/commentators with their names and social media platforms' tags.
 * Adjustable UI size to fit your specific setup and window layout.
 * Switch between overlay templates on the fly.
 * Helpful tooltips included 😉
@@ -42,7 +42,7 @@ FGCaster Overlay  | Other overlay apps
 	* 2XKO
 * Built-in templates include basic animations, which you can adjust or build upon if needed.
 * Easy to edit or create your own templates using HTML, CSS, and JS.
-	* Includes "EzColor" template for fast customization if you just want to tweak the colors.
+* Just want to tweak the colors? Easy to do by editing CSS files, no coding knowledge required.
 ### 📋 Planned Features
 * Localization support
 * Integrations with Start.gg and Challonge
