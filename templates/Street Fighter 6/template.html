@@ -312,6 +312,8 @@
 				<span class="casterIcon" id="micIcon" style="display: none;"><i class="fa-solid fa-headset"></i></span>
 				<span class="casterIcon" id="twitchIcon" style="display: none;"><i class="fa-brands fa-twitch" style="color: #772CE8"></i></span>
 				<span class="casterIcon" id="twitterIcon" style="display: none;"><i class="fa-brands fa-x-twitter" style="color: #1DA1F2"></i></span>
+				<span class="casterIcon" id="youtubeIcon" style="display: none;"><i class="fa-brands fa-youtube" style="color: #FF0000"></i></span>
+				<span class="casterIcon" id="instagramIcon" style="display: none;"><i class="fa-brands fa-instagram" style="color: #E1306C"></i></span>
 				<span id="caster2Display" class="casterText"></span>
 			</span>
 		</div>
@@ -668,18 +670,16 @@ function connectSocket() {
 
 			//////// Casters
 
-			const c1Name = (data.caster1?.name ?? "")
-				.trim();
-			const c2Name = (data.caster2?.name ?? "")
-				.trim();
-			const c1Twitch = (data.caster1?.twitch ?? "")
-				.trim();
-			const c2Twitch = (data.caster2?.twitch ?? "")
-				.trim();
-			const c1Twitter = (data.caster1?.twitter ?? "")
-				.trim();
-			const c2Twitter = (data.caster2?.twitter ?? "")
-				.trim();
+			const c1Name = (data.caster1?.name ?? "").trim();
+			const c2Name = (data.caster2?.name ?? "").trim();
+			const c1Twitch = (data.caster1?.twitch ?? "").trim();
+			const c2Twitch = (data.caster2?.twitch ?? "").trim();
+			const c1Twitter = (data.caster1?.twitter ?? "").trim();
+			const c2Twitter = (data.caster2?.twitter ?? "").trim();
+			const c1Youtube = (data.caster1?.youtube ?? "").trim();
+			const c2Youtube = (data.caster2?.youtube ?? "").trim();
+			const c1Instagram = (data.caster1?.instagram ?? "").trim();
+			const c2Instagram = (data.caster2?.instagram ?? "").trim();
 
 			// Show casters row/bg only if any of the caster's names exist
 			const hasAnyCaster = !!(c1Name || c2Name);
@@ -688,7 +688,7 @@ function connectSocket() {
 			if (castersBG) castersBG.style.display = hasAnyCaster ? 'block' : 'none';
 			if (casterContainer) casterContainer.style.display = hasAnyCaster ? 'block' : 'none';
 
-			const newDataHash = JSON.stringify([c1Name, c2Name, c1Twitch, c2Twitch, c1Twitter, c2Twitter]);
+			const newDataHash = JSON.stringify([c1Name, c2Name, c1Twitch, c2Twitch, c1Twitter, c2Twitter, c1Youtube, c2Youtube, c1Instagram, c2Instagram]);
 
 			const changed = newDataHash !== lastCasterData;
 			if (changed) lastCasterData = newDataHash;
@@ -705,18 +705,22 @@ function connectSocket() {
 				name: c1Name,
 				twitch: c1Twitch,
 				twitter: c1Twitter.trim()
-					.startsWith("@") ? c1Twitter.trim() : "@" + c1Twitter.trim()
+					.startsWith("@") ? c1Twitter.trim() : "@" + c1Twitter.trim(),
 				// if you don't want an @ tag in the beginning - replace previous line with this one:
-				//twitter: c1Twitter
+				//twitter: c1Twitter,
+				youtube: c1Youtube,
+				instagram: c1Instagram
 			};
 
 			caster2Info = {
 				name: c2Name,
 				twitch: c2Twitch,
 				twitter: c2Twitter.trim()
-					.startsWith("@") ? c2Twitter.trim() : "@" + c2Twitter.trim()
+					.startsWith("@") ? c2Twitter.trim() : "@" + c2Twitter.trim(),
 				// if you don't want an @ tag in the beginning - replace previous line with this one:
-				//twitter: c2Twitter
+				//twitter: c2Twitter,
+				youtube: c2Youtube,
+				instagram: c2Instagram
 			};
 
 			//////// Caster animation handling
@@ -726,6 +730,9 @@ function connectSocket() {
 				if (c1Name || c2Name) displayPhases.push("name");
 				if (c1Twitch || c2Twitch) displayPhases.push("twitch");
 				if (c1Twitter || c2Twitter) displayPhases.push("twitter");
+				if (c1Youtube || c2Youtube) displayPhases.push("youtube");
+				if (c1Instagram || c2Instagram) displayPhases.push("instagram");
+
 
 				clearTimeout(casterCycleTimeout);
 
@@ -1063,8 +1070,10 @@ let lastCasterData = ""; // To track data changes
 // How long each caster's value will stay on screen (in ms)
 const displayDurations = {
 	name: 20000,
-	twitch: 6000,
-	twitter: 6000
+    twitch: 6000,
+    twitter: 6000,
+    youtube: 6000,
+    instagram: 6000
 };
 
 function updateCasterDisplayCycle() {
@@ -1118,21 +1127,25 @@ function updateCasterDisplayCycle() {
 }
 
 function renderCasterPhase(phase) {
-	const wrapper = document.getElementById("casterCycleWrapper");
-	const c1Display = document.getElementById("caster1Display");
-	const c2Display = document.getElementById("caster2Display");
-	const micIcon = document.getElementById("micIcon");
-	const twitchIcon = document.getElementById("twitchIcon");
-	const twitterIcon = document.getElementById("twitterIcon");
+    const wrapper = document.getElementById("casterCycleWrapper");
+    const c1Display = document.getElementById("caster1Display");
+    const c2Display = document.getElementById("caster2Display");
+    const micIcon = document.getElementById("micIcon");
+    const twitchIcon = document.getElementById("twitchIcon");
+    const twitterIcon = document.getElementById("twitterIcon");
+    const youtubeIcon = document.getElementById("youtubeIcon");
+    const instagramIcon = document.getElementById("instagramIcon");
 
-	c1Display.textContent = caster1Info[phase] || "";
-	c2Display.textContent = caster2Info[phase] || "";
+    c1Display.textContent = caster1Info[phase] || "";
+    c2Display.textContent = caster2Info[phase] || "";
 
-	micIcon.style.display = phase === "name" ? "inline-block" : "none";
-	twitchIcon.style.display = phase === "twitch" ? "inline-block" : "none";
-	twitterIcon.style.display = phase === "twitter" ? "inline-block" : "none";
+    micIcon.style.display       = phase === "name"      ? "inline-block" : "none";
+    twitchIcon.style.display    = phase === "twitch"    ? "inline-block" : "none";
+    twitterIcon.style.display   = phase === "twitter"   ? "inline-block" : "none";
+    youtubeIcon.style.display   = phase === "youtube"   ? "inline-block" : "none";
+    instagramIcon.style.display = phase === "instagram" ? "inline-block" : "none";
 
-	wrapper.classList.remove("fade-hidden"); // show it
+    wrapper.classList.remove("fade-hidden");
 }
 
 function startCasterCycle() {

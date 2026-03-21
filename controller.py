@@ -949,9 +949,9 @@ def _diff_payload(prev: dict, curr: dict) -> str:
 
     # Casters (if present)
     lines.append(_diff_section("Caster 1", prev.get("caster1", {}), curr.get("caster1", {}),
-                               [("name", "Name"), ("twitch", "Twitch"), ("twitter", "Twitter")]))
+                               [("name", "Name"), ("twitch", "Twitch"), ("twitter", "Twitter"), ("youtube", "YouTube"), ("instagram", "Instagram")]))
     lines.append(_diff_section("Caster 2", prev.get("caster2", {}), curr.get("caster2", {}),
-                               [("name", "Name"), ("twitch", "Twitch"), ("twitter", "Twitter")]))
+                               [("name", "Name"), ("twitch", "Twitch"), ("twitter", "Twitter"), ("youtube", "YouTube"), ("instagram", "Instagram")]))
 
     # UI scale and active template
     us = _diff_scalar("UI scale", prev.get("ui_scale"), curr.get("ui_scale"))
@@ -1395,12 +1395,16 @@ def reset_all():
         "caster1": {
             "name": "",
             "twitch": "",
-            "twitter": ""
+            "twitter": "",
+            "youtube": "",
+            "instagram": ""
         },
         "caster2": {
             "name": "",
             "twitch": "",
-            "twitter": ""
+            "twitter": "",
+            "youtube": "",
+            "instagram": ""
         }
     }
 

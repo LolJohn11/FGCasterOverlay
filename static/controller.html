@@ -293,36 +293,16 @@
                 </div>
                 <div class="box mr-3" style="margin-right: 0px !important; margin-left: 4px;">
                     <div class="extra-button-wrapper extra-fields">
-                        <div class="row" style="margin-left: 0px;margin-right: 0px;">
-                            <div class="btn-row" style="padding-left: 0px;">
-                                <button id="toggleTopText" type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Top Text" onclick="toggleExtraField('topTextWrapper')">T</button>
-                                <button id="toggleCaster1" type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Caster 1" onclick="toggleExtraField('inputCaster1')">C1<div class="square squareTwitch"></div>
-                                    <div class="square squareTwitter"></div>
-                                </button>
-                                <button id="toggleCaster2" type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Caster 2" onclick="toggleExtraField('inputCaster2')">C2<div class="square squareTwitch"></div>
-                                    <div class="square squareTwitter"></div>
-                                </button>
-                            </div>
-                            <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="Settings" style="padding: 0px; margin-left: 12px;">
-                                <button class="btn btn-outline-secondary" style="padding: 6px 12px; height: 31px;" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvas" aria-controls="offcanvas"><i class="fa-solid fa-gear"></i></button>
+                        <div class="row" style="margin-left: 0px;margin-right: 0px;justify-content: space-between;">
+                            <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="Casters" style="padding: 0px;">
+								<button id="toggleCasters" class="btn btn-sm btn-outline-secondary" style="padding: 6px; height: 31px;" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCasters" aria-controls="offcanvas"><i class="fa-solid fa-headset"></i></button>
+							</span>
+							<span data-bs-toggle="tooltip" data-bs-placement="bottom" title="Settings" style="padding: 0px; margin-left: 12px;">
+                                <button class="btn btn-outline-secondary" style="padding: 6px 12px; height: 31px; border-radius: 0.25rem;" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvas" aria-controls="offcanvas"><i class="fa-solid fa-gear"></i></button>
                             </span>
                         </div>
-                        <div id="topTextWrapper" class="form-inline sb-2 extraField" style="display: none;">
-                            <input id="topText" name="topText" style="width: 150px;" placeholder="Stream name, etc..." class="form-control mb-1" oninput="updateTopTextButtonColor()" value="" />
-                        </div>
-                        <div id="inputCaster1" class="form-inline sb-2 extraField" style="display: none;">
-                            <button id="caster1TwitchToggle" type="button" class="btn btn-sm btn-outline-secondary casterToggles" data-bs-toggle="tooltip" data-bs-placement="top" title="Twitch" onclick="toggleTagFields('1', 'Twitch')"><i class="fa-brands fa-twitch fa-sm" style="color:#f1f1f1; margin-top: 2px"></i></button>
-                            <button id="caster1TwitterToggle" type="button" class="btn btn-sm btn-outline-secondary casterToggles" data-bs-toggle="tooltip" data-bs-placement="top" title="X" onclick="toggleTagFields('1', 'Twitter')"><i class="fa-brands fa-x-twitter fa-sm" style="color:#f1f1f1; margin-top: 2px"></i></button>
-                            <input id="caster1Name" name="caster1_name" placeholder="C1 Name" class="form-control mb-1 casterInput" oninput="updateTagIconColors(1)" value="" />
-                            <input id="caster1Twitch" name="caster1_twitch" style="display: none;" placeholder="C1 Twitch Tag" class="form-control mb-1 casterInput" oninput="updateTagIconColors(1)" value="" />
-                            <input id="caster1Twitter" name="caster1_twitter" style="display: none;" placeholder="C1 X Tag" class="form-control mb-1 casterInput" oninput="updateTagIconColors(1)" value="" />
-                        </div>
-                        <div id="inputCaster2" class="form-inline sb-2 extraField" style="display: none;">
-                            <button id="caster2TwitchToggle" type="button" class="btn btn-sm btn-outline-secondary casterToggles" data-bs-toggle="tooltip" data-bs-placement="top" title="Twitch" onclick="toggleTagFields('2', 'Twitch')"><i class="fa-brands fa-twitch fa-sm" style="color:#f1f1f1; margin-top: 2px"></i></button>
-                            <button id="caster2TwitterToggle" type="button" class="btn btn-sm btn-outline-secondary casterToggles" data-bs-toggle="tooltip" data-bs-placement="top" title="X" onclick="toggleTagFields('2', 'Twitter')"><i class="fa-brands fa-x-twitter fa-sm" style="color:#f1f1f1; margin-top: 2px"></i></button>
-                            <input id="caster2Name" name="caster2_name" placeholder="C2 Name" class="form-control mb-1 casterInput" oninput="updateTagIconColors(2)" value="" />
-                            <input id="caster2Twitch" name="caster2_twitch" style="display: none;" placeholder="C2 Twitch Tag" class="form-control mb-1 casterInput" oninput="updateTagIconColors(2)" value="" />
-                            <input id="caster2Twitter" name="caster2_twitter" style="display: none;" placeholder="C2 X Tag" class="form-control mb-1 casterInput" oninput="updateTagIconColors(2)" value="" />
+                        <div id="topTextWrapper" class="form-inline sb-2">
+                            <input id="topText" name="topText" style="width: 132px;" placeholder="Top Text" class="form-control mb-1" value="" />
                         </div>
                     </div>
                 </div>
@@ -379,7 +359,47 @@
             </div>
         </form>
     </div>
-    <div class="offcanvas offcanvas-end" id="offcanvas">
+	<!-- Casters Offcanvas -->
+    <div class="offcanvas offcanvas-end" id="offcanvasCasters">
+		<div class="offcanvas-body ui-scaled">
+			<div class="caster-block">
+				<!-- Caster 1 -->
+				<div class="row" style="margin-bottom: 1px;">
+					<input id="caster1Name" name="caster1_name" placeholder="Caster 1 Name" class="form-control mb-1 caster-name-input" oninput="updateTagIconColors(1)" value=""/>
+					<div class="input-group caster-platform-row" style="margin-left:6px;height:31px;">
+						<button id="caster1TwitchToggle" type="button" class="btn btn-sm btn-outline-secondary casterToggles" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Twitch" onclick="toggleTagFields('1', 'Twitch')"><i class="fa-brands fa-twitch"></i></button>
+						<button id="caster1TwitterToggle" type="button" class="btn btn-sm btn-outline-secondary casterToggles" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Twitter" onclick="toggleTagFields('1', 'Twitter')"><i class="fa-brands fa-x-twitter"></i></button>
+						<button id="caster1YoutubeToggle" type="button" class="btn btn-sm btn-outline-secondary casterToggles" data-bs-toggle="tooltip" data-bs-placement="bottom" title="YouTube" onclick="toggleTagFields('1', 'Youtube')"><i class="fa-brands fa-youtube"></i></button>
+						<button id="caster1InstagramToggle" type="button" class="btn btn-sm btn-outline-secondary casterToggles" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Instagram" onclick="toggleTagFields('1', 'Instagram')"><i class="fa-brands fa-instagram"></i></button>
+
+						<input id="caster1Twitch" name="caster1_twitch" style="display: none;" placeholder="Caster 1 Twitch" class="form-control mb-1 caster-tag-input" oninput="updateTagIconColors(1)" value="" />
+						<input id="caster1Twitter" name="caster1_twitter" style="display: none;" placeholder="Caster 1 X / Twitter" class="form-control mb-1 caster-tag-input" oninput="updateTagIconColors(1)" value="" />
+						<input id="caster1Youtube" name="caster1_youtube" style="display: none;" placeholder="Caster 1 YouTube" class="form-control mb-1 caster-tag-input" oninput="updateTagIconColors(1)" value="" />
+						<input id="caster1Instagram" name="caster1_instagram" style="display: none;" placeholder="Caster 1 Instagram" class="form-control mb-1 caster-tag-input" oninput="updateTagIconColors(1)" value="" />
+					</div>
+				</div>
+				
+				<!-- Caster 2 -->
+				<div class="row">
+					<input id="caster2Name" name="caster2_name" placeholder="Caster 2 Name" class="form-control mb-1 caster-name-input" oninput="updateTagIconColors(2)" value=""/>
+					<div class="input-group mb-3 caster-platform-row" style="margin-left:6px;height:31px;">
+						<button id="caster2TwitchToggle" type="button" class="btn btn-sm btn-outline-secondary casterToggles" data-bs-toggle="tooltip" data-bs-placement="top" title="Twitch" onclick="toggleTagFields('2', 'Twitch')"><i class="fa-brands fa-twitch"></i></button>
+						<button id="caster2TwitterToggle" type="button" class="btn btn-sm btn-outline-secondary casterToggles" data-bs-toggle="tooltip" data-bs-placement="top" title="Twitter" onclick="toggleTagFields('2', 'Twitter')"><i class="fa-brands fa-x-twitter"></i></button>
+						<button id="caster2YoutubeToggle" type="button" class="btn btn-sm btn-outline-secondary casterToggles" data-bs-toggle="tooltip" data-bs-placement="top" title="YouTube" onclick="toggleTagFields('2', 'Youtube')"><i class="fa-brands fa-youtube"></i></button>
+						<button id="caster2InstagramToggle" type="button" class="btn btn-sm btn-outline-secondary casterToggles" data-bs-toggle="tooltip" data-bs-placement="top" title="Instagram" onclick="toggleTagFields('2', 'Instagram')"><i class="fa-brands fa-instagram"></i></button>
+
+						<input id="caster2Twitch" name="caster2_twitch" style="display: none;" placeholder="Caster 2 Twitch" class="form-control mb-1 caster-tag-input" oninput="updateTagIconColors(2)" value="" />
+						<input id="caster2Twitter" name="caster2_twitter" style="display: none;" placeholder="Caster 2 X / Twitter" class="form-control mb-1 caster-tag-input" oninput="updateTagIconColors(2)" value="" />
+						<input id="caster2Youtube" name="caster2_youtube" style="display: none;" placeholder="Caster 2 YouTube" class="form-control mb-1 caster-tag-input" oninput="updateTagIconColors(2)" value="" />
+						<input id="caster2Instagram" name="caster2_instagram" style="display: none;" placeholder="Caster 2 Instagram" class="form-control mb-1 caster-tag-input" oninput="updateTagIconColors(2)" value="" />
+					</div>
+				</div>
+			</div>
+			<button type="button" class="btn-close btn-close-white" style="margin-left: 10px;margin-right: 16px;" data-bs-dismiss="offcanvas"></button>
+		</div>
+	</div>
+	<!-- Settings Offcanvas -->
+	<div class="offcanvas offcanvas-end" id="offcanvas">
         <div class="offcanvas-body ui-scaled">
             <div class="form-floating" style="margin-left: 10px;">
                 <select id="uiZoomSelect" class="form-select form-select-sm" aria-label="UI Scale">
@@ -2800,82 +2820,8 @@ function updateTeamToggleColors() {
 
 ////////////////////////////////////////////////////			
 
-function toggleExtraField(value) {
-    const input = document.getElementById(value);
-    const otherInputs = document.querySelectorAll(`.extraField:not(#${value})`);
-
-    // Determine what the target will become
-    const willShow = (input.style.display === "none" || input.style.display === "");
-
-    // Hide others
-    otherInputs.forEach(el => {
-        el.style.display = "none";
-    });
-
-    // Deactivate all toggle buttons first
-    document.querySelectorAll('#toggleTopText, #toggleCaster1, #toggleCaster2').forEach(btn => {
-        btn.classList.remove('active');
-        btn.setAttribute('aria-pressed', 'false');
-    });
-
-    // Toggle the target
-    if (willShow) {
-        input.style.display = "inline-flex";
-        // Map input -> toggle button id
-        const map = {
-            topTextWrapper: 'toggleTopText',
-            inputCaster1: 'toggleCaster1',
-            inputCaster2: 'toggleCaster2'
-        };
-        const btn = document.getElementById(map[value]);
-        if (btn) {
-            btn.classList.add('active');
-            btn.setAttribute('aria-pressed', 'true');
-        }
-    } else {
-        input.style.display = "none";
-        // none active
-    }
-}
-
-function syncExtraToggleStates() {
-    const pairs = [{
-            input: 'topTextWrapper',
-            btn: 'toggleTopText'
-        },
-        {
-            input: 'inputCaster1',
-            btn: 'toggleCaster1'
-        },
-        {
-            input: 'inputCaster2',
-            btn: 'toggleCaster2'
-        }
-    ];
-    // clear all
-    document.querySelectorAll('#toggleTopText, #toggleCaster1, #toggleCaster2').forEach(btn => {
-        btn.classList.remove('active');
-        btn.setAttribute('aria-pressed', 'false');
-    });
-    // set active for any visible block
-    pairs.forEach(({
-        input,
-        btn
-    }) => {
-        const el = document.getElementById(input);
-        const b = document.getElementById(btn);
-        if (!el || !b) return;
-        const shown = getComputedStyle(el).display !== 'none';
-        if (shown) {
-            b.classList.add('active');
-            b.setAttribute('aria-pressed', 'true');
-        }
-    });
-}
-
 function toggleTagFields(casterNum, tagType) {
-    const platforms = ["Twitch", "Twitter"];
-    const nameField = document.getElementById(`caster${casterNum}Name`);
+    const platforms = ["Twitch", "Twitter", "Youtube", "Instagram"];
 
     platforms.forEach(platform => {
         const btn = document.getElementById(`caster${casterNum}${platform}Toggle`);
@@ -2884,19 +2830,14 @@ function toggleTagFields(casterNum, tagType) {
         if (platform === tagType) {
             const isActive = btn.classList.contains("active");
 
-            // If button was active, deactivate and show name field
             if (isActive) {
                 btn.classList.remove("active");
                 input.style.display = "none";
-                nameField.style.display = "inline-flex";
             } else {
-                // Activate this button and deactivate the other
                 btn.classList.add("active");
                 input.style.display = "inline-flex";
-                nameField.style.display = "none";
             }
         } else {
-            // Always deactivate the other button/input
             btn.classList.remove("active");
             input.style.display = "none";
         }
@@ -2906,51 +2847,34 @@ function toggleTagFields(casterNum, tagType) {
 function updateTagIconColors(casterNum) {
     const platforms = {
         Twitch: "#772CE8",
-        Twitter: "#1DA1F2"
+        Twitter: "#1DA1F2",
+        Youtube: "#FF0000",
+        Instagram: "#E1306C"
     };
 
     for (const [platform, color] of Object.entries(platforms)) {
         const input = document.getElementById(`caster${casterNum}${platform}`);
         const icon = document.querySelector(`#caster${casterNum}${platform}Toggle i`);
-        const casterToggle = document.getElementById(`toggleCaster${casterNum}`);
-        const indicator = document.querySelector(`#toggleCaster${casterNum} .square${platform}`)
 
         if (input && icon) {
-            if (input.value.trim() !== "") {
-                icon.style.color = color;
-                indicator.style.display = "block";
-            } else {
-                icon.style.color = "#f1f1f1"; // Default color
-                indicator.style.display = "none";
-            }
+            icon.style.color = input.value.trim() !== "" ? color : "#f1f1f1";
         }
     }
 
-    const nameInput = document.getElementById(`caster${casterNum}Name`);
-    const casterToggle = document.getElementById(`toggleCaster${casterNum}`);
-
-    if (nameInput && casterToggle) {
-        if (nameInput.value.trim() !== "") {
-            casterToggle.style.color = "#0ead00";
-        } else {
-            casterToggle.style.color = "#f1f1f1";
-        }
-    }
+    updateCastersButtonColor();
 }
 
-function updateTopTextButtonColor() {
-
-    const textInput = document.getElementById("topText");
-    const topTextBtn = document.getElementById("toggleTopText");
-
-    if (textInput && topTextBtn) {
-        if (textInput.value.trim() !== "") {
-            topTextBtn.style.color = "#0ead00";
-        } else {
-            topTextBtn.style.color = "#f1f1f1";
-        }
-    }
-
+function updateCastersButtonColor() {
+    const btn = document.getElementById("toggleCasters");
+    if (!btn) return;
+    const fields = ["name", "twitch", "twitter", "youtube", "instagram"];
+    const hasAny = ["caster1", "caster2"].some(c =>
+        fields.some(f => {
+            const el = document.querySelector(`[name="${c}_${f}"]`);
+            return el && el.value.trim() !== "";
+        })
+    );
+    btn.style.color = hasAny ? "#0ead00" : "#f1f1f1";
 }
 
 ////////////////////////////////////////////////////
@@ -3796,7 +3720,7 @@ function bindTemplateSelect() {
 
 document.addEventListener('DOMContentLoaded', async () => {
   try {
-    const data = await fetch('/static/data.json?' + Date.now()).then(r => r.json());
+    const data = await fetch('data.json?' + Date.now()).then(r => r.json());
     const cb = document.getElementById('charOverride');
     if (cb) cb.checked = !!data.char_override;
   } catch (e) {}
@@ -4050,11 +3974,20 @@ function getFormData() {
             twitch: json.caster1_twitch,
             twitter: json.caster1_twitter
         },
-        caster2: {
-            name: json.caster2_name,
-            twitch: json.caster2_twitch,
-            twitter: json.caster2_twitter
-        },
+        caster1: {
+			name: getStr('[name="caster1_name"]'),
+			twitch: getStr('[name="caster1_twitch"]'),
+			twitter: getStr('[name="caster1_twitter"]'),
+			youtube: getStr('[name="caster1_youtube"]'),
+			instagram: getStr('[name="caster1_instagram"]'),
+		},
+		caster2: {
+			name: getStr('[name="caster2_name"]'),
+			twitch: getStr('[name="caster2_twitch"]'),
+			twitter: getStr('[name="caster2_twitter"]'),
+			youtube: getStr('[name="caster2_youtube"]'),
+			instagram: getStr('[name="caster2_instagram"]'),
+		},
         toptext: json.topText,
     };
 }
@@ -4105,11 +4038,15 @@ async function loadDataAndHydrate() {
         document.querySelector('[name="topText"]').value = data.toptext ?? '';
 
         document.querySelector('[name="caster1_name"]').value = data.caster1?.name ?? '';
-        document.querySelector('[name="caster1_twitch"]').value = data.caster1?.twitch ?? '';
-        document.querySelector('[name="caster1_twitter"]').value = data.caster1?.twitter ?? '';
-        document.querySelector('[name="caster2_name"]').value = data.caster2?.name ?? '';
-        document.querySelector('[name="caster2_twitch"]').value = data.caster2?.twitch ?? '';
-        document.querySelector('[name="caster2_twitter"]').value = data.caster2?.twitter ?? '';
+		document.querySelector('[name="caster1_twitch"]').value = data.caster1?.twitch ?? '';
+		document.querySelector('[name="caster1_twitter"]').value = data.caster1?.twitter ?? '';
+		document.querySelector('[name="caster1_youtube"]').value = data.caster1?.youtube ?? '';
+		document.querySelector('[name="caster1_instagram"]').value = data.caster1?.instagram ?? '';
+		document.querySelector('[name="caster2_name"]').value = data.caster2?.name ?? '';
+		document.querySelector('[name="caster2_twitch"]').value = data.caster2?.twitch ?? '';
+		document.querySelector('[name="caster2_twitter"]').value = data.caster2?.twitter ?? '';
+		document.querySelector('[name="caster2_youtube"]').value = data.caster2?.youtube ?? '';
+		document.querySelector('[name="caster2_instagram"]').value = data.caster2?.instagram ?? '';
 
         document.querySelector('[name="team1Img"]').value = data.team1?.img ?? '';
         document.querySelector('[name="team1_name"]').value = data.team1?.name ?? '';
@@ -4133,13 +4070,12 @@ async function loadDataAndHydrate() {
         restoreImageButtonStateFor?.(2);
         restoreTeamImageButtonState?.(1);
         restoreTeamImageButtonState?.(2);
-        updateTopTextButtonColor();
         updateTagIconColors(1);
         updateTagIconColors(2);
+		updateCastersButtonColor();
         updateTeamToggleColors();
 		updateCharacterButtonColor(1);
 		updateCharacterButtonColor(2);
-        syncExtraToggleStates();
 		updatePlayerIdToggleColor(1);
 		updatePlayerIdToggleColor(2);
 		loadCharacterListForActiveGame(window.__savedData?.active_template);
@@ -4946,25 +4882,20 @@ function resetAll() {
 
         // 3) Top text block
         uiOnly_Set(document.getElementById('topText'), '');
-        updateTopTextButtonColor();
-
-        // Hide all extra fields (Top text, C1, C2), and sync toggle states
-        document.querySelectorAll('.extraField').forEach(el => {
-            el.style.display = 'none';
-        });
-        syncExtraToggleStates();
 
         // 4) Casters
-        uiOnly_Set(document.getElementById('caster1Name'), '');
-        uiOnly_Set(document.getElementById('caster1Twitch'), '');
-        uiOnly_Set(document.getElementById('caster1Twitter'), '');
-        uiOnly_Set(document.getElementById('caster2Name'), '');
-        uiOnly_Set(document.getElementById('caster2Twitch'), '');
-        uiOnly_Set(document.getElementById('caster2Twitter'), '');
-        // turn off caster platform toggles’ active styles
-        document.querySelectorAll('.casterToggles').forEach(b => b.classList.remove('active'));
-        updateTagIconColors(1);
-        updateTagIconColors(2);
+		['caster1', 'caster2'].forEach(c => {
+			['name', 'twitch', 'twitter', 'youtube', 'instagram'].forEach(field => {
+				const el = document.querySelector(`[name="${c}_${field}"]`);
+				if (el) uiOnly_Set(el, '');
+			});
+		});
+		// restore name fields, hide all tag inputs, deactivate platform toggles
+		document.querySelectorAll('.caster-tag-input').forEach(el => el.style.display = 'none');
+		document.querySelectorAll('.casterToggles').forEach(b => b.classList.remove('active'));
+		updateTagIconColors(1);
+		updateTagIconColors(2);
+		updateCastersButtonColor();
 
         // 5) Stage & Match Type
         resetStageValues();
@@ -4987,6 +4918,16 @@ function resetAll() {
 }
 
 document.querySelectorAll("#scoreForm input").forEach((input) => {
+    input.addEventListener("blur", emitUpdate);
+    input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            input.blur();
+        }
+    });
+});
+
+document.querySelectorAll(".caster-name-input, .caster-tag-input").forEach((input) => {
     input.addEventListener("blur", emitUpdate);
     input.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {

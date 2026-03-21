@@ -1,6 +1,4 @@
 {
-  "ui_scale": 1,
-  "char_override": false,
   "player1": {
     "name": "",
     "id": "",
@@ -35,17 +33,23 @@
   },
   "stage": "",
   "match_type": "",
+  "toptext": "",
   "caster1": {
     "name": "",
     "twitch": "",
-    "twitter": ""
+    "twitter": "",
+    "youtube": "",
+    "instagram": ""
   },
   "caster2": {
     "name": "",
     "twitch": "",
-    "twitter": ""
+    "twitter": "",
+    "youtube": "",
+    "instagram": ""
   },
-  "toptext": "",
+  "ui_scale": 1,
+  "char_override": false,
   "port": 8008,
   "active_template": "default"
 }
