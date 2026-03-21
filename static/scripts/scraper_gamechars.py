@@ -49,11 +49,14 @@ def extract_characters_from_game_page(html: str) -> List[str]:
     if not list_td:
         raise RuntimeError("Found 'Characters:' label but no sibling TD with the list.")
 
-    names = []
-    for a in list_td.find_all("a", href=True):
-        raw = a.get_text(" ", strip=True)
-        if raw:
-            names.append(" ".join(raw.split()))  # collapse newlines/extra spaces
+    # Walk all child nodes (text nodes and <a> links alike) to reconstruct
+    # the full character string, then split by commas. This handles three formats:
+    # 1. All names are <a> links  (most pages)
+    # 2. All names are plain comma-delimited text  (e.g. 2xko)
+    # 3. A mix of plain text and <a> links  (e.g. inv)
+    full_text = list_td.get_text(" ", strip=True)
+    candidates = [c.strip() for c in full_text.split(",")]
+    names = [" ".join(c.split()) for c in candidates if c.strip()]
 
     return sorted(set(names), key=lambda s: s.lower())
 
@@ -142,10 +145,14 @@ def main():
         try:
             html = fetch_html_fast(game_url)
         except Exception:
-            #html = get_html_playwright(game_url)
-            error("Cannot fetch HTML with the fast method.")
+            warn(f"No page found for '{slug}' at {game_url} — skipping character list update.")
+            return
 
-    characters = extract_characters_from_game_page(html)
+    try:
+        characters = extract_characters_from_game_page(html)
+    except RuntimeError as e:
+        warn(f"Could not extract characters for '{slug}': {e} — skipping character list update.")
+        return
 
     # write output
     out_dir = Path(args.output_dir)
