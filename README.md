@@ -60,22 +60,4 @@ Submit your thoughts in the ["Issues"](https://github.com/LolJohn11/FGCasterOver
 |:-------------:|:-------------:|
 | ![Screenshot - GGST](static/img/example_GGST.png) | ![Screenshot - 2XKO](static/img/example_2XKO.png) |
 
-## ⚙️ How to use
-1. Download the `.zip` file of the [latest release](https://github.com/LolJohn11/FGCasterOverlay/releases/latest) version and extract the contents into any folder of your choosing.
-2. Launch the `FGCaster-Overlay.exe`.
-3. In your streaming software, add the controller UI as a custom browser dock. In OBS, you can do it by going to `Docks -> Custom Browser Docks` menu and adding a new dock with the URL `http://localhost:8008/`.
-![OBS Custom Dock Example](static/img/OBS_custom_dock.jpg)
-4. Add the overlay as a browser source to your scene. Set the URL to `http://localhost:8008/scoreboard` and match the size of the source to the size of the template (1920x1080 by default).
-5. (Optional) If you ever need to change the port that this app will use from the default `8008` port, you can do that by changing the `port` value inside the `data.json`, found in the app's root folder.
-
-## 🗃️ How to make new templates
-Simply copy an existing template folder and rename it as desired to get started. All templates live in the `templates` folder and have the same file and folder structure inside. The file and folder names in your template folder must follow this schema:
-```
-📁template_name
-├── 📁fonts
-├── 📁img
-├── 📄template.html
-└── 📄template.css
-```
-The files in the `img` and `fonts` folders can be named however you like (just don't forget to change the references to said files in the `template.html` and `template.css`.
-Once you have your new template files and folders set up and ready, you can modify the template using HTML, CSS, and JavaScript to achieve the desired look and functionality.
+## 📖 Check out the [Wiki](https://github.com/LolJohn11/FGCasterOverlay/wiki) for more information and tutorials!
