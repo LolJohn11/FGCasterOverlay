@@ -12,7 +12,7 @@ Here is how it compares to the other fighting game-focused overlay apps out ther
 
 FGCaster Overlay  | Other overlay apps
 ------------- | -------------
-✔️ Covers all common FGC tournament use cases | ❌ Lack important functionality
+✔️ Covers all common FGC tournament use cases | ❌ Limited functionality
 ✔️ Easily customizable overlay templates | ❌ Difficult and\or limited customization options
 ✔️ Compact & embeddable controller UI | ❌ Sub-optimal UI
 ✔️ Only OBS required | ❌ Rely on additional software for backend
