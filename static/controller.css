@@ -443,215 +443,219 @@ input::placeholder,
 /* Remove default number input spinners */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
-   -webkit-appearance: none;
-   margin: 0;
+	-webkit-appearance: none;
+	margin: 0;
 }
 
 input[type="number"] {
-   -moz-appearance: textfield;
+	-moz-appearance: textfield;
 }
 
 input.form-control {
-   max-height: 31px;
-   padding: .375rem .5rem .375rem .5rem;
-   font-size: 14px;
+	max-height: 31px;
+	padding: .375rem .5rem .375rem .5rem;
+	font-size: 14px;
 }
 
 input[type="text"],
 input[type="number"],
 input::placeholder {
-   font-size: 14px;
+	font-size: 14px;
 }
 
 #customMatchTypeInput {
-   width: 92px;
-   height: 40px;
-   margin-top: 5px;
+	width: 92px;
+	height: 40px;
+	margin-top: 5px;
+}
+
+#matchWinsGroup {
+	column-gap: 4px;
 }
 
 .mainstage-button-wrapper,
 .extra-button-wrapper {
-   display: flex;
-   flex-direction: column;
-   gap: 5px;
-   width: max-content;
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	width: max-content;
 }
 
 .mainstage-button-wrapper .btn-row,
 .extra-button-wrapper .btn-row {
-   display: flex;
-   border: 1px solid #777;
-   border-radius: 0.25rem;
-   overflow: hidden;
-   width: max-content;
+	display: flex;
+	border: 1px solid #777;
+	border-radius: 0.25rem;
+	overflow: hidden;
+	width: max-content;
 }
 
 .mainstage-button-wrapper .btn-row .btn {
-   width: 33px;
-   border-radius: 0;
-   border: 0px solid #777;
+	width: 33px;
+	border-radius: 0;
+	border: 0px solid #777;
 }
 
 .extra-button-wrapper .btn-row .btn {
-   width: 32px;
-   border-radius: 0;
-   border: 0px solid #777;
+	width: 32px;
+	border-radius: 0;
+	border: 0px solid #777;
 }
 
 .mainstage-button-wrapper .btn-row .btn:nth-child(2),
 .extra-button-wrapper .btn-row .btn:nth-child(2) {
-   border-left: 1px solid #777 !important;
-   border-right: 1px solid #777 !important;
+	border-left: 1px solid #777 !important;
+	border-right: 1px solid #777 !important;
 }
 
 .mainstage-button-wrapper .btn-row .btn:last-child,
 .extra-button-wrapper .btn-row .btn:last-child {
-   border-right: none;
+	border-right: none;
 }
 
 .substage-button-wrapper .btn-row .btn:last-child,
 .substage-button-wrapper .btn-row .btn:first-child,
 .mainstage-button-wrapper .btn-row .btn:last-child,
 .mainstage-button-wrapper .btn-row .btn:first-child {
-   width: 31px !important;
-   padding-left: 0px;
-   padding-right: 0px;
+	width: 31px !important;
+	padding-left: 0px;
+	padding-right: 0px;
 }
 
 .extra-button-wrapper .btn-row .btn:last-child,
 .extra-button-wrapper .btn-row .btn:first-child {
-   width: 29px !important;
-   padding-left: 0px;
-   padding-right: 0px;
+	width: 29px !important;
+	padding-left: 0px;
+	padding-right: 0px;
 }
 
 .substage-button-wrapper {
-   display: flex;
-   flex-direction: column;
-   gap: 5px;
-   width: max-content;
-   align-items: center;
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	width: max-content;
+	align-items: center;
 }
 
 .substage-button-wrapper .btn-row {
-   display: flex;
-   border: 1px solid #777;
-   border-radius: 0.25rem;
-   overflow: hidden;
-   width: max-content;
+	display: flex;
+	border: 1px solid #777;
+	border-radius: 0.25rem;
+	overflow: hidden;
+	width: max-content;
 }
 
 .substage-button-wrapper .btn-row .btn {
-   width: 33px;
-   border-radius: 0;
-   border: 0px solid #777;
+	width: 33px;
+	border-radius: 0;
+	border: 0px solid #777;
 }
 
 .substage-button-wrapper .btn-row .btn:nth-child(2) {
-   border-left: 1px solid #777 !important;
-   border-right: 1px solid #777 !important;
+	border-left: 1px solid #777 !important;
+	border-right: 1px solid #777 !important;
 }
 
 .substage-button-wrapper .btn-row .btn:last-child {
-   border-right: none !important;
+	border-right: none !important;
 }
 
 #customStageInput {
-   width: 134px;
-   margin-top: 18px;
-   display: none;
+	width: 134px;
+	margin-top: 18px;
+	display: none;
 }
 
 .round-control {
-   display: flex;
-   flex-direction: column;
-   align-items: stretch;
-   width: 33px;
-   border: 1px solid #777;
-   border-radius: 0.25rem;
-   padding: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	width: 33px;
+	border: 1px solid #777;
+	border-radius: 0.25rem;
+	padding: 0;
 }
 
 .round-control button {
-   flex: 0 0 17px;
-   height: 5px;
-   padding: 2px 0;
-   width: 100%;
-   border: none;
-   border-radius: 0;
-   font-size: 12px;
+	flex: 0 0 17px;
+	height: 5px;
+	padding: 2px 0;
+	width: 100%;
+	border: none;
+	border-radius: 0;
+	font-size: 12px;
 }
 
 .round-control input[type="number"] {
-   flex: 1 1 auto;
-   text-align: center;
-   border-left: none;
-   border-right: none;
-   border-radius: 0;
-   padding: 2px 0;
-   height: 50px;
-   width: 100%;
-   font-size: 13px;
-   -moz-appearance: textfield;
+	flex: 1 1 auto;
+	text-align: center;
+	border-left: none;
+	border-right: none;
+	border-radius: 0;
+	padding: 2px 0;
+	height: 50px;
+	width: 100%;
+	font-size: 13px;
+	-moz-appearance: textfield;
 }
 
 .round-control input[type="number"]::-webkit-inner-spin-button,
 .round-control input[type="number"]::-webkit-outer-spin-button {
-   -webkit-appearance: none;
-   margin: 0;
+	-webkit-appearance: none;
+	margin: 0;
 }
 
 .inputPlayer {
-   border-radius: 0px !important;
-   border-left: none !important;
-   border-right: none !important;
-   width: 88px;
+	border-radius: 0px !important;
+	border-left: none !important;
+	border-right: none !important;
+	width: 88px;
 }
 
 .inputTeam {
-   border-radius: 0px !important;
-   border-right: none !important;
-   width: 52px;
+	border-radius: 0px !important;
+	border-right: none !important;
+	width: 52px;
 }
 
 .team-popover {
-   height: 31px;
-   width: 29.5px;
-   padding: 0 2px;
-   border-color: #777;
-   border-radius: .25rem;
+	height: 31px;
+	width: 29.5px;
+	padding: 0 2px;
+	border-color: #777;
+	border-radius: .25rem;
 }
 
 .team-popover:hover {
-   background-color: #444;
-   border-color: #777;
-   color: #fff;
+	background-color: #444;
+	border-color: #777;
+	color: #fff;
 }
 
 .teamRow input[type="text"] {
-   border-radius: 0px;
-   border-right: none;
+	border-radius: 0px;
+	border-right: none;
 }
 
 .teamScore {
-   width: 39px;
-   height: 31px;
-   text-align: center;
+	width: 39px;
+	height: 31px;
+	text-align: center;
 }
 
 .id-toggle {
-  height: 31px;
-  padding: 0 2px;
-  border-radius: 0;
-  border-color: #444;
+	height: 31px;
+	padding: 0 2px;
+	border-radius: 0;
+	border-color: #444;
 }
 .id-toggle:hover {
-   background-color: #444;
-   border-color: #444 !important;
-   color: #fff;
+	background-color: #444;
+	border-color: #444 !important;
+	color: #fff;
 }
 .id-toggle.active {
-   border-color: #444 !important;
+	border-color: #444 !important;
 }
 
 #imgSelect,
@@ -799,20 +803,20 @@ input::placeholder {
 
 @keyframes scroll-text {
 
-   0%,
-   5% {
-      transform: translateX(0%);
-   }
+	0%,
+	5% {
+		transform: translateX(0%);
+	}
 
-   30%,
-   60% {
-      transform: translateX(var(--scroll-distance, -50px));
-   }
+	30%,
+	60% {
+		transform: translateX(var(--scroll-distance, -50px));
+	}
 
-   85%,
-   100% {
-      transform: translateX(0%);
-   }
+	85%,
+	100% {
+		transform: translateX(0%);
+	}
 }
 
 #offcanvasCasters .offcanvas-body {
