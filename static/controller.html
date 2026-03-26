@@ -3049,7 +3049,12 @@ function restoreImageButtonStateFor(player) {
     if (!btn || !hidden) return;
 
     const val = hidden.value?.trim();
-    if (!val) return;
+    if (!val) {
+        // No image selected — reset button to its default icon
+        btn.innerHTML = `<i class="fa-regular fa-image" style="color:#f1f1f1;"><\/i>`;
+        selectedImageByPlayer[player] = null;
+        return;
+    }
 
     // if it’s a flag path, switch 4x3 to 1x1 for the button icon
     const iconSrc = val.includes("/flags/flags/4x3/") ?
@@ -3380,7 +3385,12 @@ function restoreTeamImageButtonState(team) {
     if (!btn || !hidden) return;
 
     const val = hidden.value?.trim();
-    if (!val) return;
+    if (!val) {
+        // No image selected — reset button to its default icon
+        btn.innerHTML = `<i class="fa-regular fa-image" style="color:#f1f1f1;"><\/i>`;
+        selectedImageByTeam[team] = null;
+        return;
+    }
 
     const iconSrc = val.includes("/flags/flags/4x3/") ?
         val.replace("/4x3/", "/1x1/") :
@@ -4523,9 +4533,13 @@ function swapPlayers() {
 	swapValues("player1_character", "player2_character");
     swapValues("player1_wl", "player2_wl");
     swapValues("player1Img", "player2Img");
-    restoreImageButtonStateFor(1);
-    restoreImageButtonStateFor(2);
-
+	restoreImageButtonStateFor?.(1);
+	restoreImageButtonStateFor?.(2);
+	updatePlayerIdToggleColor(1);
+	updatePlayerIdToggleColor(2);
+	updateCharacterButtonColor(1);
+	updateCharacterButtonColor(2);
+	
     // Update button visuals based on swapped hidden input values
     const wlButtons = ["player1", "player2"];
     wlButtons.forEach((player) => {
@@ -4567,8 +4581,13 @@ function swapAll() {
     swapValues("player1_score", "player2_score");
     swapValues("player1_wl", "player2_wl");
     swapValues("player1Img", "player2Img");
+
     restoreImageButtonStateFor(1);
     restoreImageButtonStateFor(2);
+	updatePlayerIdToggleColor(1);
+	updatePlayerIdToggleColor(2);
+	updateCharacterButtonColor(1);
+	updateCharacterButtonColor(2);
 
     swapValues("team1_name", "team2_name");
     swapValues("team1_score", "team2_score");
