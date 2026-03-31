@@ -11,3 +11,4 @@ profiles/teams/*
 !profiles/teams/*.txt
 
 *.psd
+*.env
