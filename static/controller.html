@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8" />
     <title>FGCaster Controller UI</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="/static/controller.css" />
     <link rel="stylesheet" href="./static/fa/css/all.min.css" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         (function() {
             try {
@@ -76,7 +76,12 @@
 		socket.on('connect_error', (err) => {
 		  console.error('[SOCKET] Connection error:', err);
 		});
-
+		
+		socket.on('bracket_status', function(data) {
+			// Button re-enabling and profile refresh are handled by startBracketCompletionPoll.
+			// This listener is kept for potential future use / debug visibility via onAny.
+		});
+		
 		socket.on('charlist_status', async (msg) => {
 		  //console.log('[SOCKET] ✓ charlist_status received:', JSON.stringify(msg, null, 2));
 		  
@@ -297,7 +302,10 @@
                             <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="Casters" style="padding: 0px;">
 								<button id="toggleCasters" class="btn btn-sm btn-outline-secondary" style="padding: 6px; height: 31px;" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCasters" aria-controls="offcanvas"><i class="fa-solid fa-headset"></i></button>
 							</span>
-							<span data-bs-toggle="tooltip" data-bs-placement="bottom" title="Settings" style="padding: 0px; margin-left: 12px;">
+							<span data-bs-toggle="tooltip" data-bs-placement="bottom" title="Brackets" style="padding: 0px;">
+								<button id="toggleBrackets" class="btn btn-sm btn-outline-secondary" style="padding: 6px; height: 31px;" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasBrackets" aria-controls="offcanvas"><i class="fa-solid fa-table"></i></button>
+							</span>
+							<span data-bs-toggle="tooltip" data-bs-placement="bottom" title="Settings" style="padding: 0px;">
                                 <button class="btn btn-outline-secondary" style="padding: 6px 12px; height: 31px; border-radius: 0.25rem;" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvas" aria-controls="offcanvas"><i class="fa-solid fa-gear"></i></button>
                             </span>
                         </div>
@@ -371,14 +379,12 @@
 						<button id="caster1TwitterToggle" type="button" class="btn btn-sm btn-outline-secondary casterToggles" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Twitter" onclick="toggleTagFields('1', 'Twitter')"><i class="fa-brands fa-x-twitter"></i></button>
 						<button id="caster1YoutubeToggle" type="button" class="btn btn-sm btn-outline-secondary casterToggles" data-bs-toggle="tooltip" data-bs-placement="bottom" title="YouTube" onclick="toggleTagFields('1', 'Youtube')"><i class="fa-brands fa-youtube"></i></button>
 						<button id="caster1InstagramToggle" type="button" class="btn btn-sm btn-outline-secondary casterToggles" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Instagram" onclick="toggleTagFields('1', 'Instagram')"><i class="fa-brands fa-instagram"></i></button>
-
 						<input id="caster1Twitch" name="caster1_twitch" style="display: none;" placeholder="Caster 1 Twitch" class="form-control mb-1 caster-tag-input" oninput="updateTagIconColors(1)" value="" />
 						<input id="caster1Twitter" name="caster1_twitter" style="display: none;" placeholder="Caster 1 X / Twitter" class="form-control mb-1 caster-tag-input" oninput="updateTagIconColors(1)" value="" />
 						<input id="caster1Youtube" name="caster1_youtube" style="display: none;" placeholder="Caster 1 YouTube" class="form-control mb-1 caster-tag-input" oninput="updateTagIconColors(1)" value="" />
 						<input id="caster1Instagram" name="caster1_instagram" style="display: none;" placeholder="Caster 1 Instagram" class="form-control mb-1 caster-tag-input" oninput="updateTagIconColors(1)" value="" />
 					</div>
-				</div>
-				
+				</div>				
 				<!-- Caster 2 -->
 				<div class="row">
 					<input id="caster2Name" name="caster2_name" placeholder="Caster 2 Name" class="form-control mb-1 caster-name-input" oninput="updateTagIconColors(2)" value=""/>
@@ -387,12 +393,43 @@
 						<button id="caster2TwitterToggle" type="button" class="btn btn-sm btn-outline-secondary casterToggles" data-bs-toggle="tooltip" data-bs-placement="top" title="Twitter" onclick="toggleTagFields('2', 'Twitter')"><i class="fa-brands fa-x-twitter"></i></button>
 						<button id="caster2YoutubeToggle" type="button" class="btn btn-sm btn-outline-secondary casterToggles" data-bs-toggle="tooltip" data-bs-placement="top" title="YouTube" onclick="toggleTagFields('2', 'Youtube')"><i class="fa-brands fa-youtube"></i></button>
 						<button id="caster2InstagramToggle" type="button" class="btn btn-sm btn-outline-secondary casterToggles" data-bs-toggle="tooltip" data-bs-placement="top" title="Instagram" onclick="toggleTagFields('2', 'Instagram')"><i class="fa-brands fa-instagram"></i></button>
-
 						<input id="caster2Twitch" name="caster2_twitch" style="display: none;" placeholder="Caster 2 Twitch" class="form-control mb-1 caster-tag-input" oninput="updateTagIconColors(2)" value="" />
 						<input id="caster2Twitter" name="caster2_twitter" style="display: none;" placeholder="Caster 2 X / Twitter" class="form-control mb-1 caster-tag-input" oninput="updateTagIconColors(2)" value="" />
 						<input id="caster2Youtube" name="caster2_youtube" style="display: none;" placeholder="Caster 2 YouTube" class="form-control mb-1 caster-tag-input" oninput="updateTagIconColors(2)" value="" />
 						<input id="caster2Instagram" name="caster2_instagram" style="display: none;" placeholder="Caster 2 Instagram" class="form-control mb-1 caster-tag-input" oninput="updateTagIconColors(2)" value="" />
 					</div>
+				</div>
+			</div>
+			<button type="button" class="btn-close btn-close-white" style="margin-left: 10px;margin-right: 16px;" data-bs-dismiss="offcanvas"></button>
+		</div>
+	</div>
+	<!-- Brackets Offcanvas -->
+    <div class="offcanvas offcanvas-end" id="offcanvasBrackets">
+		<div class="offcanvas-body ui-scaled">
+			<div class="brackets-block">
+				<!-- Challonge -->
+				<div class="row" style="margin-bottom: 4px; gap: 6px;">
+					<div class="form-floating form-floating-sm">
+						<input id="keyChallonge" name="keyChallonge" type="password" placeholder="Challonge API Key" class="form-control api-input" value=""/>
+						<label for="keyChallonge">Challonge API Key</label>
+					</div>
+					<div class="form-floating form-floating-sm">
+						<input id="linkChallonge" name="linkChallonge" placeholder="Challonge Event Link" class="form-control event-link-input" oninput="updateBracketColors()" value=""/>
+						<label for="linkChallonge">Challonge Event Link</label>
+					</div>
+					<button id="getChallongeBtn" type="button" class="btn btn-sm btn-outline-secondary" style="padding: 6px; height: 31px;" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Create Player Profiles" onclick="getChallonge()"><i class="fa-solid fa-file-import"></i></button>
+				</div>			
+				<!-- Start.gg -->
+				<div class="row" style="gap: 6px;">
+					<div class="form-floating form-floating-sm">
+						<input id="keyStartgg" name="keyStartgg" type="password" placeholder="Start.gg API Key" class="form-control api-input" value=""/>
+						<label for="keyStartgg">Start.gg API Key</label>
+					</div>
+					<div class="form-floating form-floating-sm">
+						<input id="linkStartgg" name="linkStartgg" placeholder="Start.gg Event Link" class="form-control event-link-input" oninput="updateBracketColors()" value=""/>
+						<label for="linkStartgg">Start.gg Event Link</label>
+					</div>
+					<button id="getStartggBtn" type="button" class="btn btn-sm btn-outline-secondary" style="padding: 6px; height: 31px;" data-bs-toggle="tooltip" data-bs-placement="top" title="Create Player Profiles" onclick="getStartgg()"><i class="fa-solid fa-file-import"></i></button>
 				</div>
 			</div>
 			<button type="button" class="btn-close btn-close-white" style="margin-left: 10px;margin-right: 16px;" data-bs-dismiss="offcanvas"></button>
@@ -537,7 +574,76 @@
 
 })();
 
+// ===== Bracket PLayer Profile Downloading Functions =====
+
+function startBracketCompletionPoll(platform) {
+    const pollInterval = setInterval(async () => {
+        try {
+            const res = await fetch('/bracket/status?' + Date.now(), { cache: 'no-store' });
+            if (!res.ok) return;
+            const status = await res.json();
+            if (!status.running) {
+                clearInterval(pollInterval);
+                const challongeBtn = document.getElementById('getChallongeBtn');
+                const startggBtn   = document.getElementById('getStartggBtn');
+                if (challongeBtn) challongeBtn.disabled = false;
+                if (startggBtn)   startggBtn.disabled   = false;
+                // Refresh profile menus now that new profiles exist
+				await loadPlayerProfiles(window.__currentProfilePath);
+				buildProfileMenu(1);
+				buildProfileMenu(2);
+            }
+        } catch (e) {
+            // silent — will retry next tick
+        }
+    }, 1000);
+}
+
+function getChallonge() {
+    const btn = document.getElementById('getChallongeBtn');
+    if (btn) btn.disabled = true;
+    fetch('/bracket/run/challonge', { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+            if (data.ok) {
+                startBracketCompletionPoll('challonge');
+            } else {
+                console.warn('[Bracket] ' + (data.message || 'Could not start Challonge fetch.'));
+                if (btn) btn.disabled = false;
+            }
+        })
+        .catch(err => {
+            console.error('[Bracket] Challonge fetch error:', err);
+            if (btn) btn.disabled = false;
+        });
+}
+
+function getStartgg() {
+    const btn = document.getElementById('getStartggBtn');
+    if (btn) btn.disabled = true;
+    fetch('/bracket/run/startgg', { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+            if (data.ok) {
+                startBracketCompletionPoll('startgg');
+            } else {
+                console.warn('[Bracket] ' + (data.message || 'Could not start Start.gg fetch.'));
+                if (btn) btn.disabled = false;
+            }
+        })
+        .catch(err => {
+            console.error('[Bracket] Start.gg fetch error:', err);
+            if (btn) btn.disabled = false;
+        });
+}
+
 // ===== Player Profile Picker =====
+
+// Encode a profile path for use in a URL, preserving "/" separators
+// while safely encoding special characters (e.g. "#", "?", " ") per segment.
+function encodeProfilePath(path) {
+    return path.split('/').map(encodeURIComponent).join('/');
+}
 
 let activeProfileDropdown = null;
 window.__profileList = [];
@@ -889,7 +995,7 @@ async function selectProfile(player, profileId, profileName) {
     
     // Fetch the full profile data
     try {
-        const res = await fetch(`/profiles/players/${profileId}`, { cache: 'no-store' });
+        const res = await fetch(`/profiles/players/${encodeProfilePath(profileId)}`, { cache: 'no-store' });
         if (!res.ok) {
             console.error('[PROFILE] Failed to fetch profile data');
             return;
@@ -1490,7 +1596,7 @@ async function selectTeamProfile(team, profileId, profileName) {
     updateTeamProfileButtonColor(team);
     
     try {
-        const res = await fetch(`/profiles/teams/${profileId}`, { cache: 'no-store' });
+        const res = await fetch(`/profiles/teams/${encodeProfilePath(profileId)}`, { cache: 'no-store' });
         if (!res.ok) {
             console.error('[TEAM-PROFILE] Failed to fetch profile data');
             return;
@@ -1817,7 +1923,7 @@ function updateProfileButtonColor(player) {
     }
 }
 
-// ===== Tag Game Detection (Backend Version) =====
+// ===== Tag Game Detection =====
 
 let isTagGameMode = false;
 
@@ -2589,7 +2695,7 @@ async function restoreProfilePrioritization() {
         window.__selectedProfiles[1] = p1ProfileToUse;
 		updateProfileButtonColor(1);
         try {
-            const res = await fetch(`/profiles/players/${p1ProfileToUse}`, { cache: 'no-store' });
+            const res = await fetch(`/profiles/players/${encodeProfilePath(p1ProfileToUse)}`, { cache: 'no-store' });
             if (res.ok) {
                 const profileData = await res.json();
                 if (profileData.characters) {
@@ -2612,7 +2718,7 @@ async function restoreProfilePrioritization() {
         window.__selectedProfiles[2] = p2ProfileToUse;
 		updateProfileButtonColor(2);
         try {
-            const res = await fetch(`/profiles/players/${p2ProfileToUse}`, { cache: 'no-store' });
+            const res = await fetch(`/profiles/players/${encodeProfilePath(p2ProfileToUse)}`, { cache: 'no-store' });
             if (res.ok) {
                 const profileData = await res.json();
                 if (profileData.characters) {
@@ -3979,11 +4085,8 @@ function getFormData() {
 
         stage: getCurrentStage(),
         match_type: getMatchTypeString(),
-        caster1: {
-            name: json.caster1_name,
-            twitch: json.caster1_twitch,
-            twitter: json.caster1_twitter
-        },
+        toptext: getStr('[name="topText"]'),
+		
         caster1: {
 			name: getStr('[name="caster1_name"]'),
 			twitch: getStr('[name="caster1_twitch"]'),
@@ -3998,7 +4101,13 @@ function getFormData() {
 			youtube: getStr('[name="caster2_youtube"]'),
 			instagram: getStr('[name="caster2_instagram"]'),
 		},
-        toptext: json.topText,
+		
+		bracket: {
+            keyChallonge: getStr('[name="keyChallonge"]'),
+            linkChallonge: getStr('[name="linkChallonge"]'),
+            keyStartgg: getStr('[name="keyStartgg"]'),
+            linkStartgg: getStr('[name="linkStartgg"]'),
+        },
     };
 }
 
@@ -4066,6 +4175,11 @@ async function loadDataAndHydrate() {
         document.querySelector('[name="team2_name"]').value = data.team2?.name ?? '';
         document.querySelector('[name="team2_score"]').value = data.team2?.score ?? 0;
 		
+		document.querySelector('[name="keyChallonge"]').value = data.bracket?.keyChallonge ?? '';
+        document.querySelector('[name="linkChallonge"]').value = data.bracket?.linkChallonge ?? '';
+        document.querySelector('[name="keyStartgg"]').value = data.bracket?.keyStartgg ?? '';
+        document.querySelector('[name="linkStartgg"]').value = data.bracket?.linkStartgg ?? '';
+		
         // restore various UI states you already have helpers for:
         restoreWLButtons();
         restoreMatchTypeButtons();
@@ -4123,7 +4237,7 @@ async function loadDataAndHydrate() {
             window.__selectedProfiles[1] = data.player1.profile;
             // Reload the profile to restore character prioritization
             try {
-                const res = await fetch(`/profiles/players/${data.player1.profile}`, { cache: 'no-store' });
+                const res = await fetch(`/profiles/players/${encodeProfilePath(data.player1.profile)}`, { cache: 'no-store' });
                 if (res.ok) {
                     const profileData = await res.json();
                     if (profileData.characters) {
@@ -4139,7 +4253,7 @@ async function loadDataAndHydrate() {
             window.__selectedProfiles[2] = data.player2.profile;
             // Reload the profile to restore character prioritization
             try {
-                const res = await fetch(`/profiles/players/${data.player2.profile}`, { cache: 'no-store' });
+                const res = await fetch(`/profiles/players/${encodeProfilePath(data.player2.profile)}`, { cache: 'no-store' });
                 if (res.ok) {
                     const profileData = await res.json();
                     if (profileData.characters) {
@@ -4915,8 +5029,14 @@ function resetAll() {
 		updateTagIconColors(1);
 		updateTagIconColors(2);
 		updateCastersButtonColor();
-
-        // 5) Stage & Match Type
+		
+		// 5) Bracket links (links only)
+		['linkChallonge', 'linkStartgg'].forEach(field => {
+			const el = document.querySelector(`[name="${field}"]`);
+			if (el) uiOnly_Set(el, '');
+		});
+				
+        // 6) Stage & Match Type
         resetStageValues();
 		// Clear stage buttons (main/sub), round control, custom text
         document.querySelectorAll('.stage-main .btn, .stage-sub .btn').forEach(b => b.classList.remove('active'));
@@ -4947,6 +5067,16 @@ document.querySelectorAll("#scoreForm input").forEach((input) => {
 });
 
 document.querySelectorAll(".caster-name-input, .caster-tag-input").forEach((input) => {
+    input.addEventListener("blur", emitUpdate);
+    input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            input.blur();
+        }
+    });
+});
+
+document.querySelectorAll(".api-input, .event-link-input").forEach((input) => {
     input.addEventListener("blur", emitUpdate);
     input.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {

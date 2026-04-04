@@ -29,6 +29,9 @@ SCRAPER_LOCK = threading.Lock()
 CHAR_SCRAPER_STATE = {"running": False, "slug": "", "started_at": 0.0}
 CHARLIST_LOCK = threading.Lock()
 
+BRACKET_LOCK  = threading.Lock()
+BRACKET_STATE = {"running": False, "platform": ""}
+
 def _search_bases():
     """Prefer the EXE folder for external assets; fall back to _MEIPASS; dev uses script folder."""
     exe_dir   = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else os.path.dirname(os.path.abspath(__file__))
@@ -354,6 +357,147 @@ def characters_status():
         "running": bool(CHAR_SCRAPER_STATE.get("running")),
         "slug": CHAR_SCRAPER_STATE.get("slug") or "",
         "started_at": CHAR_SCRAPER_STATE.get("started_at") or 0.0,
+    })
+
+def _run_bracket_script(platform: str):
+    """
+    Run static/scripts/challonge_eventplayers.py or startgg_eventplayers.py
+    in a background thread. Emits bracket_status socket events on start/finish.
+    platform: "challonge" or "startgg"
+    """
+    script_map = {
+        "challonge": "challonge_eventplayers.py",
+        "startgg":   "startgg_eventplayers.py",
+    }
+    script_name = script_map.get(platform)
+    if not script_name:
+        log.error(f"Unknown bracket platform: '{platform}'")
+        return
+
+    static_dir  = Path(app.static_folder)
+    script_path = static_dir / "scripts" / script_name
+
+    if not script_path.exists():
+        log.error(f"Bracket script not found: {script_path}")
+        return
+
+    if not BRACKET_LOCK.acquire(blocking=False):
+        log.warning("Bracket fetch already running; skipping duplicate.")
+        return
+
+    BRACKET_STATE.update({"running": True, "platform": platform})
+    try:
+        socketio.emit("bracket_status", {"running": True, "platform": platform})
+    except Exception:
+        pass
+
+    try:
+        #log.info(f"Fetching bracket players via '{script_name}'...")
+        log.info(f"Fetching bracket players from {platform}...")
+
+        if IS_FROZEN:
+            import runpy, io
+            from contextlib import redirect_stdout, redirect_stderr
+            original_argv = sys.argv[:]
+            original_cwd  = os.getcwd()
+            captured      = io.StringIO()
+            try:
+                sys.argv = [str(script_path)]
+                os.chdir(str(static_dir))
+                with redirect_stdout(captured), redirect_stderr(captured):
+                    runpy.run_path(str(script_path), run_name="__main__")
+                rc = 0
+            except SystemExit as e:
+                rc = e.code if isinstance(e.code, int) else (1 if e.code else 0)
+            except Exception as e:
+                log.error(f"Bracket script execution failed: {e}")
+                rc = 1
+            finally:
+                sys.argv = original_argv
+                os.chdir(original_cwd)
+                for raw in captured.getvalue().split("\n"):
+                    line = raw.strip()
+                    if not line:
+                        continue
+                    lower = line.lower()
+                    msg   = line
+                    level = "INFO"
+                    for prefix, tag in (
+                        ("[error]", "ERROR"), ("[err]", "ERROR"),
+                        ("[warn]",  "WARN"),  ("[warning]", "WARN"),
+                        ("[info]",  "INFO"),  ("[ok]", "INFO"),
+                    ):
+                        if lower.startswith(prefix):
+                            level = tag
+                            msg   = line[len(prefix):].lstrip()
+                            break
+                    if level == "ERROR":   log.error(msg)
+                    elif level == "WARN":  log.warning(msg)
+                    else:                  log.info(msg)
+        else:
+            cmd  = [sys.executable, "-u", str(script_path)]
+            proc = subprocess.Popen(
+                cmd,
+                cwd=str(static_dir),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1,
+            )
+            assert proc.stdout is not None
+            for raw in proc.stdout:
+                line = raw.rstrip("\n").strip()
+                if not line:
+                    continue
+                lower = line.lower()
+                msg   = line
+                level = "INFO"
+                for prefix, tag in (
+                    ("[error]", "ERROR"), ("[err]", "ERROR"),
+                    ("[warn]",  "WARN"),  ("[warning]", "WARN"),
+                    ("[info]",  "INFO"),  ("[ok]", "INFO"),
+                ):
+                    if lower.startswith(prefix):
+                        level = tag
+                        msg   = line[len(prefix):].lstrip()
+                        break
+                if level == "ERROR":   log.error(msg)
+                elif level == "WARN":  log.warning(msg)
+                else:                  log.info(msg)
+            rc = proc.wait()
+
+        if rc != 0:
+            log.error(f"Bracket script exited with code {rc}")
+        else:
+            log.info(f"[bold green]Bracket imported successfully[/bold green]")
+
+    except Exception as ex:
+        log.error(f"Error running bracket script: {ex}")
+    finally:
+        BRACKET_STATE.update({"running": False})
+        time.sleep(0.2)
+        try:
+            socketio.emit("bracket_status", {"running": False, "platform": platform}, namespace="/")
+        except Exception as e:
+            log.error(f"Failed to emit bracket_status: {e!r}")
+        BRACKET_LOCK.release()
+
+
+@app.route("/bracket/run/<platform>", methods=["POST"])
+def bracket_run(platform):
+    if BRACKET_STATE.get("running"):
+        return jsonify(ok=False, message="Bracket fetch already in progress."), 409
+    threading.Thread(
+        target=_run_bracket_script, args=(platform,), daemon=True
+    ).start()
+    return jsonify(ok=True)
+
+
+@app.route("/bracket/status")
+def bracket_status():
+    return jsonify({
+        "running":  bool(BRACKET_STATE.get("running")),
+        "platform": BRACKET_STATE.get("platform") or "",
     })
 
 @app.route('/profiles/players/list')
@@ -842,13 +986,22 @@ def save_team_profile():
         return jsonify({"error": str(e)}), 500
 
 # --- preserve config keys when saving UI updates ---
+
 PRESERVE_KEYS = ('port', 'active_template')
-def save_data_preserving(update: dict, preserve_keys=PRESERVE_KEYS):
+MERGE_KEYS    = ('bracket',)  # dict keys whose fields are merged rather than fully preserved or fully overwritten
+
+def save_data_preserving(update: dict, preserve_keys=PRESERVE_KEYS, merge_keys=MERGE_KEYS):
     current = load_data() or {}
     # hard-override preserved keys from current file, no matter what UI sent
     for k in preserve_keys:
         if k in current:
             update[k] = current[k]
+    # shallow-merge keys: fields present in update win; missing fields fall back to current
+    for k in merge_keys:
+        if k in current and isinstance(current[k], dict):
+            merged = dict(current[k])           # start from what's on disk
+            merged.update(update.get(k) or {})  # overlay whatever the UI sent
+            update[k] = merged
     save_data(update)
 
 def _short(v):
@@ -1288,7 +1441,7 @@ def set_template():
     log.info(f"[bold cyan]Switched active template[/bold cyan] → [bold]{name}[/bold]")
     return jsonify(ok=True)
 
-# ---- new reset functions ----
+# ---- reset functions ----
 @app.route('/reset/players', methods=['POST'])
 def reset_players():
     """Reset only players (names, scores, clans, imgs, W/L), keep everything else."""
@@ -1405,6 +1558,12 @@ def reset_all():
             "twitter": "",
             "youtube": "",
             "instagram": ""
+        },
+        # keyChallonge and keyStartgg intentionally omitted so the
+        # merge in save_data_preserving restores them from disk
+        "bracket": {
+            "linkChallonge": "",
+            "linkStartgg": ""
         }
     }
 

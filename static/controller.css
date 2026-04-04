@@ -48,22 +48,24 @@ body {
 	white-space: nowrap
 }
 
-#offcanvas {
+#offcanvas, #offcanvasCasters, #offcanvasBrackets {
 	background-color: #1e1e1e;
 	color: #f1f1f1;
 	display: flex;
 	align-items: flex-end;
-	--offcanvas-base-width: 450px;
 	--bs-offcanvas-width: calc(var(--offcanvas-base-width) * var(--ui-scale));
 }
 
+#offcanvas {
+	--offcanvas-base-width: 450px;
+}
+
 #offcanvasCasters {
-	background-color: #1e1e1e;
-	color: #f1f1f1;
-	display: flex;
-	align-items: flex-end;
 	--offcanvas-base-width: 590px;
-	--bs-offcanvas-width: calc(var(--offcanvas-base-width) * var(--ui-scale));
+}
+
+#offcanvasBrackets {
+	--offcanvas-base-width: 450px;
 }
 
 .offcanvas-body.ui-scaled {
@@ -186,6 +188,7 @@ textarea,
 }
 
 input::placeholder,
+.form-floating>label,
 .inputLabel {
 	color: #999 !important;
 }
@@ -818,6 +821,14 @@ input::placeholder {
 		transform: translateX(0%);
 	}
 }
+.caster-block, .brackets-block {
+	margin-left: 16px;
+}
+
+.api-input::placeholder,
+.event-link-input::placeholder {
+	visibility: hidden !important;
+}
 
 #offcanvasCasters .offcanvas-body {
 	display: flex;
@@ -853,7 +864,6 @@ input::placeholder {
 #caster2Name {
 	border-radius: .25rem;
 	width: 200px;
-	margin-left: 16px;
 }
 
 .caster-platform-row .btn {
@@ -861,6 +871,25 @@ input::placeholder {
 	width: 30px;
 	border: 1px solid #444;
 	color: #777;
+}
+
+.form-floating.form-floating-sm > .form-control {
+	height: 31px;
+	min-height: 31px;
+	font-size: 12px;
+	padding-top: 10px;
+	padding-bottom: 0px;
+}
+
+.form-floating.form-floating-sm > label {
+	padding-top: 4px;
+	font-size: 14px;
+	overflow: visible;
+}
+
+.form-floating>.api-input:focus~label, .form-floating>.api-input:not(:placeholder-shown)~label,
+.form-floating>.event-link-input:focus~label, .form-floating>.event-link-input:not(:placeholder-shown)~label {
+	transform: scale(.8) translateY(-.45rem) translateX(.15rem);
 }
 
 #player1_w_btn,
