@@ -2,11 +2,14 @@ import sys
 import json
 import re
 import requests
+import keyring
 from pathlib import Path
 from dotenv import load_dotenv
 import os
 
 # Config
+
+KEYRING_SERVICE = "FGCasterOverlay"
 
 API_BASE    = "https://api.challonge.com/v1"
 API_KEY_VAR = "CHAL_API1"
@@ -33,13 +36,22 @@ def _read_data_json() -> dict:
         return {}
 
 def load_api_key() -> str:
-    # 1) Try data.json first
+    """Return the Challonge API key, checking keyring → data.json → dev.env."""
+    # 1) OS keyring
+    try:
+        api_key = (keyring.get_password(KEYRING_SERVICE, API_KEY_VAR) or "").strip()
+        if api_key:
+            return api_key
+    except Exception:
+        pass
+
+    # 2) data.json
     data = _read_data_json()
     api_key = (data.get("bracket") or {}).get(DATA_KEY, "").strip()
     if api_key:
         return api_key
 
-    # 2) Fall back to dev file
+    # 3) dev.env
     if ENV_FILE.exists():
         load_dotenv(dotenv_path=ENV_FILE)
         api_key = os.getenv(API_KEY_VAR, "").strip()
@@ -49,7 +61,6 @@ def load_api_key() -> str:
     sys.exit(
         "[ERROR] Challonge API key not found.\n"
         "  Set it in the Controller UI (Brackets panel).\n"
-        "  Get your key at: https://challonge.com/settings/developer"
     )
 
 def load_event_link() -> str:
@@ -188,8 +199,7 @@ def main():
         else:
             sys.exit(
                 "[ERROR] No Challonge event link found.\n"
-                "  • Set it in the Controller UI (Brackets panel), or\n"
-                "  • Pass it as a command-line argument: python challonge_eventplayers.py <url>"
+                "  • Set it in the Controller UI (Brackets panel)."
             )
 
     api_key       = load_api_key()

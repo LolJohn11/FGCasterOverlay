@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, jsonify, url_for, abort, send_from_directory, send_file, g
 from flask_socketio import SocketIO, emit
 from pathlib import Path
-import json, os, sys, time, logging, re, click, threading, subprocess, runpy, base64
+import json, os, sys, time, logging, re, click, threading, subprocess, runpy, base64, keyring
 
 # ---------- Rich logging setup ----------
 from rich.logging import RichHandler
@@ -31,6 +31,12 @@ CHARLIST_LOCK = threading.Lock()
 
 BRACKET_LOCK  = threading.Lock()
 BRACKET_STATE = {"running": False, "platform": ""}
+
+KEYRING_SERVICE = "FGCasterOverlay"
+KEYRING_KEYS = {
+    "challonge": "CHAL_API1",
+    "startgg":   "START_API",
+}
 
 def _search_bases():
     """Prefer the EXE folder for external assets; fall back to _MEIPASS; dev uses script folder."""
@@ -313,7 +319,7 @@ def _run_char_scraper_for_slug(slug: str):
         
         # Common exit code handling
         if rc != 0:
-            log.error(f"Scraper exited with code {rc}")
+            log.error(f"Character scraper script exited with code {rc}")
         else:
             if out_path.exists():
                 try:
@@ -358,6 +364,55 @@ def characters_status():
         "slug": CHAR_SCRAPER_STATE.get("slug") or "",
         "started_at": CHAR_SCRAPER_STATE.get("started_at") or 0.0,
     })
+
+@app.route("/bracket/keys", methods=["POST"])
+def bracket_save_keys():
+    """Save or delete API keys in the OS keyring; strip them from data.json."""
+    payload = request.get_json(force=True) or {}
+    saved = []
+    deleted = []
+    for platform, var_name in KEYRING_KEYS.items():
+        if var_name not in payload:
+            continue
+        key = (payload.get(var_name) or "").strip()
+        try:
+            if key:
+                keyring.set_password(KEYRING_SERVICE, var_name, key)
+                saved.append(platform)
+                log.info(f"[bold cyan]API key saved to keyring[/bold cyan] → {platform}")
+            else:
+                # Empty value means delete
+                try:
+                    keyring.delete_password(KEYRING_SERVICE, var_name)
+                    deleted.append(platform)
+                    log.info(f"[bold cyan]API key removed from keyring[/bold cyan] → {platform}")
+                except keyring.errors.PasswordDeleteError:
+                    pass  # already absent, that's fine
+        except Exception as e:
+            log.error(f"Failed to update {platform} key in keyring: {e}")
+            return jsonify(ok=False, message=f"Keyring error: {e}"), 500
+
+    # Ensure key fields are fully absent from data.json
+    data = load_data() or {}
+    bracket = data.get("bracket") or {}
+    bracket.pop("keyChallonge", None)
+    bracket.pop("keyStartgg", None)
+    data["bracket"] = bracket
+    save_data(data)
+
+    return jsonify(ok=True, saved=saved, deleted=deleted)
+
+@app.route("/bracket/keys/status", methods=["GET"])
+def bracket_keys_status():
+    """Return the stored key length for each platform (0 = not set)."""
+    status = {}
+    for platform, var_name in KEYRING_KEYS.items():
+        try:
+            val = keyring.get_password(KEYRING_SERVICE, var_name) or ""
+            status[platform] = len(val.strip())
+        except Exception:
+            status[platform] = 0
+    return jsonify(status)
 
 def _run_bracket_script(platform: str):
     """
@@ -467,12 +522,12 @@ def _run_bracket_script(platform: str):
             rc = proc.wait()
 
         if rc != 0:
-            log.error(f"Bracket script exited with code {rc}")
+            log.error(f"Bracket fetch script exited with code {rc}")
         else:
             log.info(f"[bold green]Bracket imported successfully[/bold green]")
 
     except Exception as ex:
-        log.error(f"Error running bracket script: {ex}")
+        log.error(f"Error running bracket script: {ex!r}")
     finally:
         BRACKET_STATE.update({"running": False})
         time.sleep(0.2)
@@ -482,7 +537,6 @@ def _run_bracket_script(platform: str):
             log.error(f"Failed to emit bracket_status: {e!r}")
         BRACKET_LOCK.release()
 
-
 @app.route("/bracket/run/<platform>", methods=["POST"])
 def bracket_run(platform):
     if BRACKET_STATE.get("running"):
@@ -491,7 +545,6 @@ def bracket_run(platform):
         target=_run_bracket_script, args=(platform,), daemon=True
     ).start()
     return jsonify(ok=True)
-
 
 @app.route("/bracket/status")
 def bracket_status():
@@ -1002,6 +1055,10 @@ def save_data_preserving(update: dict, preserve_keys=PRESERVE_KEYS, merge_keys=M
             merged = dict(current[k])           # start from what's on disk
             merged.update(update.get(k) or {})  # overlay whatever the UI sent
             update[k] = merged
+    # Always strip API key fields from bracket
+    if isinstance(update.get("bracket"), dict):
+        update["bracket"].pop("keyChallonge", None)
+        update["bracket"].pop("keyStartgg", None)
     save_data(update)
 
 def _short(v):
@@ -1559,8 +1616,6 @@ def reset_all():
             "youtube": "",
             "instagram": ""
         },
-        # keyChallonge and keyStartgg intentionally omitted so the
-        # merge in save_data_preserving restores them from disk
         "bracket": {
             "linkChallonge": "",
             "linkStartgg": ""

@@ -576,6 +576,58 @@
 
 // ===== Bracket PLayer Profile Downloading Functions =====
 
+function populateKeyField(inputId, keyLength) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    if (keyLength > 0) {
+        input.value = '*'.repeat(keyLength);
+    } else {
+        input.value = '';
+    }
+}
+
+function saveApiKey(platform) {
+    const varName = platform === 'challonge' ? 'CHAL_API1' : 'START_API';
+    const inputId = platform === 'challonge' ? 'keyChallonge' : 'keyStartgg';
+    const input   = document.getElementById(inputId);
+    if (!input) return;
+
+    const raw = input.value;
+    // If the field contains only asterisks, the user hasn't changed it — do nothing
+    if (raw.length > 0 && /^\*+$/.test(raw)) return;
+
+    const key = raw.trim();
+
+    fetch('/bracket/keys', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [varName]: key }),
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.ok) {
+            if (key) {
+                input.value = '*'.repeat(key.length);
+            } else {
+                input.value = '';
+            }
+        } else {
+            console.error('[Bracket] Failed to update key:', data.message);
+        }
+    })
+    .catch(err => console.error('[Bracket] Key save error:', err));
+}
+
+function refreshKeyFields() {
+    fetch('/bracket/keys/status')
+        .then(res => res.json())
+        .then(status => {
+            populateKeyField('keyChallonge', status.challonge ?? 0);
+            populateKeyField('keyStartgg',   status.startgg  ?? 0);
+        })
+        .catch(() => {});
+}
+
 function startBracketCompletionPoll(platform) {
     const pollInterval = setInterval(async () => {
         try {
@@ -4103,9 +4155,7 @@ function getFormData() {
 		},
 		
 		bracket: {
-            keyChallonge: getStr('[name="keyChallonge"]'),
             linkChallonge: getStr('[name="linkChallonge"]'),
-            keyStartgg: getStr('[name="keyStartgg"]'),
             linkStartgg: getStr('[name="linkStartgg"]'),
         },
     };
@@ -4175,9 +4225,7 @@ async function loadDataAndHydrate() {
         document.querySelector('[name="team2_name"]').value = data.team2?.name ?? '';
         document.querySelector('[name="team2_score"]').value = data.team2?.score ?? 0;
 		
-		document.querySelector('[name="keyChallonge"]').value = data.bracket?.keyChallonge ?? '';
         document.querySelector('[name="linkChallonge"]').value = data.bracket?.linkChallonge ?? '';
-        document.querySelector('[name="keyStartgg"]').value = data.bracket?.keyStartgg ?? '';
         document.querySelector('[name="linkStartgg"]').value = data.bracket?.linkStartgg ?? '';
 		
         // restore various UI states you already have helpers for:
@@ -5076,14 +5124,25 @@ document.querySelectorAll(".caster-name-input, .caster-tag-input").forEach((inpu
     });
 });
 
-document.querySelectorAll(".api-input, .event-link-input").forEach((input) => {
-    input.addEventListener("blur", emitUpdate);
-    input.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            input.blur();
-        }
+document.querySelectorAll('.api-input').forEach(input => {
+    input.addEventListener('blur', () => {
+        const platform = input.name === 'keyChallonge' ? 'challonge' : 'startgg';
+        saveApiKey(platform);
     });
+    input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+    });
+});
+
+document.querySelectorAll('.event-link-input').forEach(input => {
+    input.addEventListener('blur', emitUpdate);
+    input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+    });
+});
+
+document.getElementById('offcanvasBrackets')?.addEventListener('show.bs.offcanvas', () => {
+    refreshKeyFields();
 });
 
 const roundInput = document.getElementById("stageRoundNum");
@@ -5097,6 +5156,7 @@ roundInput.addEventListener("keydown", (e) => {
 
 document.addEventListener("DOMContentLoaded", () => {
     loadDataAndHydrate();
+	refreshKeyFields();
 });
 
 </script>

@@ -3,11 +3,14 @@ import json
 import re
 import time
 import requests
+import keyring
 from pathlib import Path
 from dotenv import load_dotenv
 import os
 
 # Config
+
+KEYRING_SERVICE = "FGCasterOverlay"
 
 API_URL     = "https://api.start.gg/gql/alpha"
 API_KEY_VAR = "START_API"
@@ -17,6 +20,41 @@ PER_PAGE    = 500
 
 ENV_FILE    = Path(__file__).resolve().parent.parent.parent / "dev.env"
 DATA_FILE   = Path(__file__).resolve().parent.parent.parent / "data.json"
+
+def _read_data_json() -> dict:
+    """Load data.json from the app root, returning {} on any failure."""
+    try:
+        return json.loads(DATA_FILE.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+def load_api_key() -> str:
+    """Return the Start.gg API key, checking keyring → data.json → dev.env."""
+    # 1) OS keyring
+    try:
+        api_key = (keyring.get_password(KEYRING_SERVICE, API_KEY_VAR) or "").strip()
+        if api_key:
+            return api_key
+    except Exception:
+        pass
+
+    # 2) data.json
+    data = _read_data_json()
+    api_key = (data.get("bracket") or {}).get(DATA_KEY, "").strip()
+    if api_key:
+        return api_key
+
+    # 3) dev.env
+    if ENV_FILE.exists():
+        load_dotenv(dotenv_path=ENV_FILE)
+        api_key = os.getenv(API_KEY_VAR, "").strip()
+        if api_key:
+            return api_key
+
+    sys.exit(
+        "[ERROR] Start.gg API key not found.\n"
+        "  Set it in the Controller UI (Brackets panel).\n"
+    )
 
 def parse_url(raw: str) -> dict:
     """
@@ -67,38 +105,11 @@ def parse_url(raw: str) -> dict:
             "phase_group_id": None,
         }
 
-    sys.exit(
+    print(
         f"[ERROR] Could not parse a valid start.gg event URL from: '{raw}'\n"
-        "  Expected: https://www.start.gg/tournament/<name>/event/<name>[/brackets/<id>[/<id>]]"
+        "  Make sure the link starts with https://www.start.gg/tournament/"
     )
-
-def _read_data_json() -> dict:
-    """Load data.json from the app root, returning {} on any failure."""
-    try:
-        return json.loads(DATA_FILE.read_text(encoding="utf-8"))
-    except Exception:
-        return {}
-
-def load_api_key() -> str:
-    # 1) Try data.json first
-    data = _read_data_json()
-    api_key = (data.get("bracket") or {}).get(DATA_KEY, "").strip()
-    if api_key:
-        return api_key
-
-    # 2) Fall back to dev file
-    if ENV_FILE.exists():
-        load_dotenv(dotenv_path=ENV_FILE)
-        api_key = os.getenv(API_KEY_VAR, "").strip()
-        if api_key:
-            return api_key
-
-    sys.exit(
-        "[ERROR] Start.gg API key not found.\n"
-        "  • Set it in the Controller UI (Brackets panel), or\n"
-        f"  • Add '{API_KEY_VAR}=your_token' to '{ENV_FILE}'\n"
-        "  Get your token at: https://start.gg/admin/profile/developer"
-    )
+    sys.exit(1)
 
 def load_event_link() -> str:
     """Return the Start.gg event link from data.json, or '' if not set."""
@@ -131,9 +142,7 @@ def gql_request(api_key: str, query: str, variables: dict) -> dict:
             continue
         if response.status_code == 401:
             sys.exit(
-                "[ERROR] 401 Unauthorized — API token is invalid or expired.\n"
-                "  • Check START_API in dev.env.\n"
-                "  • Get a token at: https://start.gg/admin/profile/developer"
+                "[ERROR] 401 Unauthorized — API token is invalid or expired."
             )
         if not response.ok:
             sys.exit(f"[ERROR] HTTP {response.status_code}:\n{response.text}")

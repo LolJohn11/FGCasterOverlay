@@ -830,6 +830,10 @@ input::placeholder {
 	visibility: hidden !important;
 }
 
+.event-link-input {
+	text-overflow: ellipsis;
+}
+
 #offcanvasCasters .offcanvas-body {
 	display: flex;
 	justify-content: space-between;
