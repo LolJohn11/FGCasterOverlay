@@ -689,6 +689,16 @@ function getStartgg() {
         });
 }
 
+function updateBracketColors() {
+    const btn = document.getElementById("toggleBrackets");
+    if (!btn) return;
+    const hasAny = ["linkChallonge", "linkStartgg"].some(name => {
+        const el = document.querySelector(`[name="${name}"]`);
+        return el && el.value.trim() !== "";
+    });
+    btn.style.color = hasAny ? "#0ead00" : "#f1f1f1";
+}
+
 // ===== Player Profile Picker =====
 
 // Encode a profile path for use in a URL, preserving "/" separators
@@ -4245,6 +4255,7 @@ async function loadDataAndHydrate() {
         updateTagIconColors(1);
         updateTagIconColors(2);
 		updateCastersButtonColor();
+		updateBracketColors(); 
         updateTeamToggleColors();
 		updateCharacterButtonColor(1);
 		updateCharacterButtonColor(2);
@@ -5083,7 +5094,9 @@ function resetAll() {
 			const el = document.querySelector(`[name="${field}"]`);
 			if (el) uiOnly_Set(el, '');
 		});
-				
+		
+		updateBracketColors();
+		
         // 6) Stage & Match Type
         resetStageValues();
 		// Clear stage buttons (main/sub), round control, custom text
