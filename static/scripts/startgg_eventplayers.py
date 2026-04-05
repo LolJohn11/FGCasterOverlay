@@ -21,6 +21,11 @@ PER_PAGE    = 500
 ENV_FILE    = Path(__file__).resolve().parent.parent.parent / "dev.env"
 DATA_FILE   = Path(__file__).resolve().parent.parent.parent / "data.json"
 
+def die(msg: str):
+    """Print an error message and exit, ensuring output is captured in frozen mode."""
+    print(msg)
+    sys.exit(1)
+
 def _read_data_json() -> dict:
     """Load data.json from the app root, returning {} on any failure."""
     try:
@@ -51,7 +56,7 @@ def load_api_key() -> str:
         if api_key:
             return api_key
 
-    sys.exit(
+    die(
         "[ERROR] Start.gg API key not found.\n"
         "  Set it in the Controller UI (Brackets panel).\n"
     )
@@ -105,11 +110,10 @@ def parse_url(raw: str) -> dict:
             "phase_group_id": None,
         }
 
-    print(
+    die(
         f"[ERROR] Could not parse a valid start.gg event URL from: '{raw}'\n"
         "  Make sure the link starts with https://www.start.gg/tournament/"
     )
-    sys.exit(1)
 
 def load_event_link() -> str:
     """Return the Start.gg event link from data.json, or '' if not set."""
@@ -131,9 +135,9 @@ def gql_request(api_key: str, query: str, variables: dict) -> dict:
                 timeout=20,
             )
         except requests.exceptions.ConnectionError as e:
-            sys.exit(f"[ERROR] Connection failed: {e}")
+            die(f"[ERROR] Connection failed: {e}")
         except requests.exceptions.Timeout:
-            sys.exit("[ERROR] Request timed out after 20 s.")
+            die("[ERROR] Request timed out after 20 s.")
 
         if response.status_code == 429:
             wait = 10 * (attempt + 1)
@@ -141,20 +145,20 @@ def gql_request(api_key: str, query: str, variables: dict) -> dict:
             time.sleep(wait)
             continue
         if response.status_code == 401:
-            sys.exit(
+            die(
                 "[ERROR] 401 Unauthorized — API token is invalid or expired."
             )
         if not response.ok:
-            sys.exit(f"[ERROR] HTTP {response.status_code}:\n{response.text}")
+            die(f"[ERROR] HTTP {response.status_code}:\n{response.text}")
 
         data = response.json()
         if "errors" in data:
             messages = [e.get("message", str(e)) for e in data["errors"]]
-            sys.exit("[ERROR] GraphQL error(s):\n  " + "\n  ".join(messages))
+            die("[ERROR] GraphQL error(s):\n  " + "\n  ".join(messages))
 
         return data
 
-    sys.exit("[ERROR] Request failed after 3 attempts (rate limit).")
+    die("[ERROR] Request failed after 3 attempts (rate limit).")
 
 # Queries
 
@@ -246,7 +250,7 @@ def get_event(slug: str, api_key: str) -> tuple[int, str]:
     data  = gql_request(api_key, GET_EVENT_QUERY, {"slug": slug})
     event = data.get("data", {}).get("event")
     if not event:
-        sys.exit(
+        die(
             f"[ERROR] No event found for '{slug}'.\n"
             "  • Check the URL — the tournament or event name may be wrong."
         )
@@ -414,7 +418,7 @@ def main():
         if len(sys.argv) >= 2:
             raw_input = sys.argv[1]
         else:
-            sys.exit(
+            die(
                 "[ERROR] No Start.gg event link found.\n"
                 "  • Set it in the Controller UI (Brackets panel)."
             )

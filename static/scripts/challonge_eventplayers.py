@@ -28,6 +28,11 @@ HEADERS = {
     )
 }
 
+def die(msg: str):
+    """Print an error message and exit, ensuring output is captured in frozen mode."""
+    print(msg)
+    sys.exit(1)
+
 def _read_data_json() -> dict:
     """Load data.json from the app root, returning {} on any failure."""
     try:
@@ -58,7 +63,7 @@ def load_api_key() -> str:
         if api_key:
             return api_key
 
-    sys.exit(
+    die(
         "[ERROR] Challonge API key not found.\n"
         "  Set it in the Controller UI (Brackets panel).\n"
     )
@@ -102,29 +107,29 @@ def api_get(url: str, api_key: str, context: str) -> requests.Response:
             timeout=15,
         )
     except requests.exceptions.ConnectionError as e:
-        sys.exit(f"[ERROR] Connection failed ({context}): {e}")
+        die(f"[ERROR] Connection failed ({context}): {e}")
     except requests.exceptions.Timeout:
-        sys.exit(f"[ERROR] Request timed out ({context}).")
+        die(f"[ERROR] Request timed out ({context}).")
 
     #print(f"[INFO] HTTP status   : {response.status_code}")
 
     if response.status_code == 401:
-        sys.exit(
+        die(
             "[ERROR] 401 Unauthorized — API key is invalid."
         )
     if response.status_code == 404:
-        sys.exit(
+        die(
             f"[ERROR] 404 Not Found ({context}).\n"
             "  • Double-check the tournament URL or slug.\n"
             "  • Private tournaments require the key of the owning account."
         )
     if response.status_code == 520:
-        sys.exit(
+        die(
             "[ERROR] 520 — Cloudflare blocked the request.\n"
             "  • Try disabling any VPN or proxy and run again."
         )
     if not response.ok:
-        sys.exit(f"[ERROR] Unexpected HTTP {response.status_code} ({context}):\n{response.text}")
+        die(f"[ERROR] Unexpected HTTP {response.status_code} ({context}):\n{response.text}")
 
     return response
 
@@ -197,7 +202,7 @@ def main():
         if len(sys.argv) >= 2:
             raw_input = sys.argv[1]
         else:
-            sys.exit(
+            die(
                 "[ERROR] No Challonge event link found.\n"
                 "  • Set it in the Controller UI (Brackets panel)."
             )
