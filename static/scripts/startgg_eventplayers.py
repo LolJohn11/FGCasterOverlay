@@ -84,7 +84,7 @@ def parse_url(raw: str) -> dict:
         return {
             "mode":           "phase_group",
             "slug":           m.group(1),
-            "phase_id":       None,
+            "phase_id":       int(m.group(2)),
             "phase_group_id": int(m.group(3)),
         }
 
@@ -218,6 +218,14 @@ query PhaseSets($phaseId: ID!, $page: Int!, $perPage: Int!) {
 }
 """
 
+GET_PHASE_NAME_QUERY = """
+query PhaseName($phaseId: ID!) {
+  phase(id: $phaseId) {
+    name
+  }
+}
+"""
+
 GET_PHASE_GROUP_SETS_QUERY = """
 query PhaseGroupSets($phaseGroupId: ID!, $page: Int!, $perPage: Int!) {
   phaseGroup(id: $phaseGroupId) {
@@ -316,25 +324,25 @@ def _extract_players_from_sets(sets_nodes: list) -> dict[int, dict]:
                 seen[entrant["id"]] = {"tag": tag, "name": name}
     return seen
 
-def get_phase_players(phase_id: int, api_key: str) -> list[dict]:
-    """Paginate through all sets in a phase and return unique {tag, name} dicts."""
+def get_phase_players(phase_id: int, api_key: str) -> tuple[list[dict], str]:
+    """Paginate through all sets in a phase and return (participants, phase_name)."""
     seen        = {}
     page        = 1
     total_pages = None
+    phase_name  = ""
 
     while True:
-        #print(f"[INFO] Fetching phase sets — page {page}"
-        #      + (f"/{total_pages}" if total_pages else "") + "...")
         data = gql_request(
             api_key, GET_PHASE_SETS_QUERY,
             {"phaseId": phase_id, "page": page, "perPage": PER_PAGE},
         )
-        sets_data = data["data"]["phase"]["sets"]
+        phase_data = data["data"]["phase"]
+        sets_data  = phase_data["sets"]
 
         if total_pages is None:
+            phase_name  = phase_data.get("name") or ""
             pi          = sets_data["pageInfo"]
             total_pages = pi.get("totalPages") or 1
-            #print(f"[INFO] Total sets : {pi['total']} across {total_pages} page(s)")
 
         seen.update(_extract_players_from_sets(sets_data["nodes"]))
 
@@ -343,7 +351,7 @@ def get_phase_players(phase_id: int, api_key: str) -> list[dict]:
         page += 1
         time.sleep(0.75)
 
-    return list(seen.values())
+    return list(seen.values()), phase_name
 
 def get_phase_group_players(phase_group_id: int, api_key: str) -> list[dict]:
     """Paginate through all sets in a phase group and return unique {tag, name} dicts."""
@@ -374,10 +382,14 @@ def get_phase_group_players(phase_group_id: int, api_key: str) -> list[dict]:
 
     return list(seen.values())
 
+def get_phase_name(phase_id: int, api_key: str) -> str:
+    """Fetch just the phase name for a given phase ID."""
+    data = gql_request(api_key, GET_PHASE_NAME_QUERY, {"phaseId": phase_id})
+    return (data.get("data", {}).get("phase") or {}).get("name") or ""
+
 def sanitize_filename(name: str) -> str:
     """Strip characters that are illegal in filenames."""
     return re.sub(r'[\\/:*?"<>|]', '', name).strip()
-
 
 def create_player_profiles(event_name: str, participants: list[dict]) -> None:
     """Create a folder for the event and a profile JSON for each participant."""
@@ -408,9 +420,6 @@ def create_player_profiles(event_name: str, participants: list[dict]) -> None:
 
     print(f"[OK]   Created {saved} profile(s) in '{folder_name}'")
 
-
-# Main
-
 def main():
     # Event link: prefer data.json, fall back to sys.argv for CLI use
     raw_input = load_event_link()
@@ -433,16 +442,21 @@ def main():
     event_id, event_name = get_event(slug, api_key)
     print()
 
+    phase_name = ""
+
     if mode == "event":
         participants = get_event_entrants(event_id, api_key)
     elif mode == "phase":
-        participants = get_phase_players(url_parts["phase_id"], api_key)
+        participants, phase_name = get_phase_players(url_parts["phase_id"], api_key)
     else:  # phase_group
         participants = get_phase_group_players(url_parts["phase_group_id"], api_key)
+        phase_name   = get_phase_name(url_parts["phase_id"], api_key)
+
+    folder_name = f"{event_name} - {phase_name}" if phase_name else event_name
 
     # Create profiles
     print()
-    create_player_profiles(event_name, participants)
+    create_player_profiles(folder_name, participants)
 
     #print(f"\n  Event        : {event_name}")
     #print(f"  Mode         : {mode.replace('_', ' ')}")
@@ -452,7 +466,6 @@ def main():
     #    print(f"    - {tag_str}{p['name']}")
     #if len(participants) > 10:
     #    print(f"    ... and {len(participants) - 10} more")
-
 
 if __name__ == "__main__":
     main()
