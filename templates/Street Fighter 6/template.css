@@ -5,10 +5,10 @@
 /* Gradient for background/fill - Player 1 */
 #linear-gradient-p1-noimg,
 #linear-gradient-p1-full {
-	--gradient-stop-1: #7a172f; /* 7a172f */
-	--gradient-stop-2: #881734; /* 881734 */
-	--gradient-stop-3: #bf1747; /* bf1747 */
-	--gradient-stop-4: #d4174f; /* d4174f */
+	--gradient-stop-1: #990B40; /* 990B40 */
+	--gradient-stop-2: #A81149; /* A81149 */
+	--gradient-stop-3: #BC1957; /* BC1957 */
+	--gradient-stop-4: #C91E5B; /* C91E5B */
 }
 /* Gradient for background/fill - Player 2 */
 #linear-gradient-p2-noimg,
