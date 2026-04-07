@@ -15,7 +15,7 @@ FGCaster Overlay  | Other overlay apps
 ✔️ Covers all common FGC event use cases | ❌ Limited functionality
 ✔️ Easily customizable overlay templates | ❌ Difficult and\or limited customization options
 ✔️ Compact & embeddable controller UI | ❌ Sub-optimal UI
-✔️ Only OBS required | ❌ Rely on additional software for backend
+✔️ Only OBS required | ❌ Rely on additional software
 ✔️ Free | ❌ Paid
 
 ## 🖥️ Features
