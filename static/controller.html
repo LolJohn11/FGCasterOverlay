@@ -974,6 +974,9 @@ function portalProfileDropdown(menu, anchorBtn) {
     menu.style.position = 'fixed';
     menu.style.transform = 'none';
     menu.style.zIndex = '9999';
+	
+	const scale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ui-scale')) || 1;
+	menu.style.zoom = scale;
 
     const place = () => {
         const r = anchorBtn.getBoundingClientRect();
@@ -992,8 +995,8 @@ function portalProfileDropdown(menu, anchorBtn) {
         }
         if (top < margin) top = margin;
 
-        menu.style.left = Math.round(left) - 2 + 'px';
-        //menu.style.top  = Math.round(top) + 'px';
+        menu.style.left = Math.round(left / scale) - 2 + 'px';
+        //menu.style.top  = Math.round(top  / scale) + 'px';
 		menu.style.top  = 0 + 'px';
     };
 
@@ -1023,6 +1026,7 @@ function unportalProfileDropdown(menu) {
     menu.style.top = '';
     menu.style.zIndex = '';
     menu.style.width = '';
+	menu.style.zoom = '';
 
     menu._profilePortal.isPortaled = false;
 }
@@ -2344,6 +2348,9 @@ function portalDropdown(menu, anchorBtn) {
     document.body.appendChild(menu);
     menu.style.position = 'fixed';
     menu.style.transform = 'none';
+	
+	const scale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ui-scale')) || 1;
+	menu.style.zoom = scale;
 
     // compute placement and apply (also used on resize)
     const place = () => {
@@ -2366,8 +2373,8 @@ function portalDropdown(menu, anchorBtn) {
 		}
 		if (top < margin) top = margin;
 
-		menu.style.left = Math.round(left) - 2 + 'px';
-		//menu.style.top  = Math.round(top) + 'px';
+		menu.style.left = Math.round(left / scale) - 2 + 'px';
+		//menu.style.top  = Math.round(top  / scale) + 'px';
 		menu.style.top  = 0 + 'px';
     };
 
@@ -2402,6 +2409,7 @@ function unportalDropdown(menu) {
     menu.style.zIndex = '';
     // keep width return to CSS on next open
     menu.style.width = '';
+	menu.style.zoom = '';
 
     menu._portal.isPortaled = false;
 }
