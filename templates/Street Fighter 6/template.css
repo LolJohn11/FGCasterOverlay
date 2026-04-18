@@ -53,6 +53,28 @@
 	filter: drop-shadow(black 0px 0px 0.2rem);
 }
 
+/* Name text block color and drop shadow - Player 1 */
+#nameBlockP1 {
+	color: #FFFFFF; /* FFFFFF */
+	text-shadow: 0 0 10px black, 2px 0 black, -2px 0 black, 0 2px black, 0 -2px black, 1px 1px black, -1px -1px black, 1px -1px black, -1px 1px black;
+}
+/* Name text block color and drop shadow - Player 2 */
+#nameBlockP2 {
+	color: #FFFFFF; /* FFFFFF */
+	text-shadow: 0 0 10px black, 2px 0 black, -2px 0 black, 0 2px black, 0 -2px black, 1px 1px black, -1px -1px black, 1px -1px black, -1px 1px black;
+}
+
+/* Score text color and drop shadow - Player 1 */
+#player1Score {
+	color: #FFFFFF; /* FFFFFF */
+	text-shadow: 0 0 4px black , 2px 0 black, -2px 0 black, 0 2px black, 0 -2px black, 1px 1px black, -1px -1px black, 1px -1px black, -1px 1px black;
+}
+/* Score text color and drop shadow - Player 2 */
+#player2Score {
+	color: #FFFFFF; /* FFFFFF */
+	text-shadow: 0 0 4px black , 2px 0 black, -2px 0 black, 0 2px black, 0 -2px black, 1px 1px black, -1px -1px black, 1px -1px black, -1px 1px black;
+}
+
 /* == Team Plaques == */
 
 /* Background color - Team 1 */
@@ -174,7 +196,6 @@ body {
 	padding: 0px 5px 0px 5px;
 	align-content: center;
 	text-align: center;
-	text-shadow: 2px 0 black, -2px 0 black, 0 2px black, 0 -2px black, 1px 1px black, -1px -1px black, 1px -1px black, -1px 1px black;
 }
 
 .name {
@@ -196,7 +217,6 @@ body {
 	margin-top: 6px;
 	width: 38px;
 	height: 47px;
-	text-shadow: 0 0 4px black , 2px 0 black, -2px 0 black, 0 2px black, 0 -2px black, 1px 1px black, -1px -1px black, 1px -1px black, -1px 1px black;
 }
 
 .score {
