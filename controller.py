@@ -2,8 +2,7 @@ from flask import Flask, render_template, request, jsonify, url_for, abort, send
 from flask_socketio import SocketIO, emit
 from pathlib import Path
 import json, os, sys, time, logging, re, click, threading, subprocess, runpy, base64, keyring
-
-# ---------- Rich logging setup ----------
+from jinja2.exceptions import TemplateNotFound
 from rich.logging import RichHandler
 from rich.highlighter import NullHighlighter
 from rich.console import Console
@@ -1437,9 +1436,11 @@ def emit_data():
 @app.route('/scoreboard')
 def scoreboard():
     active = get_active_template()
-    # Render that template’s "template.html" file
-    #log.info(f"Render overlay with template [bold]{active}[/bold]")
-    return render_template(f"{active}/template.html", template_name=active)
+    try:
+        return render_template(f"{active}/template.html", template_name=active)
+    except TemplateNotFound:
+        log.error(f"[bold red]Template not found:[/bold red] '[bold]{active}[/bold]'.")
+        return f"Template '{active}' not found. Check the server console for details.", 404
 
 # ---- list available templates ----
 def list_templates():
