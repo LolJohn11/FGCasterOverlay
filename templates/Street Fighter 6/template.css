@@ -101,6 +101,21 @@
 	stroke: #ffffff; /* ffffff */
 }
 
+/* Team name and score text colors - Team 1 */
+#team1Name {
+	color: #ffffff; /* ffffff */
+}
+#team1Score {
+	color: #ffffff; /* ffffff */
+}
+/* Team name and score text colors - Team 2 */
+#team2Name {
+	color: #ffffff; /* ffffff */
+}
+#team2Score {
+	color: #ffffff; /* ffffff */
+}
+
 /* == Top Row == */
 
 /* Drop shadow */
@@ -113,6 +128,20 @@
 	stroke: #000000; /* 000000 */
 	fill: #000000; /* 000000 */
 	opacity: 0.9; /* 0.9 */
+}
+
+/* Text colors */
+/* Match stage (left) */
+#stageText {
+	color: #ffffff; /* ffffff */
+}
+/* Match type (right) */
+#matchTypeText {
+	color: #ffffff; /* ffffff */
+}
+/* Middle text */
+#topText {
+	color: #ffffff; /* ffffff */
 }
 
 /* == Casters Row == */
@@ -128,7 +157,19 @@
 	opacity: 0.9; /* 0.9 */
 }
 
+/* Caster text color - Caster 1*/
+#caster1Display {
+	color: #ffffff; /* ffffff */
+}
+/* Caster text color - Caster 2*/
+#caster2Display {
+	color: #ffffff; /* ffffff */
+}
+
+
+
 /* ==== END OF SVG ELEMENTS COLOR SETTINGS ==== */
+
 
 
 @font-face {
