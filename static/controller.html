@@ -4970,6 +4970,10 @@ function resetStageValues() {
         customInput.style.display = 'none';
     }
     
+	// Restore roundSelectorWrapper min-width
+	const roundSelectorWrapper = document.querySelector('.roundSelectorWrapper');
+	if (roundSelectorWrapper) roundSelectorWrapper.style.minWidth = '33px';
+	
     // Show stage-sub buttons
     const stageSubGroup = document.querySelector('.stage-sub');
     if (stageSubGroup) stageSubGroup.style.display = '';
